@@ -1,0 +1,5 @@
+# Material bruto: o site usa as versões já tratadas em src/assets e public/
+fotos e videos/
+empresa/
+dist/
+.astro/

@@ -1,0 +1,234 @@
+---
+import { Picture } from 'astro:assets';
+import { indiceDe, projetos } from '../data/projetos';
+---
+
+<section class="projetos secao" id="projetos" aria-labelledby="projetos-titulo">
+  <div class="container grade cabeca">
+    <p class="rotulo" data-revelar="fade">Projetos em destaque</p>
+    <h2 id="projetos-titulo" class="titulo" data-revelar="linhas">
+      Ambientes reais, <strong>vistos de perto.</strong>
+    </h2>
+  </div>
+
+  <div class="container projetos__lista">
+    {
+      projetos.map((p, pi) => (
+        <article class:list={['projeto', { 'projeto--inverso': pi % 2 === 1 }]} id={`projeto-${p.id}`} aria-labelledby={`projeto-${p.id}-titulo`}>
+          <header class="projeto__ficha" data-revelar="fade">
+            <p class="projeto__ambiente">{p.ambiente}</p>
+            <h3 id={`projeto-${p.id}-titulo`} class="subtitulo">
+              {p.titulo}
+            </h3>
+            <ul class="projeto__destaques">
+              {p.destaques.map((d) => (
+                <li>{d}</li>
+              ))}
+            </ul>
+          </header>
+          <div class="projeto__fotos">
+            {p.fotos.map((foto, fi) => (
+              <figure class:list={['projeto__foto', `projeto__foto--${fi + 1}`]} data-parallax-leve={fi === 1 ? '' : undefined}>
+                <button
+                  class="projeto__moldura marcas"
+                  type="button"
+                  data-lightbox-abrir={indiceDe(foto)}
+                  data-lightbox-grupo="projetos"
+                  data-cursor="Ampliar"
+                  aria-label={`Ampliar foto: ${foto.legenda}`}
+                >
+                  <span class="projeto__img" data-revelar="mascara">
+                    <Picture
+                      src={foto.src}
+                      alt={foto.alt}
+                      widths={fi === 0 ? [640, 960, foto.src.width] : [480, 720, foto.src.width]}
+                      sizes={fi === 0 ? '(min-width: 1024px) 56vw, 100vw' : '(min-width: 1024px) 34vw, 70vw'}
+                      formats={['avif', 'webp']}
+                      fallbackFormat="jpg"
+                      quality={78}
+                      loading="lazy"
+                      style={foto.foco ? `object-position: ${foto.foco}` : undefined}
+                    />
+                  </span>
+                </button>
+                <figcaption>{foto.legenda}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .projetos__lista {
+    margin-top: clamp(56px, 7vw, 112px);
+    display: grid;
+    gap: clamp(96px, 11vw, 200px);
+  }
+
+  .projeto {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    align-items: start;
+  }
+
+  /* Ficha fixa ao lado das fotos enquanto elas passam. */
+  .projeto__ficha {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--header-h) + 40px);
+    display: grid;
+    gap: 18px;
+  }
+  .projeto--inverso .projeto__ficha {
+    grid-column: 9 / span 4;
+    grid-row: 1;
+  }
+  .projeto__ambiente {
+    font-size: var(--fs-rotulo);
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+  }
+  .projeto__destaques {
+    margin-top: 6px;
+    border-top: 1px solid var(--linha);
+  }
+  .projeto__destaques li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-block: 12px;
+    border-bottom: 1px solid var(--linha);
+    font-size: var(--fs-pequeno);
+    color: var(--tinta-2);
+  }
+  .projeto__destaques li::before {
+    content: '';
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--ponto);
+    transform: translateY(-2px);
+  }
+
+  .projeto__fotos {
+    grid-column: 6 / span 7;
+    display: grid;
+  }
+  .projeto--inverso .projeto__fotos {
+    grid-column: 1 / span 7;
+    grid-row: 1;
+  }
+
+  .projeto__foto {
+    display: grid;
+    gap: 12px;
+  }
+  .projeto__foto figcaption {
+    font-size: 0.8125rem;
+    color: var(--tinta-2);
+  }
+  /* a legenda da foto grande fica no lado livre (a segunda foto sobe pelo outro lado) */
+  .projeto__foto--1 figcaption {
+    max-width: 42%;
+  }
+  .projeto--inverso .projeto__foto--1 figcaption {
+    margin-left: auto;
+    text-align: right;
+  }
+  .projeto__moldura {
+    display: block;
+    width: 100%;
+    aspect-ratio: 6 / 5;
+    text-align: left;
+  }
+  .projeto__img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    background: var(--pedra);
+  }
+  .projeto__img :global(picture),
+  .projeto__img :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+  .projeto__img :global(img) {
+    object-fit: cover;
+    transition: transform 1200ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .projeto__moldura:hover .projeto__img :global(img) {
+      transform: scale(1.035);
+    }
+  }
+
+  /* A segunda foto sobe por cima da primeira, com uma moldura da cor do fundo. */
+  .projeto__foto--2 {
+    position: relative;
+    z-index: 1;
+    width: 54%;
+    margin-top: -16%;
+    margin-left: auto;
+  }
+  .projeto--inverso .projeto__foto--2 {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  .projeto__foto--2 .projeto__moldura {
+    aspect-ratio: 4 / 5;
+    box-shadow: 0 0 0 clamp(8px, 0.9vw, 14px) var(--gesso);
+    --marca: transparent;
+  }
+  .projeto__foto--2 figcaption {
+    padding-top: clamp(8px, 0.9vw, 14px);
+  }
+
+  @media (max-width: 1023px) {
+    .projeto__ficha,
+    .projeto--inverso .projeto__ficha,
+    .projeto__fotos,
+    .projeto--inverso .projeto__fotos {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+    .projeto__ficha {
+      position: static;
+      margin-bottom: 32px;
+    }
+  }
+  @media (max-width: 767px) {
+    .projeto__foto--1 {
+      margin-inline: calc(var(--gutter) * -1);
+    }
+    .projeto__foto--1 .projeto__moldura {
+      aspect-ratio: 4 / 5;
+      --marca: transparent;
+    }
+    .projeto__foto--1 figcaption,
+    .projeto--inverso .projeto__foto--1 figcaption {
+      max-width: none;
+      margin-left: 0;
+      padding-inline: var(--gutter);
+      text-align: left;
+    }
+    .projeto__foto--2,
+    .projeto--inverso .projeto__foto--2 {
+      width: 68%;
+      margin: 20px 0 0 auto;
+    }
+    .projeto__foto--2 .projeto__moldura {
+      box-shadow: none;
+    }
+    .projeto__foto--2 figcaption {
+      padding-top: 0;
+    }
+  }
+</style>

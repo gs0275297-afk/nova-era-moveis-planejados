@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import miolo from '../assets/logo/logo-nova-era.png';
+import selo from '../assets/logo/logo-nova-era-selo.png';
+
+/*
+ * Logo oficial da Nova Era, sem redesenho (versões geradas por scripts/preparar-logo.py
+ * a partir do arquivo enviado pela empresa, pasta logo/):
+ *   miolo  monograma + nome sobre o branco original. Em fundos claros a imagem é
+ *          "multiplicada" sobre o fundo, para o branco do arquivo sumir sem recorte.
+ *   selo   o selo circular inteiro, para fundos escuros (rodapé).
+ */
+interface Props {
+  versao?: 'miolo' | 'selo';
+  class?: string;
+}
+const { versao = 'miolo', class: classe } = Astro.props;
+---
+
+{
+  versao === 'selo' ? (
+    <Image
+      class:list={['logo-selo', classe]}
+      src={selo}
+      alt="Nova Era Móveis Planejados"
+      widths={[240, 480]}
+      sizes="240px"
+      format="webp"
+      quality={90}
+      loading="lazy"
+    />
+  ) : (
+    <Image
+      class:list={['logo-miolo', classe]}
+      src={miolo}
+      alt="Nova Era Móveis Planejados"
+      widths={[200, 400]}
+      sizes="200px"
+      format="webp"
+      quality={90}
+      loading="eager"
+    />
+  )
+}
+
+<style>
+  .logo-miolo {
+    display: block;
+    width: auto;
+    height: 56px;
+    mix-blend-mode: multiply;
+  }
+  @media (max-width: 767px) {
+    .logo-miolo {
+      height: 40px;
+    }
+  }
+  .logo-selo {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

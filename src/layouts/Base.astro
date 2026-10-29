@@ -1,0 +1,87 @@
+---
+import '@fontsource-variable/jost';
+import '../styles/global.css';
+// Pré-carrega a fonte (subconjunto latino) para o título da abertura não "piscar".
+import sansNormal from '@fontsource-variable/jost/files/jost-latin-wght-normal.woff2?url';
+
+import { empresa } from '../data/empresa';
+
+interface Props {
+  titulo: string;
+  descricao: string;
+}
+
+const { titulo, descricao } = Astro.props;
+const site = Astro.site;
+const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
+const ogImagem = site ? new URL('/og-nova-era.jpg', site).href : '/og-nova-era.jpg';
+
+// Dados estruturados só com informação confirmada: sem horário, ano de fundação
+// nem avaliações (o Google não aceita avaliações autodeclaradas em LocalBusiness).
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'HomeAndConstructionBusiness',
+  name: empresa.nome,
+  description: descricao,
+  slogan: empresa.frase,
+  telephone: empresa.telefone.internacional,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: empresa.endereco.rua,
+    addressLocality: empresa.endereco.cidade,
+    addressRegion: empresa.endereco.uf,
+    postalCode: empresa.endereco.cep,
+    addressCountry: 'BR',
+  },
+  areaServed: `${empresa.cidade} – ${empresa.uf}`,
+  sameAs: [empresa.instagram.link],
+  ...(site ? { url: site.href, image: ogImagem } : {}),
+};
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{titulo}</title>
+    <meta name="description" content={descricao} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#f4f3ef" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href={sansNormal} as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={empresa.nome} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:image" content={ogImagem} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sala de jantar com painéis ripados e forro iluminado, ao lado da logo da Nova Era Móveis Planejados" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script is:inline define:vars={{ dev: import.meta.env.DEV }}>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js', 'js-motion');
+        // Movimento reduzido: só esmaecimentos suaves, sem deslocamentos nem parallax.
+        // Em desenvolvimento, ?movimento-completo força as animações completas para revisão.
+        var forcar = dev && location.search.indexOf('movimento-completo') > -1;
+        if (!forcar && window.matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('reduzido');
+        setTimeout(function () {
+          if (!d.classList.contains('motion-ok')) d.classList.add('motion-falhou');
+        }, 3000);
+      })();
+    </script>
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </head>
+  <body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+    <slot />
+  </body>
+</html>

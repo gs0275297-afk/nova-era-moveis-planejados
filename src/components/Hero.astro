@@ -1,0 +1,212 @@
+---
+import { Picture } from 'astro:assets';
+import Icone from './Icone.astro';
+import { empresa, mensagemPadrao } from '../data/empresa';
+import { abertura } from '../data/projetos';
+---
+
+<section class="hero" id="inicio" aria-labelledby="hero-titulo" data-hero>
+  <div class="container grade hero__grade">
+    <div class="hero__texto">
+      <p class="rotulo" data-hero-item>Móveis planejados · <span class="sem-quebra">{empresa.cidade} – {empresa.uf}</span></p>
+      <h1 id="hero-titulo" class="display hero__titulo" data-hero-titulo>
+        Soluções inteligentes para o <strong>seu espaço.</strong>
+      </h1>
+      <p class="lead hero__lead" data-hero-item>
+        A {empresa.nomeCurto} fabrica móveis planejados para cozinhas, salas, dormitórios, áreas gourmet e banheiros,
+        sob medida para cada ambiente.
+      </p>
+      <div class="hero__acoes" data-hero-item>
+        <a class="botao" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener" data-magnetico>
+          <Icone nome="whatsapp" />
+          Solicitar orçamento
+        </a>
+        <a class="link-seta" href="#projetos" data-dir="baixo">
+          <span>Ver projetos</span>
+          <Icone nome="seta-baixo" />
+        </a>
+      </div>
+      <dl class="hero__ficha" data-hero-item>
+        <div>
+          <dt>Telefone e WhatsApp</dt>
+          <dd><a href={empresa.telefone.link}>{empresa.telefone.exibicao}</a></dd>
+        </div>
+        <div>
+          <dt>Instagram</dt>
+          <dd><a href={empresa.instagram.link} target="_blank" rel="noopener">{empresa.instagram.usuario}</a></dd>
+        </div>
+        <div>
+          <dt>Endereço</dt>
+          <dd>{empresa.endereco.rua} – {empresa.endereco.bairro}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <figure class="hero__figura">
+      <div class="hero__foto marcas" data-hero-foto>
+        <div class="hero__img" data-hero-img>
+          <Picture
+            src={abertura.src}
+            alt={abertura.alt}
+            widths={[640, 900, abertura.src.width]}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            formats={['avif', 'webp']}
+            fallbackFormat="jpg"
+            quality={80}
+            loading="eager"
+            fetchpriority="high"
+            style={`object-position: ${abertura.foco}`}
+          />
+        </div>
+      </div>
+      <figcaption data-hero-item>{abertura.legenda}</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-top: var(--header-h);
+  }
+  .hero__grade {
+    min-height: calc(100svh - var(--header-h));
+    align-items: stretch;
+  }
+
+  .hero__texto {
+    grid-column: 1 / span 6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+    padding-block: clamp(40px, 6vh, 88px) clamp(28px, 4vh, 48px);
+  }
+  .hero__titulo {
+    max-width: 9.5em;
+  }
+  .hero__lead {
+    max-width: 30em;
+  }
+  .hero__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+  }
+
+  /* Ficha de contato: régua fina, três colunas, como o carimbo de uma prancha. */
+  .hero__ficha {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    gap: 14px clamp(20px, 3vw, 44px);
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--linha);
+    font-size: 0.875rem;
+  }
+  .hero__ficha dt {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+  }
+  .hero__ficha dd {
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .hero__ficha a {
+    display: inline-block;
+    padding-block: 4px;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size var(--t-ui) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .hero__ficha a:hover {
+      background-size: 100% 1px;
+    }
+  }
+
+  /* Foto: sangra até a borda direita da janela. */
+  .hero__figura {
+    grid-column: 7 / span 6;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 14px;
+    margin-right: calc(var(--gutter) * -1);
+    padding-block: 18px 24px;
+  }
+  .hero__foto {
+    --marca-d: -9px;
+    min-height: 0;
+  }
+  .hero__img {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--pedra);
+  }
+  .hero__img :global(picture),
+  .hero__img :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+  .hero__img :global(img) {
+    object-fit: cover;
+    transform-origin: 50% 40%;
+  }
+  .hero__figura figcaption {
+    font-size: 0.8125rem;
+    color: var(--tinta-2);
+    padding-right: var(--gutter);
+  }
+
+  /* telas largas e baixas: a ficha sai para o título respirar */
+  @media (min-width: 1024px) and (max-height: 720px) {
+    .hero__ficha {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .hero__grade {
+      min-height: 0;
+    }
+    .hero__texto {
+      grid-column: 1 / -1;
+      gap: 22px;
+      padding-block: 36px 32px;
+    }
+    .hero__titulo {
+      max-width: 10em;
+    }
+    .hero__ficha {
+      display: none;
+    }
+    .hero__figura {
+      grid-column: 1 / -1;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-block: 0;
+    }
+    .hero__foto {
+      aspect-ratio: 4 / 5;
+      /* sem marcas de corte quando a foto encosta nas bordas da tela */
+      --marca: transparent;
+    }
+    .hero__figura figcaption {
+      padding-inline: var(--gutter);
+    }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .hero__foto {
+      aspect-ratio: 5 / 4;
+    }
+  }
+  @media (max-width: 767px) {
+    .hero__acoes .botao {
+      width: 100%;
+    }
+  }
+</style>

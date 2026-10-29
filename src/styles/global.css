@@ -1,0 +1,524 @@
+/* Nova Era — sistema visual "Prancheta"
+   Conceito: precisão de projeto de interiores. Fundo cor de gesso, tinta azul-marinho
+   (do "E" e do anel da logo), alumínio (do "n" cromado) e o ponto vermelho da logo usado
+   só como marcação. A madeira e a luz quente vêm das fotos, não da interface.
+   Tipografia: uma só família geométrica (Jost), eco do "MÓVEIS PLANEJADOS" da logo:
+   títulos grandes e finos, rótulos em caixa alta bem espaçados.
+   Motivo gráfico: marcas de corte nos cantos das imagens principais (como numa prancha). */
+
+:root {
+  /* cor */
+  --gesso: #f4f3ef;
+  --gesso-2: #eae8e2;
+  --pedra: #dcd9d1;
+  --branco: #ffffff;
+  --tinta: #111a33;
+  --tinta-2: #4a5268;
+  --marinho: #0f1f5b;
+  --marinho-2: #1b2f7a;
+  --noite: #0c1326;
+  --noite-2: #151e38;
+  --aluminio: #aab0bd;
+  --claro: #f4f3ef;
+  --ponto: #c8161d;
+  --linha: rgb(17 26 51 / 0.14);
+  --linha-forte: rgb(17 26 51 / 0.32);
+  --linha-clara: rgb(244 243 239 / 0.16);
+
+  /* tipografia */
+  --sans: 'Jost Variable', 'Segoe UI', system-ui, sans-serif;
+  --fs-display: clamp(2.75rem, 1.35rem + 4.9vw, 6.6rem);
+  --fs-h2: clamp(2.2rem, 1.3rem + 3vw, 4.6rem);
+  --fs-h3: clamp(1.6rem, 1.25rem + 1.1vw, 2.4rem);
+  --fs-lead: clamp(1.06rem, 0.98rem + 0.32vw, 1.28rem);
+  --fs-corpo: 1.0625rem;
+  --fs-pequeno: 0.9375rem;
+  --fs-rotulo: 0.75rem;
+
+  /* espaço e grade */
+  --gutter: clamp(16px, 4.4vw, 72px);
+  --col-gap: clamp(12px, 1.6vw, 24px);
+  --max: 1560px;
+  --secao: clamp(88px, 6vw + 40px, 152px);
+  --header-h: 80px;
+
+  /* movimento */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-micro: 200ms;
+  --t-ui: 380ms;
+
+  color-scheme: light;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --header-h: 64px;
+    --fs-corpo: 1rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--header-h);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--gesso);
+  color: var(--tinta);
+  font-family: var(--sans);
+  font-size: var(--fs-corpo);
+  line-height: 1.65;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+img,
+video,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+::selection {
+  background: var(--marinho);
+  color: var(--claro);
+}
+
+:focus-visible {
+  outline: 2px solid var(--marinho-2);
+  outline-offset: 3px;
+}
+
+.escuro :focus-visible {
+  outline-color: var(--claro);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pular {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 18px;
+  background: var(--tinta);
+  color: var(--claro);
+  transform: translateY(-160%);
+  transition: transform var(--t-ui) var(--ease-out);
+}
+.pular:focus-visible {
+  transform: none;
+}
+
+/* ---------- grade ---------- */
+
+.container {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--col-gap);
+}
+
+/* ---------- tipografia ---------- */
+
+.display {
+  font-size: var(--fs-display);
+  font-weight: 330;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.titulo {
+  font-size: var(--fs-h2);
+  font-weight: 340;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* Ênfase sem itálico: peso maior e o azul da marca. */
+.display strong,
+.titulo strong {
+  font-weight: 500;
+  color: var(--marinho);
+}
+.escuro .titulo strong {
+  color: var(--claro);
+}
+
+.subtitulo {
+  font-size: var(--fs-h3);
+  font-weight: 380;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.6;
+  color: var(--tinta-2);
+  max-width: 34em;
+  text-wrap: pretty;
+}
+
+.texto {
+  color: var(--tinta-2);
+  max-width: 36em;
+  text-wrap: pretty;
+}
+
+/* Rótulo com o ponto vermelho da logo. */
+.rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-rotulo);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+  line-height: 1.3;
+}
+.rotulo::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ponto);
+}
+.escuro .rotulo {
+  color: var(--aluminio);
+}
+@media (max-width: 479px) {
+  .rotulo {
+    letter-spacing: 0.17em;
+  }
+}
+
+.sem-quebra {
+  white-space: nowrap;
+}
+
+/* ---------- marcas de corte (motivo da prancha) ---------- */
+
+.marcas {
+  --marca: var(--linha-forte);
+  --marca-t: 14px;
+  --marca-d: -10px;
+  position: relative;
+}
+.marcas::after {
+  content: '';
+  position: absolute;
+  inset: var(--marca-d);
+  pointer-events: none;
+  background:
+    linear-gradient(var(--marca), var(--marca)) 0 0 / var(--marca-t) 1px,
+    linear-gradient(var(--marca), var(--marca)) 0 0 / 1px var(--marca-t),
+    linear-gradient(var(--marca), var(--marca)) 100% 0 / var(--marca-t) 1px,
+    linear-gradient(var(--marca), var(--marca)) 100% 0 / 1px var(--marca-t),
+    linear-gradient(var(--marca), var(--marca)) 0 100% / var(--marca-t) 1px,
+    linear-gradient(var(--marca), var(--marca)) 0 100% / 1px var(--marca-t),
+    linear-gradient(var(--marca), var(--marca)) 100% 100% / var(--marca-t) 1px,
+    linear-gradient(var(--marca), var(--marca)) 100% 100% / 1px var(--marca-t);
+  background-repeat: no-repeat;
+}
+.escuro .marcas {
+  --marca: rgb(170 176 189 / 0.5);
+}
+@media (max-width: 767px) {
+  .marcas {
+    --marca-t: 10px;
+    --marca-d: -7px;
+  }
+}
+
+/* ---------- botões e links ---------- */
+
+.botao {
+  --bg: var(--tinta);
+  --fg: var(--claro);
+  --fill: var(--marinho-2);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 26px 0 28px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.9375rem;
+  font-weight: 550;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color var(--t-ui) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.botao::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--fill);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 520ms var(--ease-out);
+}
+.botao svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  transition: transform var(--t-ui) var(--ease-out);
+}
+@media (hover: hover) {
+  .botao:hover::before {
+    transform: scaleX(1);
+  }
+  .botao:hover svg {
+    transform: translateX(4px);
+  }
+}
+.botao:active {
+  transform: translateY(1px);
+}
+
+.botao--claro {
+  --bg: var(--claro);
+  --fg: var(--tinta);
+  --fill: var(--branco);
+}
+
+.botao--contorno {
+  --bg: transparent;
+  --fg: var(--tinta);
+  --fill: var(--tinta);
+  box-shadow: inset 0 0 0 1px var(--linha-forte);
+}
+@media (hover: hover) {
+  .botao--contorno:hover {
+    color: var(--claro);
+  }
+}
+
+.link-seta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 550;
+  font-size: 0.9375rem;
+}
+.link-seta span {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+  transition: background-size var(--t-ui) var(--ease-out);
+  padding-bottom: 2px;
+}
+.link-seta svg {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--t-ui) var(--ease-out);
+}
+@media (hover: hover) {
+  .link-seta:hover span {
+    background-position: 100% 100%;
+    background-size: 0% 1px;
+  }
+  .link-seta:hover svg {
+    transform: translate(3px, 0);
+  }
+  .link-seta[data-dir='baixo']:hover svg {
+    transform: translate(0, 3px);
+  }
+  .link-seta[data-dir='cima']:hover svg {
+    transform: translate(0, -3px);
+  }
+}
+
+/* ---------- seções ---------- */
+
+main,
+.rodape {
+  position: relative;
+  z-index: 1;
+}
+
+.secao {
+  padding-block: var(--secao);
+}
+
+.escuro {
+  background: var(--noite);
+  color: var(--claro);
+}
+.escuro .texto,
+.escuro .lead {
+  color: var(--aluminio);
+}
+
+/* Cabeça de seção: rótulo + título em colunas, com régua fina acima. */
+.cabeca {
+  row-gap: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--linha);
+}
+.escuro .cabeca {
+  border-top-color: var(--linha-clara);
+}
+.cabeca .rotulo {
+  grid-column: 1 / span 3;
+  align-self: start;
+  padding-top: 0.9em;
+}
+.cabeca .titulo {
+  grid-column: 4 / span 9;
+}
+@media (max-width: 1023px) {
+  .cabeca .rotulo,
+  .cabeca .titulo {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+}
+
+/* ---------- estados de animação ---------- */
+
+/* Antes do JS assumir, nada pisca: o conteúdo só fica oculto quando o
+   script de movimento está ativo e sai do esconderijo sozinho após 3 s. */
+.js-motion [data-revelar] {
+  opacity: 0;
+}
+.js-motion [data-revelar='linhas'] {
+  opacity: 1;
+  visibility: hidden;
+}
+.js-motion:not(.reduzido) [data-revelar='mascara'] {
+  opacity: 1;
+  clip-path: inset(100% 0 0 0);
+}
+.js-motion.motion-falhou [data-revelar='mascara'] {
+  clip-path: none !important;
+}
+.js-motion.motion-falhou [data-revelar] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.js-motion [data-hero-item] {
+  opacity: 0;
+}
+.js-motion [data-hero-titulo] {
+  visibility: hidden;
+}
+.js-motion:not(.reduzido) [data-hero-foto] {
+  clip-path: inset(10% 14% 10% 14%);
+}
+.js-motion.motion-falhou [data-hero-item] {
+  opacity: 1 !important;
+}
+.js-motion.motion-falhou [data-hero-titulo] {
+  visibility: visible !important;
+}
+.js-motion.motion-falhou [data-hero-foto] {
+  clip-path: none !important;
+}
+
+/* Linhas criadas pelo SplitText: folga para acentos e descendentes não serem cortados pela máscara. */
+.linha {
+  padding-block: 0.08em 0.12em;
+  margin-block: -0.08em -0.12em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}

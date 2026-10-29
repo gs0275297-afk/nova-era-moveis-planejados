@@ -1,0 +1,173 @@
+---
+import Logo from './Logo.astro';
+import Icone from './Icone.astro';
+import { empresa, mensagemPadrao, navegacao } from '../data/empresa';
+
+const ano = new Date().getFullYear();
+---
+
+<footer class="rodape escuro">
+  <div class="container grade rodape__grade">
+    <div class="rodape__marca">
+      <div class="rodape__selo">
+        <Logo versao="selo" />
+      </div>
+      <p class="rodape__frase">{empresa.frase}</p>
+    </div>
+
+    <nav class="rodape__nav" aria-label="Rodapé">
+      <p class="rodape__titulo">Navegação</p>
+      <ul>
+        {navegacao.map((item) => (
+          <li>
+            <a href={item.href}>{item.rotulo}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="rodape__contato">
+      <p class="rodape__titulo">Contato</p>
+      <ul>
+        <li>
+          <a href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
+            <Icone nome="whatsapp" />
+            WhatsApp {empresa.telefone.exibicao}
+          </a>
+        </li>
+        <li>
+          <a href={empresa.telefone.link}>
+            <Icone nome="telefone" />
+            Telefone {empresa.telefone.exibicao}
+          </a>
+        </li>
+        <li>
+          <a href={empresa.instagram.link} target="_blank" rel="noopener">
+            <Icone nome="instagram" />
+            {empresa.instagram.usuario}
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <address class="rodape__endereco">
+      <p class="rodape__titulo">Endereço</p>
+      {empresa.endereco.rua}<br />
+      {empresa.endereco.bairro}, {empresa.endereco.cidade} – {empresa.endereco.uf}<br />
+      CEP {empresa.endereco.cep}
+    </address>
+
+    <div class="rodape__base">
+      <p>© {ano} {empresa.nome}. {empresa.cidade} – {empresa.uf}.</p>
+      <a class="link-seta" href="#inicio" data-dir="cima">
+        <span>Voltar ao topo</span>
+        <Icone nome="seta-cima" />
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    padding-block: clamp(72px, 8vw, 128px) max(32px, env(safe-area-inset-bottom));
+  }
+  .rodape__grade {
+    row-gap: 48px;
+  }
+  .rodape__marca {
+    grid-column: 1 / span 4;
+    display: grid;
+    align-content: start;
+    gap: 28px;
+  }
+  .rodape__selo {
+    width: clamp(132px, 12vw, 176px);
+  }
+  .rodape__frase {
+    max-width: 18em;
+    font-size: 1.25rem;
+    font-weight: 330;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .rodape__titulo {
+    margin-bottom: 16px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--aluminio);
+  }
+  .rodape__nav {
+    grid-column: 6 / span 2;
+  }
+  .rodape__contato {
+    grid-column: 8 / span 3;
+  }
+  .rodape__endereco {
+    grid-column: 11 / span 2;
+    font-style: normal;
+    color: var(--claro);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+  .rodape__nav a,
+  .rodape__contato a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    font-size: 0.9375rem;
+    color: var(--claro);
+    transition: color var(--t-micro) var(--ease-out);
+  }
+  .rodape__contato :global(svg) {
+    width: 18px;
+    height: 18px;
+    color: var(--aluminio);
+  }
+  @media (hover: hover) {
+    .rodape__nav a:hover,
+    .rodape__contato a:hover {
+      color: var(--aluminio);
+    }
+  }
+  .rodape__base {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 24px;
+    margin-top: clamp(24px, 4vw, 56px);
+    padding-top: 22px;
+    border-top: 1px solid var(--linha-clara);
+    font-size: 0.8125rem;
+    color: var(--aluminio);
+  }
+
+  @media (max-width: 1023px) {
+    .rodape__marca {
+      grid-column: 1 / -1;
+    }
+    .rodape__nav {
+      grid-column: 1 / span 4;
+    }
+    .rodape__contato {
+      grid-column: 5 / span 8;
+    }
+    .rodape__endereco {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 599px) {
+    .rodape__nav,
+    .rodape__contato {
+      grid-column: 1 / -1;
+    }
+    .rodape {
+      /* espaço para a barra fixa de orçamento */
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    }
+  }
+</style>

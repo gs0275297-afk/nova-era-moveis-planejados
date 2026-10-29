@@ -1,0 +1,21 @@
+# Dependências e saídas de build
+node_modules/
+dist/
+.astro/
+
+# Vercel e variáveis de ambiente (nunca versionar)
+.vercel/
+.env*
+
+# Material bruto: fica só na máquina local (o site usa as versões tratadas em src/assets e public/).
+# Os vídeos originais têm música do Instagram e sobreposições do perfil.
+fotos e videos/
+empresa/
+
+# Configuração local de ferramentas
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,117 @@
+---
+import { empresa } from '../data/empresa';
+
+// O que a Nova Era faz, dito a partir do que aparece nos próprios projetos (sem números nem promessas).
+const principios = [
+  {
+    titulo: 'Sob medida',
+    texto: 'Cada móvel é planejado para as medidas e o uso do ambiente, da cozinha ao dormitório.',
+  },
+  {
+    titulo: 'Organização',
+    texto: 'Nichos, gavetas, prateleiras e armários até o teto, para cada coisa ter o seu lugar.',
+  },
+  {
+    titulo: 'Acabamento',
+    texto: 'Ripados, painéis, iluminação embutida e cantos arredondados: detalhes que você vê nos projetos abaixo.',
+  },
+];
+---
+
+<section class="sobre secao" id="nova-era" aria-labelledby="sobre-titulo">
+  <div class="container grade sobre__grade">
+    <p class="rotulo sobre__rotulo" data-revelar="fade">A Nova Era</p>
+    <h2 id="sobre-titulo" class="sr-only">Sobre a {empresa.nomeCurto}</h2>
+    <blockquote class="sobre__frase">
+      <p data-frase>“{empresa.frase}”</p>
+      <footer data-revelar="fade">{empresa.nome}, {empresa.instagram.usuario}</footer>
+    </blockquote>
+
+    <ul class="sobre__principios">
+      {
+        principios.map((p) => (
+          <li data-revelar="fade">
+            <h3>{p.titulo}</h3>
+            <p>{p.texto}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .sobre {
+    position: relative;
+  }
+  .sobre__grade {
+    row-gap: clamp(48px, 7vw, 112px);
+    padding-top: 22px;
+    border-top: 1px solid var(--linha);
+  }
+  .sobre__rotulo {
+    grid-column: 1 / span 3;
+    align-self: start;
+    padding-top: 1.1em;
+  }
+  .sobre__frase {
+    grid-column: 4 / span 9;
+    margin: 0;
+  }
+  .sobre__frase p {
+    font-size: clamp(2rem, 1.1rem + 3.3vw, 4.6rem);
+    font-weight: 320;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    color: var(--tinta);
+  }
+  .sobre__frase footer {
+    margin-top: 28px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--tinta-2);
+  }
+
+  .sobre__principios {
+    grid-column: 4 / span 9;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--col-gap);
+  }
+  .sobre__principios li {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--linha-forte);
+  }
+  .sobre__principios h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .sobre__principios p {
+    color: var(--tinta-2);
+    max-width: 24em;
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 1023px) {
+    .sobre__rotulo,
+    .sobre__frase,
+    .sobre__principios {
+      grid-column: 1 / -1;
+    }
+    .sobre__rotulo {
+      padding-top: 0;
+    }
+  }
+  @media (max-width: 767px) {
+    .sobre__principios {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+</style>

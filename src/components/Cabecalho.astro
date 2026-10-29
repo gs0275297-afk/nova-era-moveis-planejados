@@ -1,0 +1,257 @@
+---
+import Logo from './Logo.astro';
+import Icone from './Icone.astro';
+import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/empresa';
+---
+
+<header class="topo" data-topo>
+  <div class="container topo__barra">
+    <a href="#inicio" class="topo__logo" aria-label="Nova Era Móveis Planejados, voltar ao início">
+      <Logo />
+    </a>
+
+    <nav class="topo__nav" aria-label="Principal">
+      <ul>
+        {navegacao.map((item) => (
+          <li>
+            <a href={item.href} data-nav>{item.rotulo}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <a class="botao topo__cta" href="#contato" data-magnetico>
+      Orçamento
+    </a>
+
+    <button class="topo__menu" type="button" aria-expanded="false" aria-controls="menu-movel" data-menu-abrir>
+      <span class="topo__menu-texto">Menu</span>
+      <span class="topo__menu-icone" aria-hidden="true"><i></i><i></i></span>
+    </button>
+  </div>
+</header>
+
+<div id="menu-movel" class="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden data-menu>
+  <div class="menu__topo container">
+    <Logo />
+    <button class="menu__fechar" type="button" data-menu-fechar>
+      <span>Fechar</span>
+      <Icone nome="fechar" />
+    </button>
+  </div>
+  <nav class="menu__nav container" aria-label="Menu principal">
+    <ul>
+      {navegacao.map((item) => (
+        <li data-menu-item>
+          <a href={item.href} data-menu-link>
+            {item.rotulo}
+            <Icone nome="seta" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <div class="menu__rodape container" data-menu-item>
+    <a class="botao" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
+      <Icone nome="whatsapp" />
+      Orçamento pelo WhatsApp
+    </a>
+    <p>
+      <a href={empresa.telefone.link}>{empresa.telefone.exibicao}</a><br />
+      {enderecoCompleto}
+    </p>
+  </div>
+</div>
+
+<style>
+  .topo {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: var(--header-h);
+    background: var(--gesso);
+    transition:
+      box-shadow var(--t-ui) var(--ease-out),
+      transform 600ms var(--ease-out);
+  }
+  .topo.is-rolado {
+    box-shadow: 0 1px 0 var(--linha);
+  }
+  .topo.is-oculto {
+    transform: translateY(-100%);
+  }
+
+  .topo__barra {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+  .topo__logo {
+    display: inline-flex;
+    margin-right: auto;
+    /* a logo é multiplicada sobre este fundo */
+    background: var(--gesso);
+  }
+
+  .topo__nav ul {
+    display: flex;
+    gap: clamp(22px, 2.6vw, 44px);
+  }
+  .topo__nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding-block: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--tinta-2);
+    transition: color var(--t-micro) var(--ease-out);
+  }
+  /* item ativo: o ponto vermelho da logo */
+  .topo__nav a::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--ponto);
+    transform: scale(0);
+    transition: transform var(--t-ui) var(--ease-out);
+  }
+  .topo__nav a:hover,
+  .topo__nav a.is-ativo {
+    color: var(--tinta);
+  }
+  .topo__nav a.is-ativo::before {
+    transform: scale(1);
+  }
+
+  .topo__cta {
+    min-height: 46px;
+    padding-inline: 24px;
+    font-size: 0.875rem;
+  }
+
+  .topo__menu {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding-inline: 4px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .topo__menu-icone {
+    display: grid;
+    gap: 6px;
+    width: 26px;
+  }
+  .topo__menu-icone i {
+    display: block;
+    height: 1.5px;
+    background: currentColor;
+  }
+  .topo__menu-icone i:last-child {
+    width: 62%;
+    justify-self: end;
+  }
+
+  @media (max-width: 1023px) {
+    .topo__nav,
+    .topo__cta {
+      display: none;
+    }
+    .topo__menu {
+      display: inline-flex;
+    }
+  }
+
+  /* ---------- menu do celular ---------- */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--gesso);
+    clip-path: inset(0 0 0 0);
+  }
+  .menu[hidden] {
+    display: none;
+  }
+  .menu__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--header-h);
+  }
+  .menu__fechar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .menu__fechar :global(svg) {
+    width: 22px;
+    height: 22px;
+  }
+  .menu__nav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-block: 32px;
+  }
+  .menu__nav ul {
+    width: 100%;
+  }
+  .menu__nav li {
+    border-top: 1px solid var(--linha);
+  }
+  .menu__nav li:last-child {
+    border-bottom: 1px solid var(--linha);
+  }
+  .menu__nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-block: 16px;
+    font-size: clamp(1.9rem, 1.4rem + 2.6vw, 2.8rem);
+    font-weight: 330;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .menu__nav a :global(svg) {
+    width: 22px;
+    height: 22px;
+    color: var(--tinta-2);
+  }
+  .menu__rodape {
+    display: grid;
+    gap: 18px;
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+  .menu__rodape .botao {
+    width: 100%;
+  }
+  .menu__rodape p {
+    font-size: 0.875rem;
+    color: var(--tinta-2);
+  }
+  .menu__rodape p a {
+    display: inline-block;
+    padding-block: 6px;
+    font-weight: 550;
+    color: var(--tinta);
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import Cabecalho from '../components/Cabecalho.astro';
+import Hero from '../components/Hero.astro';
+import Sobre from '../components/Sobre.astro';
+import Projetos from '../components/Projetos.astro';
+import Galeria from '../components/Galeria.astro';
+import Detalhes from '../components/Detalhes.astro';
+import Contato from '../components/Contato.astro';
+import Rodape from '../components/Rodape.astro';
+import BarraMovel from '../components/BarraMovel.astro';
+import Lightbox from '../components/Lightbox.astro';
+---
+
+<Base
+  titulo="Nova Era Móveis Planejados | Móveis sob medida em Três Lagoas – MS"
+  descricao="Móveis planejados para cozinhas, salas, dormitórios, áreas gourmet e banheiros em Três Lagoas – MS. Veja ambientes do portfólio da Nova Era e peça seu orçamento pelo WhatsApp."
+>
+  <Cabecalho />
+  <main id="conteudo">
+    <Hero />
+    <Sobre />
+    <Projetos />
+    <Galeria />
+    <Detalhes />
+    <Contato />
+  </main>
+  <Rodape />
+  <BarraMovel />
+  <Lightbox />
+  <div class="cursor" aria-hidden="true" data-cursor-seguidor><span data-cursor-texto></span></div>
+</Base>
+
+<script>
+  import '../scripts/app';
+</script>
+
+<style is:global>
+  .cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 70;
+    pointer-events: none;
+    display: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cursor {
+      display: block;
+    }
+  }
+  .cursor span {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    margin: -44px 0 0 -44px;
+    border-radius: 50%;
+    background: var(--tinta);
+    color: var(--claro);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transform: scale(0);
+    transition: transform 420ms var(--ease-out);
+  }
+  .cursor.is-ativo span {
+    transform: scale(1);
+  }
+</style>

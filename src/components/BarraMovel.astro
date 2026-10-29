@@ -1,0 +1,41 @@
+---
+import Icone from './Icone.astro';
+import { empresa, mensagemPadrao } from '../data/empresa';
+---
+
+<!-- Atalho fixo no celular. Fica inerte (fora do foco e do leitor de tela) enquanto escondido. -->
+<div class="barra" data-barra-movel inert>
+  <a class="botao barra__whats" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
+    <Icone nome="whatsapp" />
+    Orçamento pelo WhatsApp
+  </a>
+</div>
+
+<style>
+  .barra {
+    display: none;
+  }
+  @media (max-width: 1023px) {
+    .barra {
+      display: block;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      padding: 10px var(--gutter) max(12px, env(safe-area-inset-bottom));
+      transform: translateY(110%);
+      transition: transform 500ms var(--ease-out);
+    }
+    .barra.is-visivel {
+      transform: none;
+    }
+    .barra__whats {
+      width: 100%;
+      /* sem faixa de fundo: funciona sobre seções claras e escuras */
+      box-shadow:
+        0 0 0 1px rgb(244 239 231 / 0.18),
+        0 12px 32px rgb(20 18 15 / 0.35);
+    }
+  }
+</style>

@@ -1,0 +1,13 @@
+# Fins de linha iguais no Windows e no Linux da Vercel
+* text=auto eol=lf
+
+# Arquivos binários: sem conversão
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
