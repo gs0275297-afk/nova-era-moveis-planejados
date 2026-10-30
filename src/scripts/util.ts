@@ -9,7 +9,6 @@ export const movimentoReduzido = () => document.documentElement.classList.contai
 
 export const ponteiroFino = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-export const desktop = () => window.matchMedia('(min-width: 1024px)').matches;
 
 /** Espera uma animação terminar, com limite: abas em segundo plano podem congelar a linha do tempo. */
 export const aoTerminar = (animacao: Animation, limiteMs: number) =>

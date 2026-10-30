@@ -297,28 +297,8 @@ ol {
   color: var(--aluminio);
 }
 
-.legenda {
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  color: var(--tinta-2);
-}
-.escuro .legenda {
-  color: var(--aluminio);
-}
-
 .sem-quebra {
   white-space: nowrap;
-}
-
-/* Grão fotográfico: um ladrilho fixo, sem animação, que disfarça a ampliação das fotos de tela cheia. */
-.grao::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.16;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
 /* ---------- botões e links ---------- */
@@ -490,13 +470,6 @@ main,
 .js-motion [data-revelar='linhas'] {
   opacity: 1;
   visibility: hidden;
-}
-.js-motion:not(.reduzido) [data-revelar='mascara'] {
-  opacity: 1;
-  clip-path: inset(100% 0 0 0);
-}
-.js-motion.motion-falhou [data-revelar='mascara'] {
-  clip-path: none !important;
 }
 .js-motion.motion-falhou [data-revelar] {
   opacity: 1 !important;

@@ -1,28 +1,28 @@
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { $, $$, aoTerminar, movimentoReduzido } from './util';
 
-/** Filtro da galeria por ambiente. As fotos escondidas também saem da navegação do visualizador. */
+/** Filtro dos projetos por ambiente: mostra só as séries daquela categoria. */
 export function iniciarGaleria() {
-  const secao = $('[data-galeria]');
-  const grade = $('[data-galeria-grade]');
-  if (!secao || !grade) return;
+  const secao = $('[data-projetos]');
+  if (!secao) return;
   const botoes = $$<HTMLButtonElement>('[data-filtro]', secao);
-  const itens = $$<HTMLElement>('[data-categoria]', grade);
-  const status = $('[data-galeria-status]', secao);
+  const series = $$<HTMLElement>('[data-categoria]', secao);
+  const status = $('[data-filtro-status]', secao);
 
   const aplicar = (filtro: string) => {
     let total = 0;
-    itens.forEach((item) => {
-      const mostrar = filtro === 'todos' || item.dataset.categoria === filtro;
-      item.hidden = !mostrar;
-      if (mostrar) {
-        total++;
-        // Quem estava fora da tela ainda pode estar esperando a entrada: ao mudar de lugar, aparece já.
-        item.style.opacity = '1';
-        item.style.visibility = 'visible';
-        item.style.transform = 'none';
-        item.dataset.revelado = '1';
-      }
+    series.forEach((serie) => {
+      const mostrar = filtro === 'todos' || serie.dataset.categoria === filtro;
+      serie.hidden = !mostrar;
+      if (!mostrar) return;
+      total++;
+      // Quem estava fora da tela ainda pode estar esperando a entrada: ao mudar de lugar, aparece já.
+      $$<HTMLElement>('[data-revelar]', serie).forEach((el) => {
+        el.style.opacity = '1';
+        el.style.visibility = 'visible';
+        el.style.transform = 'none';
+        el.dataset.revelado = '1';
+      });
     });
     return total;
   };
@@ -36,24 +36,20 @@ export function iniciarGaleria() {
     if (movimentoReduzido()) {
       total = aplicar(filtro);
     } else if (document.startViewTransition) {
-      // As fotos deslizam do lugar antigo para o novo, sem nenhuma animação escrita à mão.
       const transicao = document.startViewTransition(() => {
         total = aplicar(filtro);
       });
       await transicao.updateCallbackDone;
     } else {
-      await aoTerminar(grade.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-in', fill: 'forwards' }), 260);
+      const lista = series.filter((s) => !s.hidden);
+      await Promise.all(lista.map((s) => aoTerminar(s.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-in', fill: 'forwards' }), 260)));
+      lista.forEach((s) => s.getAnimations().forEach((a) => a.cancel()));
       total = aplicar(filtro);
-      grade.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
     }
-    const nome = botao.firstChild?.textContent?.trim() ?? '';
-    if (status) status.textContent = `${total} ${total === 1 ? 'foto' : 'fotos'}: ${nome}`;
-    // A altura da grade mudou: recalcula as posições das animações das seções seguintes.
+    if (status) status.textContent = `${total} ${total === 1 ? 'projeto' : 'projetos'}: ${botao.textContent?.trim() ?? ''}`;
+    // A altura da lista mudou: recalcula as posições das animações das seções seguintes.
     ScrollTrigger.refresh();
   };
 
   botoes.forEach((botao) => botao.addEventListener('click', () => filtrar(botao.dataset.filtro ?? 'todos')));
-
-  // Índice de ambientes da apresentação: o link leva à galeria já filtrada.
-  $$<HTMLAnchorElement>('[data-filtrar]').forEach((link) => link.addEventListener('click', () => filtrar(link.dataset.filtrar ?? 'todos')));
 }

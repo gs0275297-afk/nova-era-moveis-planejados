@@ -1,69 +1,11 @@
 ---
-import { Picture } from 'astro:assets';
-import Icone from './Icone.astro';
 import { empresa } from '../data/empresa';
-import { categorias, detalhes, galeria, previas } from '../data/projetos';
-
-// Duas miniaturas entram no meio da frase, como se a própria frase apontasse para os móveis.
-const ripado = detalhes.find((d) => d.id === 'ripados');
-const prateleiras = detalhes.find((d) => d.id === 'iluminacao');
-const miniRipado = ripado?.midia.tipo === 'foto' ? ripado.midia.foto.src : undefined;
-const miniLuz = prateleiras?.midia.tipo === 'foto' ? prateleiras.midia.foto.src : undefined;
-
-const indice = categorias
-  .map((c) => ({ ...c, total: galeria.filter((f) => f.categoria === c.id).length, previa: previas[c.id] }))
-  .filter((c) => c.total > 0);
 ---
 
 <!-- Sobe por cima da foto da abertura. A frase é a da própria empresa (bio do Instagram). -->
 <section class="manifesto escuro" id="nova-era" aria-labelledby="sobre-titulo" data-tema="escuro">
   <div class="container">
-    <h2 id="sobre-titulo" class="manifesto__frase" data-frase>
-      <span data-frase-texto>Fabricamos soluções</span>{' '}
-      {miniLuz && (
-        <span class="manifesto__mini" aria-hidden="true">
-          <Picture src={miniLuz} alt="" widths={[200, 320]} sizes="(min-width: 1024px) 15vw, 26vw" formats={['avif']} fallbackFormat="jpg" quality={68} loading="lazy" />
-        </span>
-      )}{' '}
-      <span data-frase-texto>inteligentes que otimizam</span>{' '}
-      {miniRipado && (
-        <span class="manifesto__mini" aria-hidden="true">
-          <Picture src={miniRipado} alt="" widths={[200, 320]} sizes="(min-width: 1024px) 15vw, 26vw" formats={['avif']} fallbackFormat="jpg" quality={68} loading="lazy" />
-        </span>
-      )}{' '}
-      <span data-frase-texto>seu espaço.</span>
-    </h2>
-
-    <div class="manifesto__corpo grade">
-      <div class="manifesto__apoio">
-        <p class="rotulo" data-revelar="fade">A {empresa.nomeCurto}</p>
-        <p class="lead" data-revelar="fade">
-          Móveis planejados em {empresa.cidade}, desenhados para as medidas e o uso de cada ambiente: nichos, gavetas e
-          armários até o teto, para cada coisa ter o seu lugar.
-        </p>
-      </div>
-
-      <nav class="indice" aria-label="Ver fotos por ambiente">
-        <ul data-indice>
-          {
-            indice.map((c) => (
-              <li data-revelar="fade">
-                <a href="#ambientes" data-filtrar={c.id}>
-                  <span class="indice__nome">{c.nome}</span>
-                  <span class="indice__total">
-                    {c.total} {c.total === 1 ? 'foto' : 'fotos'}
-                  </span>
-                  <Icone nome="seta" />
-                  <span class="indice__previa" aria-hidden="true" data-indice-previa>
-                    <Picture src={c.previa.src} alt="" widths={[320, 520]} sizes="(min-width: 1280px) 16vw, 76px" formats={['avif']} fallbackFormat="jpg" quality={66} loading="lazy" />
-                  </span>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-    </div>
+    <h2 id="sobre-titulo" class="manifesto__frase" data-frase>{empresa.frase}</h2>
   </div>
 </section>
 
@@ -78,157 +20,13 @@ const indice = categorias
   :global(.js-motion:not(.reduzido)) .manifesto {
     margin-top: -100svh;
   }
-
   .manifesto__frase {
+    max-width: 17em;
     font-family: var(--serif);
     font-weight: 400;
-    font-size: clamp(2.7rem, 1rem + 6.4vw, 9rem);
-    line-height: 1.04;
-    letter-spacing: -0.024em;
-  }
-  .manifesto__frase > :global(span[data-frase-texto]) {
-    display: inline;
-  }
-  /* miniatura na altura da linha: abre em largura na rolagem */
-  .manifesto__mini {
-    display: inline-block;
-    vertical-align: -0.09em;
-    width: 1.9em;
-    height: 0.8em;
-    margin-inline: 0.06em;
-    overflow: hidden;
-    background: var(--noite-3);
-  }
-  .manifesto__mini :global(picture),
-  .manifesto__mini :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-  .manifesto__mini :global(img) {
-    object-fit: cover;
-  }
-
-  .manifesto__corpo {
-    margin-top: clamp(72px, 9vw, 160px);
-    row-gap: 48px;
-    align-items: start;
-  }
-  .manifesto__apoio {
-    grid-column: 1 / span 4;
-    display: grid;
-    gap: 20px;
-  }
-
-  /* ---------- índice de ambientes: lista larga; a foto de cada um aparece ao apontar ---------- */
-  .indice {
-    grid-column: 6 / -1;
-  }
-  .indice ul {
-    border-top: 1px solid var(--linha-clara);
-  }
-  .indice li {
-    border-bottom: 1px solid var(--linha-clara);
-  }
-  .indice a {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    min-height: clamp(68px, 6.4vw, 104px);
-    padding-block: 10px;
-    transition: padding-left 560ms var(--ease-out);
-  }
-  .indice__nome {
-    flex: 1;
-    font-family: var(--serif);
-    font-size: clamp(1.7rem, 1.1rem + 2vw, 3.3rem);
-    line-height: 1.05;
-    letter-spacing: -0.018em;
-    transition: color var(--t-micro) var(--ease-out);
-  }
-  .indice__total {
-    font-size: 0.8125rem;
-    color: var(--aluminio);
-    white-space: nowrap;
-  }
-  .indice a > :global(svg) {
-    flex: none;
-    width: 20px;
-    height: 20px;
-    color: var(--luz);
-    transition: transform var(--t-ui) var(--ease-out);
-  }
-
-  .indice__previa {
-    position: absolute;
-    z-index: 2;
-    overflow: hidden;
-    pointer-events: none;
-    background: var(--noite-3);
-  }
-  .indice__previa :global(picture),
-  .indice__previa :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-  .indice__previa :global(img) {
-    object-fit: cover;
-  }
-
-  @media (hover: hover) {
-    .indice a:hover,
-    .indice a:focus-visible {
-      padding-left: 18px;
-    }
-    .indice a:hover .indice__nome,
-    .indice a:focus-visible .indice__nome {
-      color: var(--luz);
-    }
-    .indice a:hover > :global(svg),
-    .indice a:focus-visible > :global(svg) {
-      transform: translateX(6px);
-    }
-  }
-  /* a foto abre na coluna da esquerda, sob o texto de apoio: assim não cobre o nome de nenhum ambiente */
-  @media (hover: hover) and (min-width: 1280px) {
-    .manifesto__corpo {
-      position: relative;
-    }
-    .indice__previa {
-      left: 0;
-      bottom: -40px;
-      width: clamp(180px, 16vw, 280px);
-      aspect-ratio: 4 / 5;
-      clip-path: inset(50% 0 50% 0);
-      transition: clip-path 560ms var(--ease-in-out);
-    }
-    .indice a:hover .indice__previa,
-    .indice a:focus-visible .indice__previa {
-      clip-path: inset(0 0 0 0);
-    }
-  }
-  /* toque e telas menores: a foto fica sempre à vista, pequena, ao lado do nome */
-  @media (hover: none), (max-width: 1279px) {
-    .indice a {
-      padding-right: 0;
-    }
-    .indice__previa {
-      position: static;
-      flex: none;
-      width: 62px;
-      aspect-ratio: 1;
-      order: -1;
-    }
-    .indice__total {
-      display: none;
-    }
-  }
-
-  @media (max-width: 1023px) {
-    .manifesto__apoio,
-    .indice {
-      grid-column: 1 / -1;
-    }
+    font-size: clamp(2.2rem, 0.8rem + 4.6vw, 6.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
   }
 </style>

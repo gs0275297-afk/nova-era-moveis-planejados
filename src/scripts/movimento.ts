@@ -13,15 +13,12 @@ ScrollTrigger.config({ ignoreMobileResize: true });
 if (import.meta.env.DEV) Object.assign(window, { __gsap: gsap, __ScrollTrigger: ScrollTrigger });
 
 /*
- * Linguagem de movimento: cada elemento tem um papel, e nada se repete em tudo.
+ * Linguagem de movimento: pouca, e a serviço das fotos.
  * - abertura: a foto se abre do centro como um vão, o título sobe linha a linha e, na rolagem,
- *   a câmera desce do forro até a mesa; depois a apresentação sobe por cima da foto parada;
- * - frase da Nova Era: as palavras acendem conforme a leitura avança, e as miniaturas se abrem;
- * - capítulos dos projetos: cada foto entra por uma máscara numa direção própria, e o fundo da
- *   seção muda de cor com o capítulo em foco;
- * - galeria: sem máscara, só um assentamento curto (são muitas fotos, o movimento não pode cansar);
- * - panorama: o quadro se abre até as bordas da tela;
- * - títulos: linhas sobem dentro de máscaras. Textos de apoio: esmaecimento curto.
+ *   a apresentação sobe por cima da foto parada;
+ * - frase da Nova Era: as palavras acendem conforme a leitura avança;
+ * - títulos de seção: linhas sobem dentro de máscaras;
+ * - fotos e textos: esmaecimento com um assentamento curto (são muitas fotos, o movimento não pode cansar).
  */
 
 /*
@@ -29,13 +26,15 @@ if (import.meta.env.DEV) Object.assign(window, { __gsap: gsap, __ScrollTrigger: 
  * acontece durante o refresh de outro gatilho (página recarregada já rolada), o ScrollTrigger perde
  * o índice da lista interna e lança erro. Aqui os gatilhos ficam e cada elemento entra uma vez só.
  */
-const primeiraVez = (lote: Element[]) =>
-  lote.filter((el) => {
+const entrarUmaVez = (lote: Element[], animar: (novos: Element[]) => void) => {
+  const novos = lote.filter((el) => {
     const h = el as HTMLElement;
     if (h.dataset.revelado) return false;
     h.dataset.revelado = '1';
     return true;
   });
+  if (novos.length) animar(novos);
+};
 
 /**
  * Rolagem suave só com mouse (no toque, a rolagem nativa é a melhor). O laço só roda enquanto há
@@ -79,14 +78,6 @@ export function iniciarMovimento(): Lenis | null {
   const lenis = rolagemSuave();
 
   hero();
-  parallaxInterno();
-  fundosDosCapitulos();
-  panorama();
-  if (ponteiroFino()) {
-    magneticos();
-    cursor();
-    previaDoIndice();
-  }
   // Títulos e frases dependem das fontes para quebrar as linhas no lugar certo (sem esperar demais).
   Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 900))]).then(() => {
     revelacoes();
@@ -98,7 +89,7 @@ export function iniciarMovimento(): Lenis | null {
 
 /**
  * Versão para quem pediu menos movimento ao sistema: nada se desloca, escala ou acompanha o cursor.
- * O conteúdo surge com esmaecimentos curtos, e a cor de fundo dos capítulos continua mudando.
+ * O conteúdo surge com esmaecimentos curtos.
  */
 export function iniciarMovimentoSuave() {
   const surgir = (alvos: gsap.TweenTarget, extra: gsap.TweenVars = {}) =>
@@ -111,21 +102,17 @@ export function iniciarMovimentoSuave() {
 
   ScrollTrigger.batch('[data-revelar]', {
     start: 'top 92%',
-    once: true,
-    onEnter: (lote) => surgir(primeiraVez(lote), { stagger: 0.05, overwrite: true }),
+    onEnter: (lote) => entrarUmaVez(lote, (novos) => surgir(novos, { stagger: 0.05, overwrite: true })),
   });
-  fundosDosCapitulos();
 }
 
 /* ---------- Abertura ---------- */
 function hero() {
   const secao = $('[data-hero]');
-  const palco = $('[data-hero-palco]');
   const quadro = $('[data-hero-foto]');
-  const movel = $('[data-hero-movel]');
-  const img = movel?.querySelector('img');
+  const img = quadro?.querySelector('img');
   const titulo = $('[data-hero-titulo]');
-  if (!secao || !palco || !quadro || !movel || !img || !titulo) return;
+  if (!secao || !quadro || !img || !titulo) return;
 
   // Entrada rápida: não espera nada. Em até 1,5 s está tudo no lugar e a página nunca fica bloqueada.
   const tl = gsap.timeline();
@@ -152,63 +139,37 @@ function hero() {
   tl.fromTo('[data-hero-item]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.06 }, 0.6);
   tl.from('.topo__barra > *', { autoAlpha: 0, y: -10, duration: 0.7, ease: 'power3.out', stagger: 0.05, clearProps: 'all' }, 0.55);
 
-  // Rolagem: a câmera desce pela foto; título e chamada saem antes de ela chegar à mesa.
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: secao,
-        start: 'top top',
-        end: () => `+=${window.innerHeight * 1.1}`,
-        scrub: true,
-        invalidateOnRefresh: true,
-      },
-    })
-    .to(movel, { y: () => -(movel.offsetHeight - palco.offsetHeight), ease: 'none', duration: 1 }, 0)
-    .to('[data-hero-texto]', { y: () => -window.innerHeight * 0.24, autoAlpha: 0, ease: 'power1.in', duration: 0.42 }, 0)
-    .to('[data-hero-base]', { y: () => -window.innerHeight * 0.1, autoAlpha: 0, ease: 'power1.in', duration: 0.3 }, 0)
-    .fromTo('[data-hero-legenda]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.2, ease: 'power2.out' }, 0.78);
-
-  // Mouse: uma luz quente acompanha o cursor e a foto responde de leve.
-  if (ponteiroFino()) {
-    const luz = $('[data-hero-luz]');
-    const fotoX = gsap.quickTo(img, 'x', { duration: 1.4, ease: 'power3.out' });
-    const luzX = luz ? gsap.quickTo(luz, 'x', { duration: 0.9, ease: 'power3.out' }) : null;
-    const luzY = luz ? gsap.quickTo(luz, 'y', { duration: 0.9, ease: 'power3.out' }) : null;
-    palco.addEventListener('pointermove', (e) => {
-      fotoX((e.clientX / window.innerWidth - 0.5) * -22);
-      luz?.classList.add('is-acesa');
-      luzX?.(e.clientX);
-      luzY?.(e.clientY);
-    });
-    palco.addEventListener('pointerleave', () => {
-      fotoX(0);
-      luz?.classList.remove('is-acesa');
-    });
-  }
+  // Rolagem: título e chamada saem antes de a próxima seção cobrir a foto.
+  gsap.to('[data-hero-texto]', {
+    y: () => -window.innerHeight * 0.08,
+    autoAlpha: 0,
+    ease: 'power1.in',
+    scrollTrigger: { trigger: secao, start: 'top top', end: () => `+=${window.innerHeight * 0.45}`, scrub: true, invalidateOnRefresh: true },
+  });
 }
 
-/* ---------- Frase de apresentação: palavras acendem com a rolagem, miniaturas se abrem ---------- */
+/* ---------- Frase de apresentação: as palavras acendem com a rolagem ---------- */
 function frase() {
   const el = $('[data-frase]');
   if (!el) return;
   // Só palavras: a divisão não depende da largura, então não é refeita no redimensionamento
   // (refazer criaria um ScrollTrigger no meio de um refresh, o que o GSAP não aceita).
-  const palavras = $$('[data-frase-texto]', el).flatMap((parte) => SplitText.create(parte, { type: 'words', wordsClass: 'palavra' }).words);
-  const miniaturas = $$('.manifesto__mini', el);
-  const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 52%', scrub: 0.5 } });
-  tl.fromTo(palavras, { color: 'rgb(246 243 237 / 0.2)' }, { color: 'rgb(246 243 237 / 1)', ease: 'none', stagger: 0.1, duration: 0.3 }, 0);
-  miniaturas.forEach((m, i) => {
-    tl.fromTo(m, { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out', duration: 0.35 }, 0.15 + i * 0.3);
-  });
+  const palavras = SplitText.create(el, { type: 'words', wordsClass: 'palavra' }).words;
+  gsap.fromTo(
+    palavras,
+    { color: 'rgb(246 243 237 / 0.2)' },
+    { color: 'rgb(246 243 237 / 1)', ease: 'none', stagger: 0.1, duration: 0.3, scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 52%', scrub: 0.5 } },
+  );
 }
 
 /* ---------- Revelações na rolagem ---------- */
 function revelacoes() {
   ScrollTrigger.batch('[data-revelar="fade"]', {
     start: 'top 92%',
-    once: true,
     onEnter: (lote) =>
-      gsap.fromTo(primeiraVez(lote), { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.06, overwrite: true, clearProps: 'transform' }),
+      entrarUmaVez(lote, (novos) =>
+        gsap.fromTo(novos, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.06, overwrite: true, clearProps: 'transform' }),
+      ),
   });
 
   $$('[data-revelar="linhas"]').forEach((el) => {
@@ -228,116 +189,6 @@ function revelacoes() {
         });
       },
     });
-  });
-
-  // Fotos dos capítulos: cada uma entra por uma direção, com um leve recuo de escala.
-  const mascaras: Record<string, string> = {
-    baixo: 'inset(100% 0% 0% 0%)',
-    esquerda: 'inset(0% 100% 0% 0%)',
-    direita: 'inset(0% 0% 0% 100%)',
-    centro: 'inset(0% 42% 0% 42%)',
-  };
-  $$('[data-revelar="mascara"]').forEach((el) => {
-    const inicio = mascaras[el.dataset.direcao ?? 'baixo'] ?? mascaras.baixo;
-    const interno = el.firstElementChild;
-    gsap.set(el, { autoAlpha: 1, clipPath: inicio });
-    const tl = gsap.timeline({ scrollTrigger: { trigger: el.parentElement, start: 'top 86%', toggleActions: 'play none none none' } });
-    tl.to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.inOut', onComplete: () => void (el.style.clipPath = 'none') });
-    if (interno) tl.from(interno, { scale: 1.14, duration: 1.8, ease: 'expo.out', clearProps: 'transform' }, 0.05);
-  });
-}
-
-/* ---------- Foto que desliza dentro do próprio quadro ---------- */
-function parallaxInterno() {
-  $$('[data-parallax]').forEach((el) => {
-    gsap.fromTo(el, { yPercent: -5 }, { yPercent: 5, ease: 'none', scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });
-  });
-}
-
-/* ---------- O fundo dos projetos muda com o capítulo em foco ---------- */
-function fundosDosCapitulos() {
-  const secao = $('[data-projetos]');
-  if (!secao) return;
-  $$('[data-capitulo]', secao).forEach((cap) => {
-    ScrollTrigger.create({
-      trigger: cap,
-      start: 'top 62%',
-      end: 'bottom 62%',
-      onToggle: (self) => {
-        if (self.isActive) secao.dataset.fundo = cap.dataset.capitulo;
-      },
-    });
-  });
-}
-
-/* ---------- Panorama: o quadro se abre até as bordas da tela ---------- */
-function panorama() {
-  const quadro = $('[data-panorama-quadro]');
-  if (!quadro) return;
-  gsap.fromTo(
-    quadro,
-    { clipPath: 'inset(9% 8% 9% 8%)' },
-    { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: quadro, start: 'top 95%', end: 'top 25%', scrub: true } },
-  );
-}
-
-/* ---------- Índice de ambientes: a prévia acompanha o ponteiro na vertical, de leve ---------- */
-function previaDoIndice() {
-  const lista = $('[data-indice]');
-  if (!lista || !window.matchMedia('(min-width: 1280px)').matches) return;
-  const previas = $$('[data-indice-previa]', lista);
-  const movers = previas.map((p) => gsap.quickTo(p, 'y', { duration: 0.8, ease: 'power3.out' }));
-  lista.addEventListener('pointermove', (e) => {
-    const r = lista.getBoundingClientRect();
-    const y = ((e.clientY - r.top) / r.height - 0.5) * 24;
-    movers.forEach((m) => m(y));
-  });
-}
-
-/* ---------- Botões magnéticos (somente mouse) ---------- */
-function magneticos() {
-  $$('[data-magnetico]').forEach((el) => {
-    const x = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
-    const y = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
-    el.addEventListener('pointermove', (e) => {
-      const r = el.getBoundingClientRect();
-      x(gsap.utils.clamp(-10, 10, (e.clientX - (r.left + r.width / 2)) * 0.22));
-      y(gsap.utils.clamp(-8, 8, (e.clientY - (r.top + r.height / 2)) * 0.3));
-    });
-    el.addEventListener('pointerleave', () => {
-      x(0);
-      y(0);
-    });
-  });
-}
-
-/* ---------- Cursor com rótulo sobre as fotos ---------- */
-function cursor() {
-  const seguidor = $('[data-cursor-seguidor]');
-  const texto = $('[data-cursor-texto]');
-  if (!seguidor || !texto) return;
-  const x = gsap.quickTo(seguidor, 'x', { duration: 0.45, ease: 'power3.out' });
-  const y = gsap.quickTo(seguidor, 'y', { duration: 0.45, ease: 'power3.out' });
-
-  // Só aparece depois que o mouse se mexe (evita o rótulo parado no canto da tela).
-  let mexeu = false;
-  window.addEventListener(
-    'pointermove',
-    (e) => {
-      mexeu = true;
-      x(e.clientX);
-      y(e.clientY);
-    },
-    { passive: true },
-  );
-  document.addEventListener('pointerover', (e) => {
-    const alvo = mexeu ? (e.target as Element).closest<HTMLElement>('[data-cursor]') : null;
-    if (alvo) {
-      texto.textContent = alvo.dataset.cursor ?? '';
-      seguidor.classList.add('is-ativo');
-    } else {
-      seguidor.classList.remove('is-ativo');
-    }
   });
 }
 

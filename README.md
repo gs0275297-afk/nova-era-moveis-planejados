@@ -11,7 +11,7 @@ Site institucional de página única da Nova Era Móveis Planejados (Três Lagoa
 | `npm run dev` | servidor local em `http://localhost:4321` |
 | `npm run build` | confere os tipos (`astro check`) e gera o site em `dist/` |
 | `npm run preview` | serve o `dist/` gerado, para conferir antes de publicar |
-| `npm run assets` | refaz logo, fotos e vídeos a partir de `logo/` e `fotos e videos/` (material local; exige Python com Pillow, NumPy e imageio-ffmpeg) |
+| `npm run assets` | refaz logo, fotos e vídeos a partir de `logo/` e `fotos e videos/` (material local; exige Python com Pillow, NumPy, SciPy, scikit-image e imageio-ffmpeg) |
 | `npm run texturas` | refaz as texturas procedurais do simulador e as versões leves (Python com Pillow, NumPy e SciPy) |
 
 O build (`npm run build`) não depende desses scripts nem do material bruto.
@@ -28,19 +28,22 @@ um botão no rodapé para ativar as animações (a escolha fica guardada naquele
   vermelho ficam na logo.
 - **Tipografia:** Newsreader no corte de display para frases, Jost para informação (eco da logo). A
   Newsreader é gerada por `scripts/preparar-fontes.py` (um peso, só caracteres do português: 11 KB).
-- **Composição:** cada seção tem desenho próprio; não há um "cabeçalho de seção" padrão. Fotos mantêm a
-  proporção original sempre que possível.
-- **Movimento:** cada elemento tem um papel (ver o comentário em `src/scripts/movimento.ts`). Com movimento
-  reduzido: esmaecimentos, sem deslocamento, e a abertura vira uma tela inteira estática.
+- **Composição:** as fotos são as protagonistas. Cada série reúne um ambiente, em linhas alinhadas a uma grade de
+  12 colunas: as fotos de uma linha têm a mesma altura e preenchem a largura, com a mesma distância entre elas. O
+  enquadramento é decidido em `scripts/preparar-fotos.py`; o site nunca recorta uma foto por CSS (a abertura, que
+  preenche a tela, é a única exceção).
+- **Texto:** só o que ajuda a entender os serviços, ver os projetos e entrar em contato.
+- **Movimento:** pouco, e a serviço das fotos (ver o comentário em `src/scripts/movimento.ts`). Com movimento
+  reduzido: só esmaecimentos, sem deslocamento.
 
 ## Onde editar o conteúdo
 
 - `src/data/empresa.ts`: nome, frase da marca, endereço, telefone/WhatsApp, Instagram e mensagem padrão
   do WhatsApp. Só entram dados confirmados.
-- `src/data/projetos.ts`: foto da abertura, projetos em destaque, galeria por ambiente (categorias e fotos)
-  e itens da seção Detalhes.
-- `src/components/`: uma seção por arquivo (Hero, Sobre, Projetos, Galeria, Panorama, Detalhes, Simulador,
-  Contato, Rodape), mais Cabecalho, Lightbox, BarraMovel, Logo e Icone.
+- `src/data/projetos.ts`: foto da abertura, categorias, séries de fotos por ambiente (com a composição de cada
+  linha) e itens da seção Detalhes.
+- `src/components/`: uma seção por arquivo (Hero, Sobre, Projetos, Detalhes, Simulador, Contato, Rodape), mais
+  Cabecalho, Lightbox, BarraMovel, Logo e Icone.
 - `src/styles/global.css`: cores, tipografia, botões e estados de animação.
 - `src/scripts/configurador/catalogo.ts`: acabamentos, cores, puxadores, luzes e vistas do simulador 3D.
 
@@ -96,11 +99,12 @@ preços, medidas garantidas, marcas ou especificações sem confirmação da Nov
 - **Não publicar sem confirmação:** horário de atendimento, ano de fundação, nota e número de avaliações do
   Google, depoimentos, prazos, garantias, condições de pagamento, materiais/marcas e etapas do atendimento.
   Por isso o site não tem horário, seção de processo nem avaliações, e o JSON-LD não tem `aggregateRating`.
-- **Fotos:** todas são de ambientes do portfólio da Nova Era, com a marca d'água original. Recortes
-  (abertura e detalhes) usam só enquadramentos da própria foto; nada foi gerado ou retocado. As três fotos de
-  borda a borda (`abertura-ampliada`, `jantar-adega-ampla`, `panorama-painel`) foram ampliadas por reamostragem
-  clássica, sem IA, porque os originais chegaram com 1179 px de largura. Se a empresa enviar os arquivos sem a
-  compressão do WhatsApp, troque em `fotos e videos/` e rode `python scripts/preparar-fotos.py`.
+- **Fotos:** todas são de ambientes do portfólio da Nova Era. `scripts/preparar-fotos.py` faz só tratamento
+  clássico, sem IA: reduz a compressão, corrige de leve cor e luz, endireita as verticais, recorta e aplica nitidez
+  nas bordas. Nada é gerado, apagado ou retocado. Sempre que possível, o recorte deixa a marca d'água de fora; quatro
+  fotos ainda a mostram, porque o recorte cortaria o móvel (a lista está no próprio script). Os originais chegaram com
+  1179 px de largura: se a empresa enviar os arquivos sem a compressão do WhatsApp, troque em `fotos e videos/` e rode
+  `python scripts/preparar-fotos.py`.
 - **Vídeos:** dois trechos curtos dos reels da empresa, sem som (a música dos originais foi descartada) e
   recortados entre as sobreposições do Instagram.
 

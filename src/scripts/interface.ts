@@ -1,5 +1,5 @@
 import type Lenis from 'lenis';
-import { $, $$, aoTerminar, desktop, movimentoReduzido, observar } from './util';
+import { $, $$, aoTerminar, movimentoReduzido, observar } from './util';
 
 /* ---------- Cabeçalho: acompanha o tema da seção por baixo, some ao descer, item ativo ---------- */
 export function iniciarCabecalho(estado: { menuAberto: boolean }) {
@@ -160,7 +160,7 @@ export function iniciarBarraMovel() {
     barra.inert = !mostrar;
   };
   observar(([ent]) => {
-    // a abertura é mais alta que a tela: a barra entra quando a apresentação já cobriu a foto
+    // com movimento, a abertura é mais alta que a tela: a barra entra quando a apresentação já cobriu a foto
     passouHero = !ent.isIntersecting && ent.boundingClientRect.top < 0;
     aplicar();
   }).observe(hero);
@@ -171,10 +171,10 @@ export function iniciarBarraMovel() {
   ocultar.forEach((el) => obs.observe(el));
 }
 
-/* ---------- Vídeos: tocam só quando visíveis (e, no palco do computador, só o item ativo) ---------- */
+/* ---------- Vídeos: tocam só quando visíveis ---------- */
 export function iniciarVideos() {
   const reduzido = movimentoReduzido();
-  const avaliadores = $$<HTMLVideoElement>('[data-video]').map((video) => {
+  $$<HTMLVideoElement>('[data-video]').forEach((video) => {
     const item = video.closest('.detalhe');
     const botao = item?.querySelector<HTMLButtonElement>('[data-video-alternar]');
     let pausadoPeloUsuario = reduzido;
@@ -199,9 +199,8 @@ export function iniciarVideos() {
     );
     pedirPoster.observe(video);
 
-    const liberado = () => !desktop() || !!item?.classList.contains('is-ativo');
     const avaliar = () => {
-      if (visivel && liberado() && !pausadoPeloUsuario && !document.hidden) video.play().catch(() => marcar());
+      if (visivel && !pausadoPeloUsuario && !document.hidden) video.play().catch(() => marcar());
       else if (!video.paused) video.pause();
     };
 
@@ -225,9 +224,7 @@ export function iniciarVideos() {
       { threshold: 0.35 },
     ).observe(video);
     document.addEventListener('visibilitychange', avaliar);
-    return avaliar;
   });
-  document.addEventListener('detalhes:troca', () => avaliadores.forEach((avaliar) => avaliar()));
 }
 
 /* ---------- Mapa sob demanda ---------- */

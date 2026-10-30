@@ -34,19 +34,10 @@ const abas = [
 
 <section class="simulador escuro" id="simulador" aria-labelledby="simulador-titulo" data-tema="escuro">
   <div class="container grade simulador__intro">
-    <h2 id="simulador-titulo" class="titulo" data-revelar="linhas">
-      Agora, <em>monte a sua.</em>
-    </h2>
-    <div class="simulador__texto">
-      <p class="lead" data-revelar="fade">
-        Troque madeiras, cores, puxadores, bancada e luz, abra portas e gavetas e envie a combinação para pedir um
-        orçamento à {empresa.nomeCurto}.
-      </p>
-      <p class="simulador__aviso" data-revelar="fade">
-        Simulação ilustrativa para explorar possibilidades: não é um projeto executado pela {empresa.nomeCurto} nem um
-        orçamento. Medidas, materiais e soluções são definidos com a equipe, depois da avaliação técnica e comercial.
-      </p>
-    </div>
+    <h2 id="simulador-titulo" class="titulo" data-revelar="linhas">Simulador 3D</h2>
+    <p class="simulador__aviso" data-revelar="fade">
+      Simulação ilustrativa: não é um projeto executado pela {empresa.nomeCurto} nem um orçamento.
+    </p>
   </div>
 
   <div class="simulador__moldura">
@@ -63,13 +54,11 @@ const abas = [
             <Picture src={capaCozinha} alt="" widths={[828, 1280, capaCozinha.width]} sizes="100vw" formats={['avif']} fallbackFormat="jpg" quality={66} loading="lazy" />
           </div>
           <div class="sim__capa-texto">
-            <p class="sim__capa-selo">Simulação ilustrativa</p>
-            <p class="sim__capa-sub" data-sim-capa-sub>Gire, aproxime, abra portas e gavetas e troque os acabamentos em tempo real.</p>
+            <p class="sim__capa-sub">Troque madeiras, cores e luz, abra portas e gavetas e envie a combinação para orçamento.</p>
             <button class="botao botao--luz" type="button" data-sim-abrir>
               Abrir o simulador
               <Icone nome="seta" />
             </button>
-            <p class="sim__capa-nota">O 3D só é baixado quando você abre.</p>
           </div>
           <div class="sim__erro" data-sim-erro hidden>
             <p class="sim__capa-titulo">O 3D não abriu neste aparelho</p>
@@ -391,19 +380,15 @@ const abas = [
   .simulador__intro :global(.titulo) {
     grid-column: 1 / span 7;
   }
-  .simulador__texto {
-    grid-column: 8 / -1;
-    display: grid;
-    gap: 16px;
-  }
   .simulador__aviso {
-    font-size: 0.8125rem;
+    grid-column: 8 / -1;
+    font-size: var(--fs-pequeno);
     line-height: 1.5;
     color: var(--aluminio);
   }
   @media (max-width: 1023px) {
     .simulador__intro :global(.titulo),
-    .simulador__texto {
+    .simulador__aviso {
       grid-column: 1 / -1;
     }
   }
@@ -487,12 +472,6 @@ const abas = [
     gap: 16px;
     max-width: 26em;
   }
-  .sim__capa-selo {
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
   .sim__capa-titulo {
     font-family: var(--serif);
     font-size: clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
@@ -503,10 +482,6 @@ const abas = [
     font-size: var(--fs-lead);
     line-height: 1.45;
     color: var(--claro);
-  }
-  .sim__capa-nota {
-    font-size: 0.8125rem;
-    color: rgb(246 243 237 / 0.86);
   }
   .sim[data-estado='erro'] .sim__capa-texto,
   .sim__erro[hidden] {

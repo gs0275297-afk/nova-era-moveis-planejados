@@ -2,65 +2,62 @@
 import { Picture } from 'astro:assets';
 import Icone from './Icone.astro';
 import { detalhes } from '../data/projetos';
+import type { Detalhe } from '../data/projetos';
+
+const proporcao = (d: Detalhe) => (d.midia.tipo === 'foto' ? d.midia.src.width / d.midia.src.height : d.midia.largura / d.midia.altura);
 ---
 
-<section class="detalhes secao escuro" id="detalhes" aria-labelledby="detalhes-titulo" data-detalhes data-tema="escuro">
-  <div class="container detalhes__cabeca">
-    <h2 id="detalhes-titulo" class="titulo" data-revelar="linhas">
-      De perto, é o <em>acabamento</em> que aparece.
-    </h2>
-  </div>
-
-  <div class="container detalhes__corpo">
-    <!-- No computador: lista à esquerda e um palco à direita que troca a imagem do item escolhido.
-         No celular: cartões com imagem e texto que deslizam para o lado. -->
-    <ol class="detalhes__lista" data-detalhes-lista>
+<!-- Close-ups de acabamento, com a mesma lógica de linhas dos projetos. No celular, deslizam para o lado. -->
+<section class="detalhes secao escuro" id="detalhes" aria-labelledby="detalhes-titulo" data-tema="escuro">
+  <div class="container">
+    <h2 id="detalhes-titulo" class="titulo" data-revelar="linhas">Detalhes</h2>
+    <div class="detalhes__grade">
       {
-        detalhes.map((d, i) => (
-          <li class:list={['detalhe', { 'is-ativo': i === 0 }]} data-detalhe={d.id}>
-            <button class="detalhe__botao" type="button" aria-pressed={i === 0 ? 'true' : 'false'} data-detalhe-botao>
-              <span class="detalhe__titulo">{d.titulo}</span>
-              <span class="detalhe__texto"><span>{d.texto}</span></span>
-            </button>
-            <div class="detalhe__midia">
-              {d.midia.tipo === 'foto' ? (
-                <Picture
-                  src={d.midia.foto.src}
-                  alt={d.midia.foto.alt}
-                  widths={[480, 720, d.midia.foto.src.width]}
-                  sizes="(min-width: 1024px) 50vw, 82vw"
-                  formats={['avif']}
-                  fallbackFormat="jpg"
-                  quality={72}
-                  loading="lazy"
-                />
-              ) : (
-                <>
-                  <video
-                    muted
-                    loop
-                    playsinline
-                    preload="none"
-                    data-poster={`/videos/${d.midia.arquivo}.jpg`}
-                    width="576"
-                    height="460"
-                    aria-label={d.midia.alt}
-                    data-video
-                  >
-                    <source src={`/videos/${d.midia.arquivo}.mp4`} type="video/mp4" />
-                  </video>
-                  <button class="detalhe__pausa" type="button" data-video-alternar aria-label={`Pausar vídeo: ${d.midia.alt}`}>
-                    <Icone nome="pausa" class="detalhe__icone-pausa" />
-                    <Icone nome="play" class="detalhe__icone-play" />
-                  </button>
-                </>
-              )}
-            </div>
-          </li>
+        detalhes.map((linha) => (
+          <div class="detalhes__linha">
+            {linha.map((d) => (
+              <figure class="detalhe" style={`--r: ${proporcao(d).toFixed(4)}`} data-revelar="fade">
+                <div class="detalhe__midia">
+                  {d.midia.tipo === 'foto' ? (
+                    <Picture
+                      src={d.midia.src}
+                      alt={d.midia.alt}
+                      widths={[480, d.midia.src.width]}
+                      sizes="(min-width: 1024px) 50vw, 90vw"
+                      formats={['avif']}
+                      fallbackFormat="jpg"
+                      quality={74}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <>
+                      <video
+                        muted
+                        loop
+                        playsinline
+                        preload="none"
+                        data-poster={`/videos/${d.midia.arquivo}.jpg`}
+                        width={d.midia.largura}
+                        height={d.midia.altura}
+                        aria-label={d.midia.alt}
+                        data-video
+                      >
+                        <source src={`/videos/${d.midia.arquivo}.mp4`} type="video/mp4" />
+                      </video>
+                      <button class="detalhe__pausa" type="button" data-video-alternar aria-label={`Pausar vídeo: ${d.midia.alt}`}>
+                        <Icone nome="pausa" class="detalhe__icone-pausa" />
+                        <Icone nome="play" class="detalhe__icone-play" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                <figcaption>{d.titulo}</figcaption>
+              </figure>
+            ))}
+          </div>
         ))
       }
-    </ol>
-    <p class="detalhes__nota" data-revelar="fade">Recortes de fotos e vídeos de ambientes do portfólio da Nova Era.</p>
+    </div>
   </div>
 </section>
 
@@ -69,28 +66,37 @@ import { detalhes } from '../data/projetos';
     position: relative;
     z-index: 2;
   }
-  .detalhes__cabeca :global(.titulo) {
-    max-width: 11em;
+  .detalhes__grade {
+    display: grid;
+    row-gap: clamp(28px, 3vw, 48px);
+    margin-top: clamp(32px, 4vw, 64px);
   }
-  .detalhes__corpo {
-    position: relative;
-    margin-top: clamp(48px, 6vw, 96px);
+  .detalhes__linha {
+    display: flex;
+    gap: var(--col-gap);
   }
-
+  .detalhe {
+    flex: var(--r) 1 0;
+    min-width: 0;
+  }
   .detalhe__midia {
     position: relative;
+    aspect-ratio: var(--r);
     overflow: hidden;
     background: var(--noite-2);
   }
   .detalhe__midia :global(picture),
   .detalhe__midia :global(img),
   .detalhe__midia video {
+    display: block;
     width: 100%;
     height: 100%;
-  }
-  .detalhe__midia :global(img),
-  .detalhe__midia video {
     object-fit: cover;
+  }
+  .detalhe figcaption {
+    margin-top: 12px;
+    font-size: var(--fs-pequeno);
+    color: var(--aluminio);
   }
 
   .detalhe__pausa {
@@ -102,7 +108,7 @@ import { detalhes } from '../data/projetos';
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgb(12 19 38 / 0.6);
+    background: rgb(13 15 20 / 0.6);
     color: var(--claro);
     box-shadow: inset 0 0 0 1px var(--linha-clara);
   }
@@ -118,163 +124,30 @@ import { detalhes } from '../data/projetos';
     display: block;
   }
 
-  .detalhe__botao {
-    display: grid;
-    gap: 8px;
-    width: 100%;
-    text-align: left;
-  }
-  .detalhe__titulo {
-    font-family: var(--serif);
-    font-size: clamp(1.7rem, 1.2rem + 1.5vw, 2.9rem);
-    letter-spacing: -0.018em;
-    line-height: 1.06;
-  }
-  .detalhe__texto {
-    font-size: var(--fs-pequeno);
-    color: var(--aluminio);
-    max-width: 30em;
-  }
-  .detalhes__nota {
-    margin-top: 28px;
-    font-size: 0.8125rem;
-    color: var(--aluminio);
-  }
-
-  /* ---------- computador: lista + palco ---------- */
-  @media (min-width: 1024px) {
-    .detalhes__lista {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: var(--col-gap);
-      position: relative;
-      /* o palco ocupa a coluna da direita; a lista define a altura */
-      min-height: clamp(480px, 46vw, 780px);
-      align-content: start;
-    }
-    .detalhe {
-      grid-column: 1 / span 4;
-      border-top: 1px solid var(--linha-clara);
-    }
-    .detalhe:last-child {
-      border-bottom: 1px solid var(--linha-clara);
-    }
-    .detalhe__botao {
-      position: relative;
-      padding: 20px 0;
-      color: var(--aluminio);
-      transition: color var(--t-ui) var(--ease-out);
-    }
-    /* linha de luz marca o item ativo */
-    .detalhe__botao::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: -1px;
-      width: 100%;
-      height: 1px;
-      background: var(--luz);
-      transform: scaleX(0);
-      transform-origin: 0 50%;
-      transition: transform 700ms var(--ease-out);
-    }
-    .detalhe.is-ativo .detalhe__botao {
-      color: var(--claro);
-    }
-    .detalhe.is-ativo .detalhe__botao::before {
-      transform: scaleX(1);
-    }
-    /* texto de apoio só no item ativo, abrindo em altura */
-    .detalhe__texto {
-      display: grid;
-      grid-template-rows: 0fr;
-      opacity: 0;
-      transition:
-        grid-template-rows 500ms var(--ease-out),
-        opacity 400ms var(--ease-out);
-    }
-    .detalhe__texto > span {
-      min-height: 0;
-      overflow: hidden;
-    }
-    .detalhe.is-ativo .detalhe__texto {
-      grid-template-rows: 1fr;
-      opacity: 1;
-    }
-    @media (hover: hover) {
-      .detalhe__botao:hover {
-        color: var(--claro);
-      }
-    }
-
-    /* palco: todas as mídias empilhadas no mesmo lugar */
-    .detalhe__midia {
-      position: absolute;
-      top: 0;
-      right: 0;
-      /* palco largo: sete colunas, até a borda direita da tela */
-      right: calc(var(--gutter) * -1);
-      width: calc((100% - 11 * var(--col-gap)) / 12 * 7 + 7 * var(--col-gap) + var(--gutter));
-      height: 100%;
-      clip-path: inset(0 0 100% 0);
-      transition: clip-path 900ms var(--ease-in-out);
-      pointer-events: none;
-    }
-    .detalhe__midia :global(img),
-    .detalhe__midia video {
-      transform: scale(1.08);
-      transition: transform 1400ms var(--ease-out);
-    }
-    .detalhe.is-ativo .detalhe__midia {
-      z-index: 1;
-      clip-path: inset(0 0 0 0);
-      pointer-events: auto;
-    }
-    .detalhe.is-ativo .detalhe__midia :global(img),
-    .detalhe.is-ativo .detalhe__midia video {
-      transform: none;
-    }
-    /* a mídia que sai fica embaixo, inteira, até a nova cobrir */
-    .detalhe.is-saindo .detalhe__midia {
-      clip-path: inset(0 0 0 0);
-      transition: none;
-    }
-  }
-
-  @media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
-    .detalhe__midia,
-    .detalhe__midia :global(img),
-    .detalhe__midia video {
-      transition: none;
-    }
-  }
-
-  /* ---------- celular e tablet: cartões deslizantes ---------- */
-  @media (max-width: 1023px) {
-    .detalhes__lista {
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: min(82%, 420px);
-      gap: 14px;
+  /* celular: mesma altura para todas, deslizando para o lado */
+  @media (max-width: 767px) {
+    .detalhes__grade {
+      display: flex;
+      gap: 10px;
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: x proximity;
       overscroll-behavior-x: contain;
       margin-inline: calc(var(--gutter) * -1);
       padding-inline: var(--gutter);
       scroll-padding-inline: var(--gutter);
       scrollbar-width: none;
     }
-    .detalhes__lista::-webkit-scrollbar {
+    .detalhes__grade::-webkit-scrollbar {
       display: none;
     }
-    .detalhe {
-      scroll-snap-align: start;
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 18px;
+    .detalhes__linha {
+      display: contents;
     }
-    .detalhe__midia {
-      aspect-ratio: 5 / 4;
+    .detalhe {
+      flex: none;
+      width: calc(66vw * var(--r));
+      max-width: 88vw;
+      scroll-snap-align: start;
     }
   }
 </style>

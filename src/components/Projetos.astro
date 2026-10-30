@@ -1,383 +1,278 @@
 ---
 import { Picture } from 'astro:assets';
-import { indiceDe, projetos } from '../data/projetos';
+import { categorias, indiceDe, series } from '../data/projetos';
+import type { Foto, Linha } from '../data/projetos';
 
-const living = projetos.find((p) => p.id === 'living')!;
-const jantar = projetos.find((p) => p.id === 'jantar')!;
-const cozinha = projetos.find((p) => p.id === 'cozinha')!;
+const filtros = categorias.filter((c) => series.some((s) => s.categoria === c.id));
+
+const proporcao = (foto: Foto) => foto.src.width / foto.src.height;
+// Parte da largura da tela ocupada por cada tipo de linha, para o navegador escolher o arquivo certo.
+const larguraDaLinha: Record<Linha['largura'], number> = { plena: 100, inteira: 93, direita: 62, esquerda: 62, estreita: 46 };
+const tamanhos = (linha: Linha, foto: Foto) => {
+  const soma = linha.fotos.reduce((total, f) => total + proporcao(f), 0);
+  return `(max-width: 767px) 100vw, ${Math.round((larguraDaLinha[linha.largura] * proporcao(foto)) / soma)}vw`;
+};
+const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.src.width).concat(foto.src.width);
 ---
 
-<!-- Três projetos, três composições. O fundo da seção muda com o capítulo em foco (data-capitulo):
-     a página passa da sala clara para a noite do jantar e chega à cor da cozinha. -->
-<section class="projetos" id="projetos" aria-labelledby="projetos-titulo" data-projetos data-fundo="gesso">
-  <h2 id="projetos-titulo" class="sr-only">Projetos em destaque</h2>
-
-  <!-- 1. Living: a foto alta fica presa à esquerda, de borda a borda, enquanto o texto passa ao lado -->
-  <article class="cap cap--living" id="projeto-living" data-capitulo="gesso" data-tema="claro" aria-labelledby="cap-living">
-    <figure class="cap-living__alta">
-      <button class="foto" type="button" data-lightbox-abrir={indiceDe(living.fotos[0])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${living.fotos[0].legenda}`}>
-        <span class="cap__revela" data-revelar="mascara" data-direcao="esquerda">
-          <Picture
-            src={living.fotos[0].src}
-            alt={living.fotos[0].alt}
-            widths={[640, 960, living.fotos[0].src.width]}
-            sizes="(min-width: 1024px) 56vw, 100vw"
-            formats={['avif']}
-            fallbackFormat="jpg"
-            quality={70}
-            loading="lazy"
-            style={`object-position: ${living.fotos[0].foco}`}
-          />
-        </span>
-      </button>
-    </figure>
-    <div class="cap-living__texto">
-      <header class="cap__cabeca">
-        <p class="rotulo" data-revelar="fade">{living.ambiente}</p>
-        <h3 id="cap-living" class="titulo" data-revelar="linhas">Pé-direito duplo, <em>móvel suspenso.</em></h3>
-      </header>
-      <ul class="cap__destaques" data-revelar="fade">
-        {living.destaques.map((d) => <li>{d}</li>)}
-      </ul>
-      <figure class="cap-living__detalhe">
-        <button class="foto" type="button" data-lightbox-abrir={indiceDe(living.fotos[1])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${living.fotos[1].legenda}`}>
-          <span class="cap__revela" data-revelar="mascara">
-            <Picture
-              src={living.fotos[1].src}
-              alt={living.fotos[1].alt}
-              widths={[480, 720, living.fotos[1].src.width]}
-              sizes="(min-width: 1024px) 30vw, 80vw"
-              formats={['avif']}
-              fallbackFormat="jpg"
-              quality={70}
-              loading="lazy"
-              style={`object-position: ${living.fotos[1].foco}`}
-            />
-          </span>
-        </button>
-        <figcaption class="legenda">{living.fotos[1].legenda}</figcaption>
-      </figure>
-    </div>
-  </article>
-
-  <!-- 2. Jantar: a sala de ponta a ponta, com o título sobre a foto, e a adega subindo por cima da borda -->
-  <article class="cap cap--jantar" id="projeto-jantar" data-capitulo="noite" data-tema="escuro" aria-labelledby="cap-jantar">
-    <figure class="cap-jantar__ampla grao">
-      <button class="foto" type="button" data-lightbox-abrir={indiceDe(jantar.fotos[0])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${jantar.fotos[0].legenda}`}>
-        <span class="cap__revela" data-revelar="mascara" data-direcao="centro">
-          <span class="cap__parallax" data-parallax>
-            <Picture
-              src={jantar.ampla!}
-              alt={jantar.fotos[0].alt}
-              widths={[828, 1280, jantar.ampla!.width]}
-              sizes="100vw"
-              formats={['avif']}
-              fallbackFormat="jpg"
-              quality={68}
-              loading="lazy"
-            />
-          </span>
-        </span>
-      </button>
-      <header class="cap-jantar__cabeca">
-        <p class="rotulo" data-revelar="fade">{jantar.ambiente}</p>
-        <h3 id="cap-jantar" class="titulo" data-revelar="linhas">A sala é a <em>adega.</em></h3>
-      </header>
-    </figure>
-    <div class="container grade cap-jantar__baixo">
-      <ul class="cap__destaques" data-revelar="fade">
-        {jantar.destaques.map((d) => <li>{d}</li>)}
-      </ul>
-      <figure class="cap-jantar__adega">
-        <button class="foto" type="button" data-lightbox-abrir={indiceDe(jantar.fotos[1])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${jantar.fotos[1].legenda}`}>
-          <span class="cap__revela" data-revelar="mascara" data-direcao="direita">
-            <Picture
-              src={jantar.fotos[1].src}
-              alt={jantar.fotos[1].alt}
-              widths={[480, 720, jantar.fotos[1].src.width]}
-              sizes="(min-width: 1024px) 38vw, 86vw"
-              formats={['avif']}
-              fallbackFormat="jpg"
-              quality={70}
-              loading="lazy"
-              style={`object-position: ${jantar.fotos[1].foco}`}
-            />
-          </span>
-        </button>
-        <figcaption class="legenda">{jantar.fotos[1].legenda}</figcaption>
-      </figure>
-    </div>
-  </article>
-
-  <!-- 3. Cozinha: fundo da cor dos armários, título atravessando a foto, segunda foto em degrau -->
-  <article class="cap cap--cozinha" id="projeto-cozinha" data-capitulo="areia" data-tema="claro" aria-labelledby="cap-cozinha">
-    <div class="container grade cap-cozinha__grade">
-      <header class="cap-cozinha__cabeca">
-        <p class="rotulo" data-revelar="fade">{cozinha.ambiente}</p>
-        <h3 id="cap-cozinha" class="titulo" data-revelar="linhas">Tudo em tom de <em>areia.</em></h3>
-      </header>
-      <figure class="cap-cozinha__maior">
-        <button class="foto" type="button" data-lightbox-abrir={indiceDe(cozinha.fotos[0])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${cozinha.fotos[0].legenda}`}>
-          <span class="cap__revela" data-revelar="mascara">
-            <Picture
-              src={cozinha.fotos[0].src}
-              alt={cozinha.fotos[0].alt}
-              widths={[640, 960, cozinha.fotos[0].src.width]}
-              sizes="(min-width: 1024px) 50vw, 92vw"
-              formats={['avif']}
-              fallbackFormat="jpg"
-              quality={70}
-              loading="lazy"
-              style={`object-position: ${cozinha.fotos[0].foco}`}
-            />
-          </span>
-        </button>
-        <figcaption class="legenda">{cozinha.fotos[0].legenda}</figcaption>
-      </figure>
-      <div class="cap-cozinha__lado">
-        <ul class="cap__destaques" data-revelar="fade">
-          {cozinha.destaques.map((d) => <li>{d}</li>)}
-        </ul>
-        <figure>
-          <button class="foto" type="button" data-lightbox-abrir={indiceDe(cozinha.fotos[1])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${cozinha.fotos[1].legenda}`}>
-            <span class="cap__revela" data-revelar="mascara" data-direcao="direita">
-              <Picture
-                src={cozinha.fotos[1].src}
-                alt={cozinha.fotos[1].alt}
-                widths={[480, 720, cozinha.fotos[1].src.width]}
-                sizes="(min-width: 1024px) 34vw, 80vw"
-                formats={['avif']}
-                fallbackFormat="jpg"
-                quality={70}
-                loading="lazy"
-                style={`object-position: ${cozinha.fotos[1].foco}`}
-              />
-            </span>
-          </button>
-          <figcaption class="legenda">{cozinha.fotos[1].legenda}</figcaption>
-        </figure>
+<!-- Cada série reúne as fotos de um ambiente. Numa mesma linha as fotos têm a mesma altura e preenchem a
+     largura (a proporção de cada uma define o quanto ocupa), então todas as bordas caem na grade. -->
+<section class="projetos" id="projetos" aria-labelledby="projetos-titulo" data-projetos>
+  <header class="projetos__cabeca escuro" data-tema="escuro">
+    <div class="container">
+      <h2 id="projetos-titulo" class="titulo" data-revelar="linhas">Projetos</h2>
+      <div class="filtros" role="group" aria-label="Filtrar projetos por ambiente" data-revelar="fade">
+        <button type="button" class="filtro" aria-pressed="true" data-filtro="todos">Todos</button>
+        {filtros.map((c) => <button type="button" class="filtro" aria-pressed="false" data-filtro={c.id}>{c.nome}</button>)}
       </div>
     </div>
-  </article>
+  </header>
+  <p class="sr-only" aria-live="polite" data-filtro-status></p>
+
+  {
+    series.map((serie) => (
+      <article
+        class:list={['serie', { escuro: serie.tom === 'escuro', 'serie--abre-plena': serie.linhas[0].largura === 'plena' }]}
+        id={`projeto-${serie.id}`}
+        data-categoria={serie.categoria}
+        data-tema={serie.tom}
+        aria-labelledby={`titulo-${serie.id}`}
+      >
+        {serie.linhas.map((linha) => (
+          <div class={`fileira fileira--${linha.largura}`}>
+            {linha.titulo && (
+              <h3 id={`titulo-${serie.id}`} class="serie__titulo" data-revelar="fade">
+                {serie.titulo}
+              </h3>
+            )}
+            <div class="fileira__fotos">
+              {linha.fotos.map((foto) => (
+                <figure style={`--r: ${proporcao(foto).toFixed(4)}`} data-revelar="fade">
+                  <button
+                    class="foto"
+                    type="button"
+                    data-lightbox-abrir={indiceDe(foto)}
+                    data-lightbox-grupo={serie.id}
+                    aria-label={`Ampliar foto: ${foto.legenda}`}
+                  >
+                    <Picture
+                      src={foto.src}
+                      alt={foto.alt}
+                      widths={larguras(foto)}
+                      sizes={tamanhos(linha, foto)}
+                      formats={['avif']}
+                      fallbackFormat="jpg"
+                      quality={76}
+                      loading="lazy"
+                    />
+                  </button>
+                </figure>
+              ))}
+            </div>
+          </div>
+        ))}
+      </article>
+    ))
+  }
 </section>
 
 <style>
   .projetos {
-    --enfase: var(--madeira);
     position: relative;
     z-index: 2;
-    background: var(--gesso);
-    color: var(--tinta);
-    transition:
-      background-color 900ms var(--ease-out),
-      color 700ms var(--ease-out);
   }
-  .projetos[data-fundo='noite'] {
-    --enfase: var(--luz);
-    background: var(--noite);
-    color: var(--claro);
+  /* As alturas vêm da proporção das fotos e podem terminar em fração de pixel: a sombra de 1 px, na
+     cor do próprio fundo, cobre a emenda entre duas faixas. */
+  .projetos__cabeca,
+  .serie.escuro {
+    box-shadow: 0 1px 0 var(--noite);
   }
-  .projetos[data-fundo='noite'] :global(.rotulo),
-  .projetos[data-fundo='noite'] :global(.legenda),
-  .projetos[data-fundo='noite'] .cap__destaques {
-    color: var(--aluminio);
-  }
-  .projetos[data-fundo='areia'] {
-    background: var(--areia);
-  }
-  :global(.reduzido) .projetos {
-    transition: none;
+  .projetos__cabeca {
+    display: flow-root;
+    padding-bottom: clamp(32px, 4vw, 64px);
   }
 
-  .cap__revela {
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px clamp(20px, 2.6vw, 40px);
+    margin-top: clamp(24px, 3vw, 44px);
   }
-  .cap__destaques {
-    display: grid;
-    gap: 2px;
-    font-size: var(--fs-lead);
-    line-height: 1.4;
-    color: var(--tinta-2);
-    transition: color 700ms var(--ease-out);
-  }
-  .cap__destaques li + li {
-    margin-top: 4px;
-  }
-  .projetos :global(.legenda) {
-    margin-top: 12px;
-  }
-
-  /* ---------- 1. living ---------- */
-  .cap--living {
-    display: grid;
-    grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
-    align-items: start;
-    padding-bottom: var(--secao);
-  }
-  .cap-living__alta {
-    position: sticky;
-    top: 0;
-    height: 100svh;
-  }
-  .cap-living__alta .foto {
-    height: 100%;
-  }
-  .cap-living__texto {
-    display: grid;
-    gap: 28px;
-    padding: clamp(112px, 24vh, 260px) var(--gutter) 0 clamp(28px, 5vw, 96px);
-  }
-  .cap__cabeca {
-    display: grid;
-    gap: 20px;
-  }
-  .cap-living__detalhe {
-    width: min(76%, 480px);
-    margin-top: clamp(56px, 14vh, 180px);
-    margin-left: auto;
-  }
-  .cap-living__detalhe .foto {
-    aspect-ratio: 4 / 5;
-  }
-
-  /* ---------- 2. jantar ---------- */
-  .cap--jantar {
-    padding-bottom: var(--secao);
-  }
-  .cap-jantar__ampla {
+  .filtro {
     position: relative;
-    height: clamp(460px, 100svh, 62vw);
-    min-height: 520px;
-    overflow: hidden;
+    min-height: 44px;
+    padding-block: 10px;
+    font-size: var(--fs-pequeno);
+    color: var(--aluminio);
+    transition: color var(--t-micro) var(--ease-out);
   }
-  .cap-jantar__ampla .foto {
-    height: 100%;
-    background: var(--noite-2);
-  }
-  /* a foto é maior que o quadro para deslizar dentro dele na rolagem */
-  .cap__parallax {
-    position: absolute;
-    inset: -7% 0;
-    display: block;
-  }
-  .cap-jantar__ampla::before {
+  .filtro::after {
     content: '';
     position: absolute;
-    inset: 42% 0 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(180deg, transparent, rgb(13 15 20 / 0.78));
+    left: 0;
+    right: 0;
+    bottom: 6px;
+    height: 1px;
+    background: var(--luz);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 460ms var(--ease-out);
   }
-  .cap-jantar__cabeca {
-    position: absolute;
-    z-index: 2;
-    left: var(--gutter);
-    right: var(--gutter);
-    bottom: clamp(24px, 5vh, 56px);
-    display: grid;
-    gap: 14px;
+  .filtro:hover,
+  .filtro[aria-pressed='true'] {
     color: var(--claro);
-    pointer-events: none;
   }
-  .cap-jantar__cabeca :global(.rotulo) {
-    color: rgb(246 243 237 / 0.84) !important;
-  }
-  .cap-jantar__baixo {
-    row-gap: 36px;
-    align-items: start;
-  }
-  .cap-jantar__baixo .cap__destaques {
-    grid-column: 1 / span 4;
-    padding-top: clamp(28px, 3vw, 48px);
-  }
-  .cap-jantar__adega {
-    position: relative;
-    z-index: 3;
-    grid-column: 8 / -1;
-    margin-top: clamp(-220px, -14vw, -80px);
-  }
-  .cap-jantar__adega .foto {
-    aspect-ratio: 4 / 5;
+  .filtro[aria-pressed='true']::after {
+    transform: scaleX(1);
   }
 
-  /* ---------- 3. cozinha ---------- */
-  .cap--cozinha {
-    padding-block: var(--secao);
+  .serie {
+    display: grid;
+    row-gap: var(--col-gap);
+    padding-block: clamp(56px, 5.5vw, 104px);
+    background: var(--gesso);
+    box-shadow: 0 1px 0 var(--gesso);
   }
-  .cap-cozinha__grade {
-    align-items: start;
-    row-gap: 40px;
+  .serie.escuro {
+    background: var(--noite);
   }
-  .cap-cozinha__cabeca {
-    position: relative;
-    z-index: 2;
+  .serie[hidden] {
+    display: none;
+  }
+  .serie--abre-plena {
+    padding-top: 0;
+  }
+
+  .serie__titulo {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 1.1rem + 1.3vw, 2.6rem);
+    line-height: 1.08;
+    letter-spacing: -0.016em;
+    text-wrap: balance;
+  }
+
+  /* ---------- fileiras de fotos: sempre sobre a mesma grade de 12 colunas ---------- */
+  .fileira {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    width: 100%;
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  .fileira__fotos {
+    display: flex;
+    gap: var(--col-gap);
+    min-width: 0;
+  }
+  .fileira__fotos figure {
+    flex: var(--r) 1 0;
+    min-width: 0;
+  }
+  .fileira__fotos .foto {
+    aspect-ratio: var(--r);
+    cursor: zoom-in;
+  }
+
+  .fileira--plena {
+    display: block;
+    max-width: none;
+    padding-inline: 0;
+    margin-bottom: clamp(8px, 1.4vw, 24px);
+  }
+  .fileira--inteira .fileira__fotos {
     grid-column: 1 / -1;
-    display: grid;
-    gap: 18px;
-    margin-bottom: clamp(-96px, -5vw, -24px);
   }
-  .cap-cozinha__cabeca :global(.titulo) {
-    max-width: 12em;
+  .fileira--inteira .serie__titulo {
+    grid-column: 1 / -1;
+    margin-bottom: clamp(20px, 2vw, 32px);
   }
-  .cap-cozinha__maior {
-    grid-column: 1 / span 7;
+  .fileira--direita .serie__titulo {
+    grid-column: 1 / span 4;
   }
-  .cap-cozinha__maior .foto {
-    aspect-ratio: 5 / 6;
+  .fileira--direita .fileira__fotos {
+    grid-column: 5 / -1;
   }
-  .cap-cozinha__lado {
+  .fileira--esquerda .fileira__fotos {
+    grid-column: 1 / span 8;
+    grid-row: 1;
+  }
+  .fileira--esquerda .serie__titulo {
     grid-column: 9 / -1;
-    display: grid;
-    gap: clamp(40px, 6vw, 96px);
-    padding-top: clamp(80px, 13vw, 240px);
+    grid-row: 1;
+    padding-left: clamp(8px, 1.4vw, 24px);
   }
-  .cap-cozinha__lado .foto {
-    aspect-ratio: 4 / 5;
+  .fileira--estreita .serie__titulo {
+    grid-column: 1 / span 6;
+  }
+  .fileira--estreita .fileira__fotos {
+    grid-column: 7 / -1;
   }
 
+  /* tablet: as linhas recuadas ocupam a largura toda, com o título em cima */
   @media (max-width: 1023px) {
-    .cap--living {
-      display: block;
-      padding-bottom: var(--secao);
-    }
-    .cap-living__alta {
-      position: relative;
-      height: min(120vw, 92svh);
-    }
-    .cap-living__texto {
-      padding: 40px var(--gutter) 0;
-    }
-    .cap-jantar__ampla {
-      height: min(125vw, 86svh);
-    }
-    .cap-jantar__baixo .cap__destaques,
-    .cap-jantar__adega,
-    .cap-cozinha__maior,
-    .cap-cozinha__lado {
+    .fileira--direita .serie__titulo,
+    .fileira--esquerda .serie__titulo,
+    .fileira--estreita .serie__titulo,
+    .fileira--direita .fileira__fotos,
+    .fileira--esquerda .fileira__fotos,
+    .fileira--estreita .fileira__fotos {
       grid-column: 1 / -1;
+      grid-row: auto;
+      padding-left: 0;
     }
-    .cap-jantar__adega {
-      width: 86%;
-      margin: 0 calc(var(--gutter) * -1) 0 auto;
+    .fileira--direita .serie__titulo,
+    .fileira--esquerda .serie__titulo,
+    .fileira--estreita .serie__titulo {
+      margin-bottom: 20px;
     }
-    .cap-cozinha__cabeca {
-      margin-bottom: 0;
-    }
-    .cap-cozinha__maior {
+  }
+
+  /* celular: uma foto por vez, de borda a borda, para ver o ambiente no maior tamanho possível */
+  @media (max-width: 767px) {
+    .filtros {
+      flex-wrap: nowrap;
+      overflow-x: auto;
       margin-inline: calc(var(--gutter) * -1);
-    }
-    .cap-cozinha__maior :global(.legenda) {
       padding-inline: var(--gutter);
+      scrollbar-width: none;
     }
-    .cap-cozinha__lado {
+    .filtros::-webkit-scrollbar {
+      display: none;
+    }
+    .filtro {
+      flex: none;
+    }
+    .serie {
+      row-gap: 6px;
+      padding-block: 44px;
+    }
+    .serie--abre-plena {
       padding-top: 0;
     }
-    .cap-cozinha__lado figure {
-      width: 78%;
-      margin-left: auto;
+    .fileira {
+      display: block;
+      padding-inline: 0;
+    }
+    .serie__titulo,
+    .fileira--inteira .serie__titulo,
+    .fileira--direita .serie__titulo,
+    .fileira--esquerda .serie__titulo,
+    .fileira--estreita .serie__titulo {
+      margin-bottom: 16px;
+      padding-inline: var(--gutter);
+    }
+    .serie--abre-plena .serie__titulo {
+      margin-top: 22px;
+    }
+    .fileira__fotos {
+      flex-direction: column;
+      gap: 6px;
+    }
+    .fileira__fotos figure {
+      flex: none;
     }
   }
 </style>

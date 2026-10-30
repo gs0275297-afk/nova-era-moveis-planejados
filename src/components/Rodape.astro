@@ -8,16 +8,10 @@ const ano = new Date().getFullYear();
 
 <footer class="rodape escuro" data-tema="escuro">
   <div class="container">
-    <a class="rodape__chamada" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
-      <span class="titulo">Vamos planejar <em>o seu espaço?</em></span>
-      <Icone nome="seta-diagonal" />
-    </a>
-
     <div class="grade rodape__grade">
       <div class="rodape__selo">
         <Logo versao="selo" />
       </div>
-      <p class="rodape__frase">{empresa.frase}</p>
 
       <nav class="rodape__nav" aria-label="Rodapé">
         <p class="rotulo">Navegação</p>
@@ -69,45 +63,14 @@ const ano = new Date().getFullYear();
 
 <style>
   .rodape {
-    padding-block: clamp(80px, 10vw, 176px) max(28px, env(safe-area-inset-bottom));
+    padding-block: clamp(56px, 6vw, 104px) max(28px, env(safe-area-inset-bottom));
   }
-  .rodape__chamada {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    padding-bottom: clamp(32px, 4vw, 64px);
-    border-bottom: 1px solid var(--linha-clara);
-  }
-  .rodape__chamada :global(svg) {
-    flex: none;
-    width: clamp(36px, 5vw, 84px);
-    height: clamp(36px, 5vw, 84px);
-    stroke-width: 1;
-    color: var(--luz);
-    transition: transform 620ms var(--ease-out);
-  }
-  @media (hover: hover) {
-    .rodape__chamada:hover :global(svg) {
-      transform: translate(6px, -6px);
-    }
-  }
-
   .rodape__grade {
     row-gap: 40px;
-    padding-top: clamp(40px, 5vw, 80px);
   }
   .rodape__selo {
-    grid-column: 1 / span 1;
+    grid-column: 1 / span 2;
     width: clamp(84px, 7vw, 116px);
-  }
-  .rodape__frase {
-    grid-column: 3 / span 3;
-    max-width: 16em;
-    font-family: var(--serif);
-    font-size: 1.5rem;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
   }
   .rodape :global(.rotulo) {
     margin-bottom: 14px;
@@ -164,10 +127,7 @@ const ano = new Date().getFullYear();
 
   @media (max-width: 1023px) {
     .rodape__selo {
-      grid-column: 1 / span 3;
-    }
-    .rodape__frase {
-      grid-column: 4 / -1;
+      grid-column: 1 / -1;
     }
     .rodape__nav {
       grid-column: 1 / span 4;

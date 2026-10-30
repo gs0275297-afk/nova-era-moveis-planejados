@@ -3,21 +3,14 @@ import Icone from './Icone.astro';
 import { empresa, enderecoCompleto, mapa, mensagemPadrao } from '../data/empresa';
 import { categorias } from '../data/projetos';
 
-// Mesmos ambientes da galeria, mais "Outro".
+// Mesmos ambientes dos projetos, mais "Outro".
 const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
 ---
 
 <section class="contato secao" id="contato" aria-labelledby="contato-titulo" data-tema="claro">
   <div class="container grade contato__grade">
     <div class="contato__info">
-      <p class="rotulo" data-revelar="fade">Orçamento</p>
-      <h2 id="contato-titulo" class="titulo" data-revelar="linhas">
-        Conte qual espaço <em>você quer planejar.</em>
-      </h2>
-      <p class="lead" data-revelar="fade">
-        Preencha o formulário e a mensagem abre pronta no WhatsApp da {empresa.nomeCurto}. Se preferir, fale direto
-        pelos canais abaixo.
-      </p>
+      <h2 id="contato-titulo" class="titulo" data-revelar="linhas">Orçamento</h2>
 
       <dl class="canais" data-revelar="fade">
         <div class="canal">
@@ -100,39 +93,26 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
           name="mensagem"
           rows="4"
           maxlength="800"
-          placeholder="Medidas aproximadas, o que precisa guardar, estilo que você gosta…"></textarea>
+          placeholder="Medidas aproximadas, o que precisa guardar…"></textarea>
       </div>
 
       <div class="formulario__envio">
-        <button class="botao" type="submit" data-magnetico>
+        <button class="botao" type="submit">
           <Icone nome="whatsapp" />
           Enviar pelo WhatsApp
         </button>
-        <p class="formulario__nota">Nenhum dado fica salvo neste site: o formulário só monta a mensagem e abre o WhatsApp.</p>
+        <p class="formulario__nota">A mensagem abre no WhatsApp. Nada fica salvo neste site.</p>
       </div>
     </form>
 
-    <div class="mapa escuro" data-mapa data-revelar="fade">
-      <div class="mapa__capa" data-mapa-capa>
-        <svg class="mapa__desenho" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <g stroke="currentColor" stroke-width="1" fill="none">
-            <path d="M-20 110 L1220 70" /><path d="M-20 230 L1220 190" /><path d="M-20 350 L1220 310" />
-            <path d="M160 -20 L200 420" /><path d="M420 -20 L460 420" /><path d="M680 -20 L720 420" />
-            <path d="M940 -20 L980 420" /><path d="M-20 20 L1220 400" stroke-dasharray="3 7" />
-          </g>
-        </svg>
-        <span class="mapa__marcador" aria-hidden="true"></span>
-        <div class="mapa__texto">
-          <p><strong>{empresa.endereco.rua}</strong> · {empresa.endereco.bairro}, {empresa.endereco.cidade} – {empresa.endereco.uf}</p>
-          <div class="mapa__botoes">
-            <button class="botao botao--claro" type="button" data-mapa-carregar>Mostrar mapa aqui</button>
-            <a class="link-seta" href={mapa.abrir} target="_blank" rel="noopener">
-              <span>Abrir no Google Maps</span>
-              <Icone nome="seta-diagonal" />
-            </a>
-          </div>
-          <p class="mapa__nota">O mapa só é carregado do Google se você pedir.</p>
-        </div>
+    <!-- O mapa do Google só é carregado se a pessoa pedir. -->
+    <div class="mapa" data-mapa data-revelar="fade">
+      <div class="mapa__botoes" data-mapa-capa>
+        <button class="botao botao--contorno" type="button" data-mapa-carregar>Mostrar mapa</button>
+        <a class="link-seta" href={mapa.abrir} target="_blank" rel="noopener">
+          <span>Abrir no Google Maps</span>
+          <Icone nome="seta-diagonal" />
+        </a>
       </div>
       <template data-mapa-template>
         <iframe title={`Mapa: ${empresa.nome}, ${enderecoCompleto}`} src={mapa.embed} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
@@ -322,60 +302,13 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
   /* ---------- mapa sob demanda ---------- */
   .mapa {
     grid-column: 1 / -1;
-    position: relative;
-    aspect-ratio: 3 / 1;
-    min-height: 320px;
-    overflow: hidden;
-    background: var(--noite);
-    color: var(--claro);
   }
   .mapa :global(iframe) {
-    position: absolute;
-    inset: 0;
+    display: block;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 3 / 1;
+    min-height: 320px;
     border: 0;
-  }
-  .mapa__capa {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    align-items: end;
-    padding: clamp(22px, 3vw, 44px);
-  }
-  .mapa__desenho {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    color: rgb(170 176 189 / 0.22);
-  }
-  /* marcador: um ponto de luz, com anel */
-  .mapa__marcador {
-    position: absolute;
-    left: 58%;
-    top: 46%;
-    width: 14px;
-    height: 14px;
-    margin: -7px 0 0 -7px;
-    border-radius: 50%;
-    background: var(--luz);
-    box-shadow:
-      0 0 0 8px rgb(239 197 142 / 0.18),
-      0 0 0 20px rgb(239 197 142 / 0.08);
-  }
-  .mapa__texto {
-    position: relative;
-    display: grid;
-    gap: 16px;
-    max-width: 40em;
-  }
-  .mapa__texto p {
-    color: var(--aluminio);
-  }
-  .mapa__texto strong {
-    font-weight: 500;
-    color: var(--claro);
   }
   .mapa__botoes {
     display: flex;
@@ -383,16 +316,13 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
     align-items: center;
     gap: 14px 28px;
   }
-  .mapa__nota {
-    font-size: 0.8125rem;
-  }
 
   @media (max-width: 1023px) {
     .contato__info,
     .formulario {
       grid-column: 1 / -1;
     }
-    .mapa {
+    .mapa :global(iframe) {
       aspect-ratio: 4 / 3;
     }
   }
@@ -400,11 +330,6 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
     .formulario__envio .botao,
     .mapa__botoes .botao {
       width: 100%;
-    }
-    .mapa {
-      margin-inline: calc(var(--gutter) * -1);
-      aspect-ratio: auto;
-      min-height: 420px;
     }
   }
 </style>

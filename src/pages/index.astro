@@ -4,8 +4,6 @@ import Cabecalho from '../components/Cabecalho.astro';
 import Hero from '../components/Hero.astro';
 import Sobre from '../components/Sobre.astro';
 import Projetos from '../components/Projetos.astro';
-import Galeria from '../components/Galeria.astro';
-import Panorama from '../components/Panorama.astro';
 import Detalhes from '../components/Detalhes.astro';
 import Simulador from '../components/Simulador.astro';
 import Contato from '../components/Contato.astro';
@@ -23,8 +21,6 @@ import Lightbox from '../components/Lightbox.astro';
     <Hero />
     <Sobre />
     <Projetos />
-    <Galeria />
-    <Panorama />
     <Detalhes />
     <Simulador />
     <Contato />
@@ -32,44 +28,8 @@ import Lightbox from '../components/Lightbox.astro';
   <Rodape />
   <BarraMovel />
   <Lightbox />
-  <div class="cursor" aria-hidden="true" data-cursor-seguidor><span data-cursor-texto></span></div>
 </Base>
 
 <script>
   import '../scripts/app';
 </script>
-
-<style is:global>
-  .cursor {
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 70;
-    pointer-events: none;
-    display: none;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .cursor {
-      display: block;
-    }
-  }
-  .cursor span {
-    display: grid;
-    place-items: center;
-    width: 84px;
-    height: 84px;
-    margin: -42px 0 0 -42px;
-    border-radius: 50%;
-    background: var(--luz);
-    color: var(--tinta);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    transform: scale(0);
-    transition: transform 420ms var(--ease-out);
-  }
-  .cursor.is-ativo span {
-    transform: scale(1);
-  }
-</style>
