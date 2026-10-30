@@ -22,7 +22,7 @@ const amostra = (nome: string) => `/3d/amostras/${nome}.webp`;
 
 export const madeiras: Acabamento[] = [
   { id: 'carvalho', nome: 'Carvalho claro', grupo: 'madeira', amostra: '#cfae84', imagem: amostra('carvalho'), tom: '#fff4e6' },
-  { id: 'freijo', nome: 'Freijó', grupo: 'madeira', amostra: '#b58456', imagem: amostra('freijo'), tom: '#f2e2cc' },
+  { id: 'freijo', nome: 'Freijó', grupo: 'madeira', amostra: '#b58456', imagem: amostra('freijo'), tom: '#ecdfd0' },
   { id: 'nogueira', nome: 'Nogueira', grupo: 'madeira', amostra: '#6a4530', imagem: amostra('nogueira'), tom: '#b47e58' },
   { id: 'nogueira-escura', nome: 'Madeira escura', grupo: 'madeira', amostra: '#3b281d', imagem: amostra('nogueira'), tom: '#6b4631' },
 ];
@@ -69,9 +69,10 @@ export function acabamento(id: string): Acabamento {
 }
 
 /* ---------- componentes que recebem acabamento ---------- */
-export type Papel = 'estrutura' | 'portas' | 'gavetas' | 'paineis' | 'prateleiras';
+export type Papel = 'estrutura' | 'portas' | 'aereos' | 'gavetas' | 'paineis' | 'prateleiras';
 export const papeis: { id: Papel; nome: string; dica: string }[] = [
-  { id: 'portas', nome: 'Portas', dica: 'Frentes com dobradiça e portas basculantes' },
+  { id: 'portas', nome: 'Portas', dica: 'Portas de baixo, torre quente e geladeira' },
+  { id: 'aereos', nome: 'Portas superiores', dica: 'Portas dos armários superiores' },
   { id: 'gavetas', nome: 'Gavetas', dica: 'Frentes das gavetas' },
   { id: 'estrutura', nome: 'Estrutura', dica: 'Caixas, laterais internas e rodapé' },
   { id: 'paineis', nome: 'Painéis', dica: 'Laterais aparentes, painel superior e ripado da ilha' },
@@ -102,12 +103,13 @@ export const cenarios: { id: Cenario; nome: string; dica: string }[] = [
   { id: 'neutra', nome: 'Neutra', dica: 'Dia nublado, luz difusa e branca' },
   { id: 'noite', nome: 'Noite', dica: 'Só a iluminação artificial' },
 ];
-export type Luz = 'led' | 'nichos' | 'pendentes' | 'spots';
+export type Luz = 'led' | 'nichos' | 'pendentes' | 'spots' | 'indireta';
 export const luzes: { id: Luz; nome: string }[] = [
   { id: 'led', nome: 'Fita de LED sob os armários' },
   { id: 'nichos', nome: 'LED dos nichos' },
   { id: 'pendentes', nome: 'Pendentes da ilha' },
-  { id: 'spots', nome: 'Spots do teto' },
+  { id: 'spots', nome: 'Spots embutidos' },
+  { id: 'indireta', nome: 'Luz indireta da sanca' },
 ];
 export type TemperaturaLuz = 'quente' | 'neutra';
 export const temperaturas: { id: TemperaturaLuz; nome: string }[] = [

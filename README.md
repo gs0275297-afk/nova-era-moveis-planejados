@@ -12,7 +12,7 @@ Site institucional de página única da Nova Era Móveis Planejados (Três Lagoa
 | `npm run build` | confere os tipos (`astro check`) e gera o site em `dist/` |
 | `npm run preview` | serve o `dist/` gerado, para conferir antes de publicar |
 | `npm run assets` | refaz logo, fotos e vídeos a partir de `logo/` e `fotos e videos/` (material local; exige Python com Pillow, NumPy e imageio-ffmpeg) |
-| `npm run texturas` | refaz as texturas procedurais do simulador e as versões leves (Python com Pillow e NumPy) |
+| `npm run texturas` | refaz as texturas procedurais do simulador e as versões leves (Python com Pillow, NumPy e SciPy) |
 
 O build (`npm run build`) não depende desses scripts nem do material bruto.
 
@@ -36,10 +36,10 @@ quando o sistema pede movimento reduzido. Esse atalho não existe no site public
 |---|---|
 | `catalogo.ts` | opções do simulador (sem three.js: a interface usa antes da cena carregar) |
 | `estado.ts` | configuração, desfazer, link compartilhável, configurações salvas, resumo |
-| `materiais.ts` | biblioteca central de materiais e carga das texturas |
-| `moveis.ts` | peças reutilizáveis: caixas, portas, basculantes, gavetas, puxadores |
+| `materiais.ts` | biblioteca central de materiais, luzes leves (uniforms), reflexo projetado e carga das texturas |
+| `moveis.ts` | peças reutilizáveis: caixas, portas, basculantes, gavetas, puxadores, dobradiças e corrediças |
 | `ambientes/` | um módulo por ambiente, com geometria, luzes e vistas próprias (hoje, `cozinha.ts`) |
-| `motor.ts` | renderização sob demanda, câmera, paredes em corte, comparação, captura, descarte |
+| `motor.ts` | renderização sob demanda em HDR, refino progressivo, câmera, comparação, captura, descarte |
 | `index.ts` | liga o painel ao estado e ao motor |
 
 `src/scripts/simulador.ts` fica no pacote principal e só baixa o three.js quando o simulador vai ser usado.
@@ -47,6 +47,27 @@ quando o sistema pede movimento reduzido. Esse atalho não existe no site public
 **Para adicionar um ambiente:** crie `ambientes/<nome>.ts` que cumpra o contrato de `ambientes/tipos.ts`, registre em
 `AMBIENTES` (`motor.ts`) e na lista `ambientes` (`catalogo.ts`). O painel de portas e gavetas se monta sozinho a partir
 das articulações do ambiente.
+
+**Como a imagem é feita (decisões vindas de medição, não de gosto):**
+
+- Só o sol é uma luz completa do three.js, com sombra. Spots, pendentes, fitas de LED, sanca e janela são calculados
+  em `materiais.ts` e controlados por uniforms: ligar e desligar muda um número. Antes, com 11 luzes reais, cada troca
+  recompilava todos os shaders (8 s para acender os spots numa GPU integrada).
+- O brilho vem de uma sonda de reflexo da própria sala, com projeção em caixa. Ela é refeita só quando a luz, a
+  composição ou um material mudam.
+- Em movimento: um quadro em HDR com MSAA e resolução dinâmica, que só cai se a mediana do tempo real entre quadros
+  passar de 19 ms ou se um em cada dez quadros passar de 28 ms.
+- Parado: refino progressivo, um passo por quadro, que qualquer interação interrompe (antisserrilhado por deslocamento
+  de câmera, penumbra por deslocamento do sol, oclusão de ambiente uma vez). Acabado o refino, nada é desenhado.
+- As frentes são desenhadas primeiro e as paredes por último (`ORDEM_DESENHO` em `moveis.ts`), e o que fica dentro de uma
+  gaveta ou atrás de uma porta fechada nem é desenhado.
+- `compileAsync` prepara todas as variantes de shader durante a carga e as texturas vão para a GPU em ocioso.
+- Com movimento reduzido no sistema, as vistas se dissolvem em vez de voar, e portas, gavetas e zoom ficam mais curtos.
+
+Em desenvolvimento, `window.__simulador.motor` tem `diagnostico()` (custos reais da GPU), `medirFluidez(ms)`,
+`avancarQuadros(n)`, `olhar(pos, mira)` e `_interno()`. Medir com a janela do app visível: atrás de outra janela, o
+navegador quase para o `requestAnimationFrame`. Se o sistema pedir movimento reduzido, use `?movimento-completo` para medir
+as animações completas.
 
 Regras do simulador: é sempre uma **simulação ilustrativa**, não um projeto executado nem um orçamento. Não acrescentar
 preços, medidas garantidas, marcas ou especificações sem confirmação da Nova Era.
@@ -72,11 +93,8 @@ Detalhes em `src/assets/logo/LEIA-ME.md`.
 
 ## Fluxo de entrega: local → GitHub → Vercel
 
-**Nada foi enviado nem publicado.** Cada etapa abaixo depende de autorização.
-
-> O Git desta pasta tem histórico próprio da Nova Era (iniciado em 29/10/2026) e **ainda não tem remoto**.
-> Quando houver um repositório da Nova Era no GitHub, adicione-o com
-> `git remote add origin https://github.com/USUARIO/NOVO-REPOSITORIO.git`.
+O repositório está em `https://github.com/gs0275297-afk/nova-era-moveis-planejados`; a Vercel ainda não foi conectada.
+Cada envio ou publicação depende de autorização.
 
 ### O que vai para o repositório
 
@@ -89,9 +107,8 @@ O `.gitignore` deixa de fora dependências, builds, variáveis de ambiente, conf
 
 ### 1. GitHub (quando autorizado)
 
-Criar um repositório **vazio** no GitHub para a Nova Era (sem README, licença ou `.gitignore`), adicionar
-o `origin` como acima e enviar com `git push -u origin main`. Esta pasta fica no OneDrive: se a
-sincronização causar conflitos na pasta `.git`, pause o OneDrive durante os commits.
+Enviar com `git push origin main`. Esta pasta fica no OneDrive: se a sincronização causar conflitos na pasta
+`.git`, pause o OneDrive durante os commits.
 
 ### 2. Vercel (quando autorizado)
 
@@ -111,5 +128,6 @@ sincronização causar conflitos na pasta `.git`, pause o OneDrive durante os co
 
 - Fonte: Jost (SIL Open Font License), via Fontsource.
 - Lâminas de madeira do simulador: [Poly Haven](https://polyhaven.com) (`oak_veneer_01`, `teak_veneer`,
-  `american_walnut_veneer`), licença CC0. As demais texturas são procedurais (`scripts/gerar-texturas.py`).
+  `american_walnut_veneer`), licença CC0. As demais texturas (pedras, piso, gesso, relevos) são procedurais
+  (`scripts/gerar-texturas.py`).
 - Bibliotecas: Astro, GSAP (com SplitText e ScrollTrigger), Lenis, three.js.

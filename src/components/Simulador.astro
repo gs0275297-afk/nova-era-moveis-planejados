@@ -683,9 +683,9 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--tinta-2);
-  }
-  .sim__palco[data-cenario='noite'] :is(.sim__selo) {
-    color: var(--aluminio);
+    padding: 5px 9px;
+    background: rgb(255 255 255 / 0.78);
+    backdrop-filter: blur(10px);
   }
   .sim__apontar {
     position: absolute;
@@ -1458,11 +1458,17 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
     background: var(--tinta);
     color: var(--claro);
     box-shadow: 0 10px 30px rgb(12 19 38 / 0.3);
-    transform: translate(-50%, 160%);
-    transition: transform 420ms var(--ease-out);
+    /* vazio, o aviso é baixo: a translação sozinha deixaria uma tira aparecendo na borda da tela */
+    transform: translate(-50%, calc(100% + 32px));
+    visibility: hidden;
+    transition:
+      transform 420ms var(--ease-out),
+      visibility 0s linear 420ms;
     pointer-events: none;
   }
   .sim-aviso.is-visivel {
     transform: translate(-50%, 0);
+    visibility: visible;
+    transition: transform 420ms var(--ease-out);
   }
 </style>

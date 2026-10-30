@@ -35,15 +35,16 @@ export const PADRAO: Config = {
   ambiente: 'cozinha',
   composicao: { ilha: true, aereos: 'nicho' },
   acabamentos: {
-    portas: idLaca('off', 'fosco'),
-    gavetas: idLaca('off', 'fosco'),
+    portas: 'freijo',
+    aereos: idLaca('off', 'fosco'),
+    gavetas: 'freijo',
     estrutura: idLaca('branco', 'fosco'),
-    paineis: 'freijo',
-    prateleiras: 'freijo',
+    paineis: 'nogueira',
+    prateleiras: 'nogueira',
   },
   bancada: { pedra: 'marmore', espessura: 'fina' },
   puxador: { tipo: 'perfil', metal: 'aluminio' },
-  iluminacao: { cenario: 'dia', temperatura: 'quente', acesas: { led: true, nichos: true, pendentes: false, spots: false } },
+  iluminacao: { cenario: 'dia', temperatura: 'quente', acesas: { led: true, nichos: true, pendentes: false, spots: false, indireta: false } },
 };
 
 export const clonar = (c: Config): Config => structuredClone(c);
