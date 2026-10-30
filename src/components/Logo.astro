@@ -8,13 +8,15 @@ import selo from '../assets/logo/logo-nova-era-selo.png';
  * a partir do arquivo enviado pela empresa, pasta logo/):
  *   miolo  monograma + nome sobre o branco original. Em fundos claros a imagem é
  *          "multiplicada" sobre o fundo, para o branco do arquivo sumir sem recorte.
- *   selo   o selo circular inteiro, para fundos escuros (rodapé).
+ *   selo   o selo circular inteiro, para fundos escuros e fotos.
  */
 interface Props {
   versao?: 'miolo' | 'selo';
   class?: string;
+  /** o selo também aparece no topo da página: lá ele não pode esperar a rolagem */
+  imediato?: boolean;
 }
-const { versao = 'miolo', class: classe } = Astro.props;
+const { versao = 'miolo', class: classe, imediato = false } = Astro.props;
 ---
 
 {
@@ -23,11 +25,11 @@ const { versao = 'miolo', class: classe } = Astro.props;
       class:list={['logo-selo', classe]}
       src={selo}
       alt="Nova Era Móveis Planejados"
-      widths={[240, 480]}
-      sizes="240px"
+      widths={[120, 240, 480]}
+      sizes={imediato ? '64px' : '200px'}
       format="webp"
       quality={90}
-      loading="lazy"
+      loading={imediato ? 'eager' : 'lazy'}
     />
   ) : (
     <Image
@@ -38,7 +40,7 @@ const { versao = 'miolo', class: classe } = Astro.props;
       sizes="200px"
       format="webp"
       quality={90}
-      loading="eager"
+      loading={imediato ? 'eager' : 'lazy'}
     />
   )
 }
@@ -47,7 +49,7 @@ const { versao = 'miolo', class: classe } = Astro.props;
   .logo-miolo {
     display: block;
     width: auto;
-    height: 56px;
+    height: 52px;
     mix-blend-mode: multiply;
   }
   @media (max-width: 767px) {

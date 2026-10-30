@@ -15,33 +15,45 @@ export function iniciarGaleria() {
     itens.forEach((item) => {
       const mostrar = filtro === 'todos' || item.dataset.categoria === filtro;
       item.hidden = !mostrar;
-      if (mostrar) total++;
+      if (mostrar) {
+        total++;
+        // Quem estava fora da tela ainda pode estar esperando a entrada: ao mudar de lugar, aparece já.
+        item.style.opacity = '1';
+        item.style.visibility = 'visible';
+        item.style.transform = 'none';
+        item.dataset.revelado = '1';
+      }
     });
     return total;
   };
 
-  botoes.forEach((botao) =>
-    botao.addEventListener('click', async () => {
-      if (botao.getAttribute('aria-pressed') === 'true') return;
-      const filtro = botao.dataset.filtro ?? 'todos';
-      botoes.forEach((b) => b.setAttribute('aria-pressed', String(b === botao)));
+  const filtrar = async (filtro: string) => {
+    const botao = botoes.find((b) => b.dataset.filtro === filtro);
+    if (!botao || botao.getAttribute('aria-pressed') === 'true') return;
+    botoes.forEach((b) => b.setAttribute('aria-pressed', String(b === botao)));
 
-      let total: number;
-      if (movimentoReduzido()) {
+    let total = 0;
+    if (movimentoReduzido()) {
+      total = aplicar(filtro);
+    } else if (document.startViewTransition) {
+      // As fotos deslizam do lugar antigo para o novo, sem nenhuma animação escrita à mão.
+      const transicao = document.startViewTransition(() => {
         total = aplicar(filtro);
-      } else {
-        await aoTerminar(grade.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: 'ease-in', fill: 'forwards' }), 300);
-        total = aplicar(filtro);
-        grade.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], {
-          duration: 560,
-          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-          fill: 'forwards',
-        });
-      }
-      const nome = botao.firstChild?.textContent?.trim() ?? '';
-      if (status) status.textContent = `${total} ${total === 1 ? 'foto' : 'fotos'}: ${nome}`;
-      // A altura da grade mudou: recalcula as posições das animações das seções seguintes.
-      ScrollTrigger.refresh();
-    }),
-  );
+      });
+      await transicao.updateCallbackDone;
+    } else {
+      await aoTerminar(grade.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-in', fill: 'forwards' }), 260);
+      total = aplicar(filtro);
+      grade.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+    }
+    const nome = botao.firstChild?.textContent?.trim() ?? '';
+    if (status) status.textContent = `${total} ${total === 1 ? 'foto' : 'fotos'}: ${nome}`;
+    // A altura da grade mudou: recalcula as posições das animações das seções seguintes.
+    ScrollTrigger.refresh();
+  };
+
+  botoes.forEach((botao) => botao.addEventListener('click', () => filtrar(botao.dataset.filtro ?? 'todos')));
+
+  // Índice de ambientes da apresentação: o link leva à galeria já filtrada.
+  $$<HTMLAnchorElement>('[data-filtrar]').forEach((link) => link.addEventListener('click', () => filtrar(link.dataset.filtrar ?? 'todos')));
 }

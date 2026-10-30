@@ -17,7 +17,21 @@ Site institucional de página única da Nova Era Móveis Planejados (Três Lagoa
 O build (`npm run build`) não depende desses scripts nem do material bruto.
 
 Em desenvolvimento, `http://localhost:4321/?movimento-completo` força as animações completas mesmo
-quando o sistema pede movimento reduzido. Esse atalho não existe no site publicado.
+quando o sistema pede movimento reduzido. No site publicado, quem tem essa opção ligada no sistema vê
+um botão no rodapé para ativar as animações (a escolha fica guardada naquele navegador).
+
+## Direção de arte
+
+"Linha de luz": o que distingue os projetos da Nova Era nas fotos é a madeira recortada por luz embutida.
+- **Cor:** fundo escuro como uma sala à noite (`--noite`), gesso quando o ambiente pede claridade (`--gesso`,
+  `--areia`) e um único acento, a cor da fita de LED (`--luz`; `--madeira` sobre fundo claro). O azul e o
+  vermelho ficam na logo.
+- **Tipografia:** Newsreader no corte de display para frases, Jost para informação (eco da logo). A
+  Newsreader é gerada por `scripts/preparar-fontes.py` (um peso, só caracteres do português: 11 KB).
+- **Composição:** cada seção tem desenho próprio; não há um "cabeçalho de seção" padrão. Fotos mantêm a
+  proporção original sempre que possível.
+- **Movimento:** cada elemento tem um papel (ver o comentário em `src/scripts/movimento.ts`). Com movimento
+  reduzido: esmaecimentos, sem deslocamento, e a abertura vira uma tela inteira estática.
 
 ## Onde editar o conteúdo
 
@@ -25,9 +39,9 @@ quando o sistema pede movimento reduzido. Esse atalho não existe no site public
   do WhatsApp. Só entram dados confirmados.
 - `src/data/projetos.ts`: foto da abertura, projetos em destaque, galeria por ambiente (categorias e fotos)
   e itens da seção Detalhes.
-- `src/components/`: uma seção por arquivo (Hero, Sobre, Projetos, Galeria, Detalhes, Contato, Rodape),
-  mais Cabecalho, Lightbox, BarraMovel, Logo e Icone.
-- `src/styles/global.css`: cores, tipografia, botões e o motivo das marcas de corte.
+- `src/components/`: uma seção por arquivo (Hero, Sobre, Projetos, Galeria, Panorama, Detalhes, Simulador,
+  Contato, Rodape), mais Cabecalho, Lightbox, BarraMovel, Logo e Icone.
+- `src/styles/global.css`: cores, tipografia, botões e estados de animação.
 - `src/scripts/configurador/catalogo.ts`: acabamentos, cores, puxadores, luzes e vistas do simulador 3D.
 
 ### Simulador 3D (`src/components/Simulador.astro` + `src/scripts/configurador/`)
@@ -42,7 +56,9 @@ quando o sistema pede movimento reduzido. Esse atalho não existe no site public
 | `motor.ts` | renderização sob demanda em HDR, refino progressivo, câmera, comparação, captura, descarte |
 | `index.ts` | liga o painel ao estado e ao motor |
 
-`src/scripts/simulador.ts` fica no pacote principal e só baixa o three.js quando o simulador vai ser usado.
+`src/scripts/simulador.ts` fica no pacote principal e só baixa o three.js quando a pessoa abre o simulador. Até lá, a
+seção mostra uma imagem da própria cena (`src/assets/simulador/capa-cozinha.jpg`), capturada do simulador: se a cena
+mudar muito, capture de novo com `motor.capturar(1920)`.
 
 **Para adicionar um ambiente:** crie `ambientes/<nome>.ts` que cumpra o contrato de `ambientes/tipos.ts`, registre em
 `AMBIENTES` (`motor.ts`) e na lista `ambientes` (`catalogo.ts`). O painel de portas e gavetas se monta sozinho a partir
@@ -81,7 +97,10 @@ preços, medidas garantidas, marcas ou especificações sem confirmação da Nov
   Google, depoimentos, prazos, garantias, condições de pagamento, materiais/marcas e etapas do atendimento.
   Por isso o site não tem horário, seção de processo nem avaliações, e o JSON-LD não tem `aggregateRating`.
 - **Fotos:** todas são de ambientes do portfólio da Nova Era, com a marca d'água original. Recortes
-  (abertura e detalhes) usam só enquadramentos da própria foto; nada foi gerado ou retocado.
+  (abertura e detalhes) usam só enquadramentos da própria foto; nada foi gerado ou retocado. As três fotos de
+  borda a borda (`abertura-ampliada`, `jantar-adega-ampla`, `panorama-painel`) foram ampliadas por reamostragem
+  clássica, sem IA, porque os originais chegaram com 1179 px de largura. Se a empresa enviar os arquivos sem a
+  compressão do WhatsApp, troque em `fotos e videos/` e rode `python scripts/preparar-fotos.py`.
 - **Vídeos:** dois trechos curtos dos reels da empresa, sem som (a música dos originais foi descartada) e
   recortados entre as sobreposições do Instagram.
 
@@ -126,7 +145,7 @@ Enviar com `git push origin main`. Esta pasta fica no OneDrive: se a sincroniza�
 
 ## Créditos de terceiros
 
-- Fonte: Jost (SIL Open Font License), via Fontsource.
+- Fontes: Jost, via Fontsource, e Newsreader (Production Type), recortada pelo projeto; ambas sob SIL Open Font License.
 - Lâminas de madeira do simulador: [Poly Haven](https://polyhaven.com) (`oak_veneer_01`, `teak_veneer`,
   `american_walnut_veneer`), licença CC0. As demais texturas (pedras, piso, gesso, relevos) são procedurais
   (`scripts/gerar-texturas.py`).

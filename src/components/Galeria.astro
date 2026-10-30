@@ -8,56 +8,54 @@ const filtros = categorias
   .filter((c) => c.total > 0);
 ---
 
-<section class="galeria secao" id="ambientes" aria-labelledby="galeria-titulo" data-galeria>
-  <div class="container grade cabeca">
-    <p class="rotulo" data-revelar="fade">Ambientes</p>
-    <h2 id="galeria-titulo" class="titulo" data-revelar="linhas">
-      Um portfólio para <strong>cada cômodo da casa.</strong>
-    </h2>
-  </div>
-
-  <div class="container galeria__corpo">
-    <div class="galeria__filtros" role="group" aria-label="Filtrar fotos por ambiente" data-revelar="fade">
-      <button type="button" class="galeria__filtro" aria-pressed="true" data-filtro="todos">
-        Todos <span>{galeria.length}</span>
-      </button>
-      {
-        filtros.map((c) => (
-          <button type="button" class="galeria__filtro" aria-pressed="false" data-filtro={c.id}>
-            {c.nome} <span>{c.total}</span>
-          </button>
-        ))
-      }
-    </div>
+<section class="galeria secao" id="ambientes" aria-labelledby="galeria-titulo" data-galeria data-tema="claro">
+  <div class="container">
+    <header class="galeria__cabeca">
+      <h2 id="galeria-titulo" class="titulo" data-revelar="linhas">Cômodo <em>por cômodo.</em></h2>
+      <div class="galeria__filtros" role="group" aria-label="Filtrar fotos por ambiente" data-revelar="fade">
+        <button type="button" class="galeria__filtro" aria-pressed="true" data-filtro="todos">
+          Todos <span>{galeria.length}</span>
+        </button>
+        {
+          filtros.map((c) => (
+            <button type="button" class="galeria__filtro" aria-pressed="false" data-filtro={c.id}>
+              {c.nome} <span>{c.total}</span>
+            </button>
+          ))
+        }
+      </div>
+    </header>
     <p class="sr-only" aria-live="polite" data-galeria-status></p>
 
-    <ul class="galeria__grade" data-galeria-grade data-revelar="fade">
+    <!-- Mural: cada foto mantém a própria proporção. O desenho vem de uma sequência de posições
+         aplicada só às fotos visíveis, então vale para qualquer filtro. -->
+    <ul class="mural" data-galeria-grade>
       {
-        galeria.map((foto) => (
-          <li class:list={['galeria__item', `galeria__item--${foto.formato}`]} data-categoria={foto.categoria}>
-            <button
-              class="galeria__moldura"
-              type="button"
-              data-lightbox-abrir={indiceDe(foto)}
-              data-lightbox-grupo="galeria"
-              data-cursor="Ampliar"
-              aria-label={`Ampliar foto: ${foto.legenda}`}
-            >
-              <span class="galeria__img">
+        galeria.map((foto, i) => (
+          <li class="mural__item" data-categoria={foto.categoria} style={`--vt: foto-${i}`} data-revelar="fade">
+            <figure>
+              <button
+                class="foto"
+                type="button"
+                style={`aspect-ratio: ${foto.src.width} / ${foto.src.height}`}
+                data-lightbox-abrir={indiceDe(foto)}
+                data-lightbox-grupo="galeria"
+                data-cursor="Ampliar"
+                aria-label={`Ampliar foto: ${foto.legenda}`}
+              >
                 <Picture
                   src={foto.src}
                   alt={foto.alt}
-                  widths={foto.formato === 'retrato' ? [360, 540, 720] : [540, 820, foto.src.width]}
-                  sizes={foto.formato !== 'retrato' ? '(min-width: 1024px) 44vw, (min-width: 640px) 66vw, 100vw' : '(min-width: 1024px) 22vw, (min-width: 640px) 33vw, 50vw'}
-                  formats={['avif', 'webp']}
+                  widths={[480, 800, foto.src.width]}
+                  sizes="(min-width: 1024px) 38vw, (min-width: 640px) 50vw, 92vw"
+                  formats={['avif']}
                   fallbackFormat="jpg"
-                  quality={74}
+                  quality={68}
                   loading="lazy"
-                  style={foto.foco ? `object-position: ${foto.foco}` : undefined}
                 />
-              </span>
-              <span class="galeria__legenda">{foto.legenda}</span>
-            </button>
+              </button>
+              <figcaption class="legenda">{foto.legenda}</figcaption>
+            </figure>
           </li>
         ))
       }
@@ -67,134 +65,105 @@ const filtros = categorias
 
 <style>
   .galeria {
-    padding-top: 0;
+    position: relative;
+    z-index: 2;
+    background: var(--gesso);
+  }
+  .galeria__cabeca {
+    display: grid;
+    gap: clamp(28px, 4vw, 56px);
   }
   .galeria__filtros {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-block: clamp(40px, 5vw, 72px) clamp(28px, 3vw, 44px);
+    gap: 4px clamp(20px, 2.6vw, 40px);
+    padding-top: 14px;
+    border-top: 1px solid var(--linha);
   }
   .galeria__filtro {
+    position: relative;
     display: inline-flex;
-    align-items: center;
-    gap: 10px;
+    align-items: baseline;
+    gap: 8px;
     min-height: 44px;
-    padding: 0 18px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    padding-block: 10px;
+    font-size: var(--fs-pequeno);
     color: var(--tinta-2);
-    box-shadow: inset 0 0 0 1px var(--linha);
-    transition:
-      color var(--t-micro) var(--ease-out),
-      background-color var(--t-micro) var(--ease-out),
-      box-shadow var(--t-micro) var(--ease-out);
+    transition: color var(--t-micro) var(--ease-out);
   }
   .galeria__filtro span {
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
-    opacity: 0.7;
+    opacity: 0.72;
   }
-  @media (hover: hover) {
-    .galeria__filtro:hover {
-      color: var(--tinta);
-      box-shadow: inset 0 0 0 1px var(--linha-forte);
-    }
-  }
-  .galeria__filtro[aria-pressed='true'] {
-    background: var(--tinta);
-    color: var(--claro);
-    box-shadow: none;
-  }
-
-  /* Grade de 4 colunas com linhas de altura fixa (proporção 4:5 da coluna, calculada pela largura
-     do container): retrato 1x1, paisagem 2x1, destaque 2x2. Tudo alinha, com qualquer filtro. */
-  .galeria__corpo {
-    container-type: inline-size;
-  }
-  .galeria__grade {
-    --colunas: 4;
-    --vao: var(--col-gap);
-    display: grid;
-    grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
-    grid-auto-rows: calc((100cqi - (var(--colunas) - 1) * var(--vao)) / var(--colunas) * 1.25);
-    grid-auto-flow: dense;
-    gap: var(--vao);
-  }
-  .galeria__item[hidden] {
-    display: none;
-  }
-  .galeria__item--paisagem {
-    grid-column: span 2;
-  }
-  .galeria__item--destaque {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-
-  .galeria__moldura {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: var(--pedra);
-    text-align: left;
-  }
-  .galeria__img,
-  .galeria__img :global(picture),
-  .galeria__img :global(img) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-  .galeria__img :global(img) {
-    object-fit: cover;
-    transition: transform 1100ms var(--ease-out);
-  }
-
-  /* Legenda aparece numa faixa por baixo da foto ao passar o mouse; no toque fica sempre visível. */
-  .galeria__legenda {
+  .galeria__filtro::after {
+    content: '';
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 0;
-    padding: 40px 16px 14px;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    line-height: 1.35;
-    color: var(--claro);
-    background: linear-gradient(to top, rgb(12 19 38 / 0.72), rgb(12 19 38 / 0));
-    transition:
-      opacity var(--t-ui) var(--ease-out),
-      transform var(--t-ui) var(--ease-out);
+    bottom: 6px;
+    height: 1px;
+    background: var(--madeira);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 460ms var(--ease-out);
   }
-  @media (hover: hover) and (pointer: fine) {
-    .galeria__legenda {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    .galeria__moldura:hover .galeria__legenda,
-    .galeria__moldura:focus-visible .galeria__legenda {
-      opacity: 1;
-      transform: none;
-    }
-    .galeria__moldura:hover .galeria__img :global(img) {
-      transform: scale(1.04);
-    }
+  .galeria__filtro:hover,
+  .galeria__filtro[aria-pressed='true'] {
+    color: var(--tinta);
+  }
+  .galeria__filtro[aria-pressed='true']::after {
+    transform: scaleX(1);
   }
 
-  @media (max-width: 1023px) {
-    .galeria__grade {
-      --colunas: 3;
-    }
+  /* ---------- mural assimétrico ---------- */
+  .mural {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    row-gap: clamp(36px, 4.4vw, 80px);
+    align-items: start;
+    margin-top: clamp(40px, 5vw, 80px);
   }
-  @media (max-width: 639px) {
-    .galeria__grade {
-      --colunas: 2;
-      --vao: 8px;
-    }
+  .mural__item {
+    view-transition-name: var(--vt);
+  }
+  .mural__item[hidden] {
+    display: none;
+  }
+  .mural__item :global(.legenda) {
+    margin-top: 10px;
+  }
+
+  /* Sequência de sete posições: grande, pequena em degrau, pequena recuada, grande, e um trio. */
+  .mural__item:nth-child(7n + 1 of :not([hidden])) {
+    grid-column: 1 / span 5;
+  }
+  .mural__item:nth-child(7n + 2 of :not([hidden])) {
+    grid-column: 8 / span 4;
+    margin-top: clamp(56px, 10vw, 180px);
+  }
+  .mural__item:nth-child(7n + 3 of :not([hidden])) {
+    grid-column: 2 / span 3;
+    margin-top: clamp(24px, 4vw, 72px);
+  }
+  .mural__item:nth-child(7n + 4 of :not([hidden])) {
+    grid-column: 6 / span 5;
+  }
+  .mural__item:nth-child(7n + 5 of :not([hidden])) {
+    grid-column: 1 / span 4;
+  }
+  .mural__item:nth-child(7n + 6 of :not([hidden])) {
+    grid-column: 5 / span 3;
+    margin-top: clamp(40px, 7vw, 128px);
+  }
+  .mural__item:nth-child(7n + 7 of :not([hidden])) {
+    grid-column: 9 / span 4;
+    margin-top: clamp(16px, 3vw, 56px);
+  }
+
+  /* ---------- celular: uma foto de borda a borda, depois duas lado a lado, em degrau ---------- */
+  @media (max-width: 767px) {
     .galeria__filtros {
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -208,9 +177,23 @@ const filtros = categorias
     .galeria__filtro {
       flex: none;
     }
-    .galeria__legenda {
-      padding: 28px 10px 10px;
-      font-size: 0.75rem;
+    .mural {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 28px;
+    }
+    .mural__item:nth-child(n of :not([hidden])) {
+      grid-column: auto;
+      margin-top: 0;
+    }
+    .mural__item:nth-child(3n + 1 of :not([hidden])) {
+      grid-column: 1 / -1;
+      margin-inline: calc(var(--gutter) * -1);
+    }
+    .mural__item:nth-child(3n + 1 of :not([hidden])) :global(.legenda) {
+      padding-inline: var(--gutter);
+    }
+    .mural__item:nth-child(3n + 0 of :not([hidden])) {
+      margin-top: 40px;
     }
   }
 </style>

@@ -8,15 +8,20 @@ import { $, $$, ponteiroFino } from './util';
 gsap.registerPlugin(ScrollTrigger, SplitText);
 // Sem "amortecer" atrasos: em abas que estavam em segundo plano, as entradas terminam de imediato.
 gsap.ticker.lagSmoothing(0);
+ScrollTrigger.config({ ignoreMobileResize: true });
+// Só em desenvolvimento: permite avançar as animações à mão em testes com a janela em segundo plano.
+if (import.meta.env.DEV) Object.assign(window, { __gsap: gsap, __ScrollTrigger: ScrollTrigger });
 
 /*
- * Linguagem de movimento (cada tipo de elemento tem um papel, nada se repete em tudo):
- * - abertura: o quadro da foto se abre a partir do centro (como um vão), o título sobe linha a
- *   linha e a ficha de contato surge por último; na rolagem a foto desliza dentro do quadro;
- * - frase da Nova Era: palavras ganham cor conforme a leitura avança (rolagem);
- * - fotos dos projetos: máscara de baixo para cima com leve recuo de escala;
- *   a segunda foto de cada projeto tem parallax discreto;
- * - títulos de seção: linhas sobem dentro de máscaras; textos de apoio surgem em sequência.
+ * Linguagem de movimento: cada elemento tem um papel, e nada se repete em tudo.
+ * - abertura: a foto se abre do centro como um vão, o título sobe linha a linha e, na rolagem,
+ *   a câmera desce do forro até a mesa; depois a apresentação sobe por cima da foto parada;
+ * - frase da Nova Era: as palavras acendem conforme a leitura avança, e as miniaturas se abrem;
+ * - capítulos dos projetos: cada foto entra por uma máscara numa direção própria, e o fundo da
+ *   seção muda de cor com o capítulo em foco;
+ * - galeria: sem máscara, só um assentamento curto (são muitas fotos, o movimento não pode cansar);
+ * - panorama: o quadro se abre até as bordas da tela;
+ * - títulos: linhas sobem dentro de máscaras. Textos de apoio: esmaecimento curto.
  */
 
 /*
@@ -32,63 +37,106 @@ const primeiraVez = (lote: Element[]) =>
     return true;
   });
 
-/** Rolagem suave + todas as animações. Só é chamado quando o usuário aceita movimento. */
-export function iniciarMovimento(): Lenis {
-  const lenis = new Lenis({ lerp: 0.11, wheelMultiplier: 0.95 });
+/**
+ * Rolagem suave só com mouse (no toque, a rolagem nativa é a melhor). O laço só roda enquanto há
+ * rolagem acontecendo: com a página parada, nenhum quadro é processado à toa.
+ */
+function rolagemSuave(): Lenis | null {
+  if (!ponteiroFino()) return null;
+  const lenis = new Lenis({ lerp: 0.12, wheelMultiplier: 0.9, autoRaf: false });
   lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((tempo) => lenis.raf(tempo * 1000));
 
-  // A abertura espera as fontes e a foto principal (com limite), para a máscara revelar a imagem e não um quadro vazio.
-  const fotoHero = $<HTMLImageElement>('[data-hero-img] img');
-  const prontos = Promise.all([document.fonts.ready, fotoHero?.decode().catch(() => undefined)]);
-  Promise.race([prontos, new Promise((r) => setTimeout(r, 1600))]).then(() => {
-    hero();
+  let rodando = false;
+  let parados = 0;
+  const quadro = (t: number) => {
+    lenis.raf(t);
+    parados = lenis.isScrolling ? 0 : parados + 1;
+    if (parados > 20) {
+      rodando = false;
+      return;
+    }
+    requestAnimationFrame(quadro);
+  };
+  const acordar = () => {
+    parados = 0;
+    if (rodando) return;
+    rodando = true;
+    lenis.time = 0; // sem isto, o primeiro quadro depois de parado salta direto para o destino
+    requestAnimationFrame(quadro);
+  };
+  lenis.on('virtual-scroll', acordar);
+  // scrollTo e start/stop (menu, visualizador) também precisam do laço
+  const scrollTo = lenis.scrollTo.bind(lenis);
+  lenis.scrollTo = (...args: Parameters<Lenis['scrollTo']>) => {
+    acordar();
+    return scrollTo(...args);
+  };
+  return lenis;
+}
+
+/** Rolagem suave + todas as animações. Só é chamado quando o usuário aceita movimento. */
+export function iniciarMovimento(): Lenis | null {
+  const lenis = rolagemSuave();
+
+  hero();
+  parallaxInterno();
+  fundosDosCapitulos();
+  panorama();
+  if (ponteiroFino()) {
+    magneticos();
+    cursor();
+    previaDoIndice();
+  }
+  // Títulos e frases dependem das fontes para quebrar as linhas no lugar certo (sem esperar demais).
+  Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 900))]).then(() => {
     revelacoes();
     frase();
     ScrollTrigger.refresh();
   });
-
-  parallaxLeve();
-  if (ponteiroFino()) {
-    magneticos();
-    cursor();
-  }
   return lenis;
 }
 
 /**
- * Versão para quem pediu menos movimento ao sistema: nada se desloca, escala ou
- * acompanha o cursor. O conteúdo apenas surge com esmaecimentos curtos.
+ * Versão para quem pediu menos movimento ao sistema: nada se desloca, escala ou acompanha o cursor.
+ * O conteúdo surge com esmaecimentos curtos, e a cor de fundo dos capítulos continua mudando.
  */
 export function iniciarMovimentoSuave() {
   const surgir = (alvos: gsap.TweenTarget, extra: gsap.TweenVars = {}) =>
-    gsap.fromTo(alvos, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: 'power1.out', ...extra });
+    gsap.fromTo(alvos, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power1.out', ...extra });
 
   gsap
     .timeline()
-    .add(surgir('[data-hero-titulo]'), 0.1)
-    .add(surgir('[data-hero-item]', { stagger: 0.08 }), 0.25);
+    .add(surgir('[data-hero-titulo]'), 0.05)
+    .add(surgir('[data-hero-item]', { stagger: 0.06 }), 0.15);
 
   ScrollTrigger.batch('[data-revelar]', {
     start: 'top 92%',
-    onEnter: (lote) => surgir(primeiraVez(lote), { stagger: 0.06, overwrite: true }),
+    once: true,
+    onEnter: (lote) => surgir(primeiraVez(lote), { stagger: 0.05, overwrite: true }),
   });
+  fundosDosCapitulos();
 }
 
 /* ---------- Abertura ---------- */
 function hero() {
   const secao = $('[data-hero]');
+  const palco = $('[data-hero-palco]');
   const quadro = $('[data-hero-foto]');
-  const moldura = $('[data-hero-img]');
-  const picture = moldura?.querySelector('picture');
-  const img = moldura?.querySelector('img');
+  const movel = $('[data-hero-movel]');
+  const img = movel?.querySelector('img');
   const titulo = $('[data-hero-titulo]');
-  if (!secao || !titulo) return;
+  if (!secao || !palco || !quadro || !movel || !img || !titulo) return;
 
-  const tl = gsap.timeline({ defaults: { ease: 'expo.inOut' } });
-  if (quadro) tl.to(quadro, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6 }, 0);
-  if (img) tl.fromTo(img, { scale: 1.2 }, { scale: 1, duration: 2.4, ease: 'expo.out' }, 0.05);
-
+  // Entrada rápida: não espera nada. Em até 1,5 s está tudo no lugar e a página nunca fica bloqueada.
+  const tl = gsap.timeline();
+  tl.fromTo(
+    quadro,
+    { clipPath: 'inset(0% 40% 0% 40%)' },
+    // ao terminar, "none" em vez de só limpar: o estilo inicial no CSS voltaria a valer e fecharia o quadro
+    { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.inOut', onComplete: () => void (quadro.style.clipPath = 'none') },
+    0,
+  );
+  tl.fromTo(img, { scale: 1.09 }, { scale: 1, duration: 1.7, ease: 'expo.out' }, 0);
   SplitText.create(titulo, {
     type: 'lines',
     mask: 'lines',
@@ -96,71 +144,71 @@ function hero() {
     autoSplit: true,
     onSplit(self) {
       gsap.set(titulo, { visibility: 'visible' });
-      return tl.from(self.lines, { yPercent: 110, duration: 1.25, ease: 'expo.out', stagger: 0.09 }, 0.35);
+      // Devolve só a animação das linhas: se as fontes chegarem depois, o SplitText refaz a divisão e
+      // reverte o que recebeu aqui. Devolver a linha do tempo inteira desfaria também a abertura da foto.
+      return gsap.from(self.lines, { yPercent: 112, duration: 1, delay: 0.3, ease: 'expo.out', stagger: 0.08 });
     },
   });
-  tl.to('[data-hero-item]', { autoAlpha: 1, y: 0, startAt: { y: 16 }, duration: 1, ease: 'expo.out', stagger: 0.07 }, 0.75);
+  tl.fromTo('[data-hero-item]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.06 }, 0.6);
+  tl.from('.topo__barra > *', { autoAlpha: 0, y: -10, duration: 0.7, ease: 'power3.out', stagger: 0.05, clearProps: 'all' }, 0.55);
 
-  // Rolagem: a foto desliza dentro do quadro enquanto a abertura sai da tela.
-  if (picture) {
-    gsap.set(picture, { scale: 1.1 });
-    gsap.to(picture, {
-      yPercent: 4,
-      ease: 'none',
-      scrollTrigger: { trigger: secao, start: 'top top', end: 'bottom top', scrub: true },
-    });
-  }
+  // Rolagem: a câmera desce pela foto; título e chamada saem antes de ela chegar à mesa.
+  gsap
+    .timeline({
+      scrollTrigger: {
+        trigger: secao,
+        start: 'top top',
+        end: () => `+=${window.innerHeight * 1.1}`,
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    })
+    .to(movel, { y: () => -(movel.offsetHeight - palco.offsetHeight), ease: 'none', duration: 1 }, 0)
+    .to('[data-hero-texto]', { y: () => -window.innerHeight * 0.24, autoAlpha: 0, ease: 'power1.in', duration: 0.42 }, 0)
+    .to('[data-hero-base]', { y: () => -window.innerHeight * 0.1, autoAlpha: 0, ease: 'power1.in', duration: 0.3 }, 0)
+    .fromTo('[data-hero-legenda]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.2, ease: 'power2.out' }, 0.78);
 
-  // Mouse: a foto acompanha o cursor de leve (a escala do <picture> dá a folga nas bordas).
-  if (img && ponteiroFino()) {
-    const x = gsap.quickTo(img, 'x', { duration: 1.2, ease: 'power3.out' });
-    const y = gsap.quickTo(img, 'y', { duration: 1.2, ease: 'power3.out' });
-    secao.addEventListener('pointermove', (e) => {
-      x((e.clientX / window.innerWidth - 0.5) * -18);
-      y((e.clientY / window.innerHeight - 0.5) * -12);
+  // Mouse: uma luz quente acompanha o cursor e a foto responde de leve.
+  if (ponteiroFino()) {
+    const luz = $('[data-hero-luz]');
+    const fotoX = gsap.quickTo(img, 'x', { duration: 1.4, ease: 'power3.out' });
+    const luzX = luz ? gsap.quickTo(luz, 'x', { duration: 0.9, ease: 'power3.out' }) : null;
+    const luzY = luz ? gsap.quickTo(luz, 'y', { duration: 0.9, ease: 'power3.out' }) : null;
+    palco.addEventListener('pointermove', (e) => {
+      fotoX((e.clientX / window.innerWidth - 0.5) * -22);
+      luz?.classList.add('is-acesa');
+      luzX?.(e.clientX);
+      luzY?.(e.clientY);
     });
-    secao.addEventListener('pointerleave', () => {
-      x(0);
-      y(0);
+    palco.addEventListener('pointerleave', () => {
+      fotoX(0);
+      luz?.classList.remove('is-acesa');
     });
   }
 }
 
-/* ---------- Frase de apresentação: palavras acendem com a rolagem ---------- */
+/* ---------- Frase de apresentação: palavras acendem com a rolagem, miniaturas se abrem ---------- */
 function frase() {
   const el = $('[data-frase]');
   if (!el) return;
   // Só palavras: a divisão não depende da largura, então não é refeita no redimensionamento
   // (refazer criaria um ScrollTrigger no meio de um refresh, o que o GSAP não aceita).
-  SplitText.create(el, {
-    type: 'words',
-    wordsClass: 'palavra',
-    onSplit(self) {
-      const finais = self.words.map((p) => getComputedStyle(p).color);
-      return gsap.fromTo(
-        self.words,
-        { color: 'rgb(190 194 205)' },
-        {
-          color: (i: number) => finais[i],
-          ease: 'none',
-          stagger: 0.1,
-          scrollTrigger: { trigger: el, start: 'top 82%', end: 'bottom 48%', scrub: 0.6 },
-        },
-      );
-    },
+  const palavras = $$('[data-frase-texto]', el).flatMap((parte) => SplitText.create(parte, { type: 'words', wordsClass: 'palavra' }).words);
+  const miniaturas = $$('.manifesto__mini', el);
+  const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 52%', scrub: 0.5 } });
+  tl.fromTo(palavras, { color: 'rgb(246 243 237 / 0.2)' }, { color: 'rgb(246 243 237 / 1)', ease: 'none', stagger: 0.1, duration: 0.3 }, 0);
+  miniaturas.forEach((m, i) => {
+    tl.fromTo(m, { clipPath: 'inset(0% 50% 0% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out', duration: 0.35 }, 0.15 + i * 0.3);
   });
 }
 
 /* ---------- Revelações na rolagem ---------- */
 function revelacoes() {
   ScrollTrigger.batch('[data-revelar="fade"]', {
-    start: 'top 90%',
+    start: 'top 92%',
+    once: true,
     onEnter: (lote) =>
-      gsap.fromTo(
-        primeiraVez(lote),
-        { autoAlpha: 0, y: 26 },
-        { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, overwrite: true },
-      ),
+      gsap.fromTo(primeiraVez(lote), { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.06, overwrite: true, clearProps: 'transform' }),
   });
 
   $$('[data-revelar="linhas"]').forEach((el) => {
@@ -172,43 +220,77 @@ function revelacoes() {
       onSplit(self) {
         gsap.set(el, { visibility: 'visible' });
         return gsap.from(self.lines, {
-          yPercent: 110,
-          duration: 1.2,
+          yPercent: 112,
+          duration: 1.1,
           ease: 'expo.out',
-          stagger: 0.09,
-          scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
+          stagger: 0.08,
+          scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
         });
       },
     });
   });
 
-  // Fotos dos projetos: máscara (de baixo para cima, salvo outra direção) + leve recuo de escala da imagem.
+  // Fotos dos capítulos: cada uma entra por uma direção, com um leve recuo de escala.
   const mascaras: Record<string, string> = {
     baixo: 'inset(100% 0% 0% 0%)',
     esquerda: 'inset(0% 100% 0% 0%)',
     direita: 'inset(0% 0% 0% 100%)',
+    centro: 'inset(0% 42% 0% 42%)',
   };
   $$('[data-revelar="mascara"]').forEach((el) => {
     const inicio = mascaras[el.dataset.direcao ?? 'baixo'] ?? mascaras.baixo;
     const interno = el.firstElementChild;
     gsap.set(el, { autoAlpha: 1, clipPath: inicio });
-    const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 84%', toggleActions: 'play none none none' } });
-    tl.to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'expo.inOut' });
-    if (interno) tl.from(interno, { scale: 1.25, duration: 2.1, ease: 'expo.out' }, 0.1);
+    const tl = gsap.timeline({ scrollTrigger: { trigger: el.parentElement, start: 'top 86%', toggleActions: 'play none none none' } });
+    tl.to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.inOut', onComplete: () => void (el.style.clipPath = 'none') });
+    if (interno) tl.from(interno, { scale: 1.14, duration: 1.8, ease: 'expo.out', clearProps: 'transform' }, 0.05);
   });
 }
 
-/* ---------- Parallax discreto das fotos secundárias (só em telas largas) ---------- */
-function parallaxLeve() {
-  const mm = gsap.matchMedia();
-  mm.add('(min-width: 1024px)', () => {
-    $$('[data-parallax-leve]').forEach((el) => {
-      gsap.fromTo(
-        el,
-        { yPercent: 7 },
-        { yPercent: -7, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } },
-      );
+/* ---------- Foto que desliza dentro do próprio quadro ---------- */
+function parallaxInterno() {
+  $$('[data-parallax]').forEach((el) => {
+    gsap.fromTo(el, { yPercent: -5 }, { yPercent: 5, ease: 'none', scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });
+  });
+}
+
+/* ---------- O fundo dos projetos muda com o capítulo em foco ---------- */
+function fundosDosCapitulos() {
+  const secao = $('[data-projetos]');
+  if (!secao) return;
+  $$('[data-capitulo]', secao).forEach((cap) => {
+    ScrollTrigger.create({
+      trigger: cap,
+      start: 'top 62%',
+      end: 'bottom 62%',
+      onToggle: (self) => {
+        if (self.isActive) secao.dataset.fundo = cap.dataset.capitulo;
+      },
     });
+  });
+}
+
+/* ---------- Panorama: o quadro se abre até as bordas da tela ---------- */
+function panorama() {
+  const quadro = $('[data-panorama-quadro]');
+  if (!quadro) return;
+  gsap.fromTo(
+    quadro,
+    { clipPath: 'inset(9% 8% 9% 8%)' },
+    { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: quadro, start: 'top 95%', end: 'top 25%', scrub: true } },
+  );
+}
+
+/* ---------- Índice de ambientes: a prévia acompanha o ponteiro na vertical, de leve ---------- */
+function previaDoIndice() {
+  const lista = $('[data-indice]');
+  if (!lista || !window.matchMedia('(min-width: 1280px)').matches) return;
+  const previas = $$('[data-indice-previa]', lista);
+  const movers = previas.map((p) => gsap.quickTo(p, 'y', { duration: 0.8, ease: 'power3.out' }));
+  lista.addEventListener('pointermove', (e) => {
+    const r = lista.getBoundingClientRect();
+    const y = ((e.clientY - r.top) / r.height - 0.5) * 24;
+    movers.forEach((m) => m(y));
   });
 }
 
@@ -229,7 +311,7 @@ function magneticos() {
   });
 }
 
-/* ---------- Cursor com rótulo sobre as fotos da galeria ---------- */
+/* ---------- Cursor com rótulo sobre as fotos ---------- */
 function cursor() {
   const seguidor = $('[data-cursor-seguidor]');
   const texto = $('[data-cursor-texto]');

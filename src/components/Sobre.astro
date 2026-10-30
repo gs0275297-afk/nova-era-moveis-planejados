@@ -1,117 +1,234 @@
 ---
+import { Picture } from 'astro:assets';
+import Icone from './Icone.astro';
 import { empresa } from '../data/empresa';
+import { categorias, detalhes, galeria, previas } from '../data/projetos';
 
-// O que a Nova Era faz, dito a partir do que aparece nos próprios projetos (sem números nem promessas).
-const principios = [
-  {
-    titulo: 'Sob medida',
-    texto: 'Cada móvel é planejado para as medidas e o uso do ambiente, da cozinha ao dormitório.',
-  },
-  {
-    titulo: 'Organização',
-    texto: 'Nichos, gavetas, prateleiras e armários até o teto, para cada coisa ter o seu lugar.',
-  },
-  {
-    titulo: 'Acabamento',
-    texto: 'Ripados, painéis, iluminação embutida e cantos arredondados: detalhes que você vê nos projetos abaixo.',
-  },
-];
+// Duas miniaturas entram no meio da frase, como se a própria frase apontasse para os móveis.
+const ripado = detalhes.find((d) => d.id === 'ripados');
+const prateleiras = detalhes.find((d) => d.id === 'iluminacao');
+const miniRipado = ripado?.midia.tipo === 'foto' ? ripado.midia.foto.src : undefined;
+const miniLuz = prateleiras?.midia.tipo === 'foto' ? prateleiras.midia.foto.src : undefined;
+
+const indice = categorias
+  .map((c) => ({ ...c, total: galeria.filter((f) => f.categoria === c.id).length, previa: previas[c.id] }))
+  .filter((c) => c.total > 0);
 ---
 
-<section class="sobre secao" id="nova-era" aria-labelledby="sobre-titulo">
-  <div class="container grade sobre__grade">
-    <p class="rotulo sobre__rotulo" data-revelar="fade">A Nova Era</p>
-    <h2 id="sobre-titulo" class="sr-only">Sobre a {empresa.nomeCurto}</h2>
-    <blockquote class="sobre__frase">
-      <p data-frase>“{empresa.frase}”</p>
-      <footer data-revelar="fade">{empresa.nome}, {empresa.instagram.usuario}</footer>
-    </blockquote>
+<!-- Sobe por cima da foto da abertura. A frase é a da própria empresa (bio do Instagram). -->
+<section class="manifesto escuro" id="nova-era" aria-labelledby="sobre-titulo" data-tema="escuro">
+  <div class="container">
+    <h2 id="sobre-titulo" class="manifesto__frase" data-frase>
+      <span data-frase-texto>Fabricamos soluções</span>{' '}
+      {miniLuz && (
+        <span class="manifesto__mini" aria-hidden="true">
+          <Picture src={miniLuz} alt="" widths={[200, 320]} sizes="(min-width: 1024px) 15vw, 26vw" formats={['avif']} fallbackFormat="jpg" quality={68} loading="lazy" />
+        </span>
+      )}{' '}
+      <span data-frase-texto>inteligentes que otimizam</span>{' '}
+      {miniRipado && (
+        <span class="manifesto__mini" aria-hidden="true">
+          <Picture src={miniRipado} alt="" widths={[200, 320]} sizes="(min-width: 1024px) 15vw, 26vw" formats={['avif']} fallbackFormat="jpg" quality={68} loading="lazy" />
+        </span>
+      )}{' '}
+      <span data-frase-texto>seu espaço.</span>
+    </h2>
 
-    <ul class="sobre__principios">
-      {
-        principios.map((p) => (
-          <li data-revelar="fade">
-            <h3>{p.titulo}</h3>
-            <p>{p.texto}</p>
-          </li>
-        ))
-      }
-    </ul>
+    <div class="manifesto__corpo grade">
+      <div class="manifesto__apoio">
+        <p class="rotulo" data-revelar="fade">A {empresa.nomeCurto}</p>
+        <p class="lead" data-revelar="fade">
+          Móveis planejados em {empresa.cidade}, desenhados para as medidas e o uso de cada ambiente: nichos, gavetas e
+          armários até o teto, para cada coisa ter o seu lugar.
+        </p>
+      </div>
+
+      <nav class="indice" aria-label="Ver fotos por ambiente">
+        <ul data-indice>
+          {
+            indice.map((c) => (
+              <li data-revelar="fade">
+                <a href="#ambientes" data-filtrar={c.id}>
+                  <span class="indice__nome">{c.nome}</span>
+                  <span class="indice__total">
+                    {c.total} {c.total === 1 ? 'foto' : 'fotos'}
+                  </span>
+                  <Icone nome="seta" />
+                  <span class="indice__previa" aria-hidden="true" data-indice-previa>
+                    <Picture src={c.previa.src} alt="" widths={[320, 520]} sizes="(min-width: 1280px) 16vw, 76px" formats={['avif']} fallbackFormat="jpg" quality={66} loading="lazy" />
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
   </div>
 </section>
 
 <style>
-  .sobre {
+  .manifesto {
     position: relative;
+    z-index: 2;
+    padding-block: var(--secao);
+    box-shadow: 0 -1px 0 rgb(239 197 142 / 0.5);
   }
-  .sobre__grade {
-    row-gap: clamp(48px, 7vw, 112px);
-    padding-top: 22px;
-    border-top: 1px solid var(--linha);
-  }
-  .sobre__rotulo {
-    grid-column: 1 / span 3;
-    align-self: start;
-    padding-top: 1.1em;
-  }
-  .sobre__frase {
-    grid-column: 4 / span 9;
-    margin: 0;
-  }
-  .sobre__frase p {
-    font-size: clamp(2rem, 1.1rem + 3.3vw, 4.6rem);
-    font-weight: 320;
-    line-height: 1.08;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
-    color: var(--tinta);
-  }
-  .sobre__frase footer {
-    margin-top: 28px;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: var(--tinta-2);
+  /* a seção sobe por cima da foto parada (só com movimento completo) */
+  :global(.js-motion:not(.reduzido)) .manifesto {
+    margin-top: -100svh;
   }
 
-  .sobre__principios {
-    grid-column: 4 / span 9;
+  .manifesto__frase {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.7rem, 1rem + 6.4vw, 9rem);
+    line-height: 1.04;
+    letter-spacing: -0.024em;
+  }
+  .manifesto__frase > :global(span[data-frase-texto]) {
+    display: inline;
+  }
+  /* miniatura na altura da linha: abre em largura na rolagem */
+  .manifesto__mini {
+    display: inline-block;
+    vertical-align: -0.09em;
+    width: 1.9em;
+    height: 0.8em;
+    margin-inline: 0.06em;
+    overflow: hidden;
+    background: var(--noite-3);
+  }
+  .manifesto__mini :global(picture),
+  .manifesto__mini :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .manifesto__mini :global(img) {
+    object-fit: cover;
+  }
+
+  .manifesto__corpo {
+    margin-top: clamp(72px, 9vw, 160px);
+    row-gap: 48px;
+    align-items: start;
+  }
+  .manifesto__apoio {
+    grid-column: 1 / span 4;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--col-gap);
+    gap: 20px;
   }
-  .sobre__principios li {
-    display: grid;
-    align-content: start;
-    gap: 12px;
-    padding-top: 18px;
-    border-top: 1px solid var(--linha-forte);
+
+  /* ---------- índice de ambientes: lista larga; a foto de cada um aparece ao apontar ---------- */
+  .indice {
+    grid-column: 6 / -1;
   }
-  .sobre__principios h3 {
-    font-size: 1.25rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+  .indice ul {
+    border-top: 1px solid var(--linha-clara);
   }
-  .sobre__principios p {
-    color: var(--tinta-2);
-    max-width: 24em;
-    text-wrap: pretty;
+  .indice li {
+    border-bottom: 1px solid var(--linha-clara);
+  }
+  .indice a {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: clamp(68px, 6.4vw, 104px);
+    padding-block: 10px;
+    transition: padding-left 560ms var(--ease-out);
+  }
+  .indice__nome {
+    flex: 1;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 1.1rem + 2vw, 3.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.018em;
+    transition: color var(--t-micro) var(--ease-out);
+  }
+  .indice__total {
+    font-size: 0.8125rem;
+    color: var(--aluminio);
+    white-space: nowrap;
+  }
+  .indice a > :global(svg) {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--luz);
+    transition: transform var(--t-ui) var(--ease-out);
+  }
+
+  .indice__previa {
+    position: absolute;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--noite-3);
+  }
+  .indice__previa :global(picture),
+  .indice__previa :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .indice__previa :global(img) {
+    object-fit: cover;
+  }
+
+  @media (hover: hover) {
+    .indice a:hover,
+    .indice a:focus-visible {
+      padding-left: 18px;
+    }
+    .indice a:hover .indice__nome,
+    .indice a:focus-visible .indice__nome {
+      color: var(--luz);
+    }
+    .indice a:hover > :global(svg),
+    .indice a:focus-visible > :global(svg) {
+      transform: translateX(6px);
+    }
+  }
+  /* a foto abre na coluna da esquerda, sob o texto de apoio: assim não cobre o nome de nenhum ambiente */
+  @media (hover: hover) and (min-width: 1280px) {
+    .manifesto__corpo {
+      position: relative;
+    }
+    .indice__previa {
+      left: 0;
+      bottom: -40px;
+      width: clamp(180px, 16vw, 280px);
+      aspect-ratio: 4 / 5;
+      clip-path: inset(50% 0 50% 0);
+      transition: clip-path 560ms var(--ease-in-out);
+    }
+    .indice a:hover .indice__previa,
+    .indice a:focus-visible .indice__previa {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  /* toque e telas menores: a foto fica sempre à vista, pequena, ao lado do nome */
+  @media (hover: none), (max-width: 1279px) {
+    .indice a {
+      padding-right: 0;
+    }
+    .indice__previa {
+      position: static;
+      flex: none;
+      width: 62px;
+      aspect-ratio: 1;
+      order: -1;
+    }
+    .indice__total {
+      display: none;
+    }
   }
 
   @media (max-width: 1023px) {
-    .sobre__rotulo,
-    .sobre__frase,
-    .sobre__principios {
+    .manifesto__apoio,
+    .indice {
       grid-column: 1 / -1;
-    }
-    .sobre__rotulo {
-      padding-top: 0;
-    }
-  }
-  @media (max-width: 767px) {
-    .sobre__principios {
-      grid-template-columns: 1fr;
-      gap: 28px;
     }
   }
 </style>

@@ -1,234 +1,383 @@
 ---
 import { Picture } from 'astro:assets';
 import { indiceDe, projetos } from '../data/projetos';
+
+const living = projetos.find((p) => p.id === 'living')!;
+const jantar = projetos.find((p) => p.id === 'jantar')!;
+const cozinha = projetos.find((p) => p.id === 'cozinha')!;
 ---
 
-<section class="projetos secao" id="projetos" aria-labelledby="projetos-titulo">
-  <div class="container grade cabeca">
-    <p class="rotulo" data-revelar="fade">Projetos em destaque</p>
-    <h2 id="projetos-titulo" class="titulo" data-revelar="linhas">
-      Ambientes reais, <strong>vistos de perto.</strong>
-    </h2>
-  </div>
+<!-- Três projetos, três composições. O fundo da seção muda com o capítulo em foco (data-capitulo):
+     a página passa da sala clara para a noite do jantar e chega à cor da cozinha. -->
+<section class="projetos" id="projetos" aria-labelledby="projetos-titulo" data-projetos data-fundo="gesso">
+  <h2 id="projetos-titulo" class="sr-only">Projetos em destaque</h2>
 
-  <div class="container projetos__lista">
-    {
-      projetos.map((p, pi) => (
-        <article class:list={['projeto', { 'projeto--inverso': pi % 2 === 1 }]} id={`projeto-${p.id}`} aria-labelledby={`projeto-${p.id}-titulo`}>
-          <header class="projeto__ficha" data-revelar="fade">
-            <p class="projeto__ambiente">{p.ambiente}</p>
-            <h3 id={`projeto-${p.id}-titulo`} class="subtitulo">
-              {p.titulo}
-            </h3>
-            <ul class="projeto__destaques">
-              {p.destaques.map((d) => (
-                <li>{d}</li>
-              ))}
-            </ul>
-          </header>
-          <div class="projeto__fotos">
-            {p.fotos.map((foto, fi) => (
-              <figure class:list={['projeto__foto', `projeto__foto--${fi + 1}`]} data-parallax-leve={fi === 1 ? '' : undefined}>
-                <button
-                  class="projeto__moldura marcas"
-                  type="button"
-                  data-lightbox-abrir={indiceDe(foto)}
-                  data-lightbox-grupo="projetos"
-                  data-cursor="Ampliar"
-                  aria-label={`Ampliar foto: ${foto.legenda}`}
-                >
-                  <span class="projeto__img" data-revelar="mascara">
-                    <Picture
-                      src={foto.src}
-                      alt={foto.alt}
-                      widths={fi === 0 ? [640, 960, foto.src.width] : [480, 720, foto.src.width]}
-                      sizes={fi === 0 ? '(min-width: 1024px) 56vw, 100vw' : '(min-width: 1024px) 34vw, 70vw'}
-                      formats={['avif', 'webp']}
-                      fallbackFormat="jpg"
-                      quality={78}
-                      loading="lazy"
-                      style={foto.foco ? `object-position: ${foto.foco}` : undefined}
-                    />
-                  </span>
-                </button>
-                <figcaption>{foto.legenda}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </article>
-      ))
-    }
-  </div>
+  <!-- 1. Living: a foto alta fica presa à esquerda, de borda a borda, enquanto o texto passa ao lado -->
+  <article class="cap cap--living" id="projeto-living" data-capitulo="gesso" data-tema="claro" aria-labelledby="cap-living">
+    <figure class="cap-living__alta">
+      <button class="foto" type="button" data-lightbox-abrir={indiceDe(living.fotos[0])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${living.fotos[0].legenda}`}>
+        <span class="cap__revela" data-revelar="mascara" data-direcao="esquerda">
+          <Picture
+            src={living.fotos[0].src}
+            alt={living.fotos[0].alt}
+            widths={[640, 960, living.fotos[0].src.width]}
+            sizes="(min-width: 1024px) 56vw, 100vw"
+            formats={['avif']}
+            fallbackFormat="jpg"
+            quality={70}
+            loading="lazy"
+            style={`object-position: ${living.fotos[0].foco}`}
+          />
+        </span>
+      </button>
+    </figure>
+    <div class="cap-living__texto">
+      <header class="cap__cabeca">
+        <p class="rotulo" data-revelar="fade">{living.ambiente}</p>
+        <h3 id="cap-living" class="titulo" data-revelar="linhas">Pé-direito duplo, <em>móvel suspenso.</em></h3>
+      </header>
+      <ul class="cap__destaques" data-revelar="fade">
+        {living.destaques.map((d) => <li>{d}</li>)}
+      </ul>
+      <figure class="cap-living__detalhe">
+        <button class="foto" type="button" data-lightbox-abrir={indiceDe(living.fotos[1])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${living.fotos[1].legenda}`}>
+          <span class="cap__revela" data-revelar="mascara">
+            <Picture
+              src={living.fotos[1].src}
+              alt={living.fotos[1].alt}
+              widths={[480, 720, living.fotos[1].src.width]}
+              sizes="(min-width: 1024px) 30vw, 80vw"
+              formats={['avif']}
+              fallbackFormat="jpg"
+              quality={70}
+              loading="lazy"
+              style={`object-position: ${living.fotos[1].foco}`}
+            />
+          </span>
+        </button>
+        <figcaption class="legenda">{living.fotos[1].legenda}</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <!-- 2. Jantar: a sala de ponta a ponta, com o título sobre a foto, e a adega subindo por cima da borda -->
+  <article class="cap cap--jantar" id="projeto-jantar" data-capitulo="noite" data-tema="escuro" aria-labelledby="cap-jantar">
+    <figure class="cap-jantar__ampla grao">
+      <button class="foto" type="button" data-lightbox-abrir={indiceDe(jantar.fotos[0])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${jantar.fotos[0].legenda}`}>
+        <span class="cap__revela" data-revelar="mascara" data-direcao="centro">
+          <span class="cap__parallax" data-parallax>
+            <Picture
+              src={jantar.ampla!}
+              alt={jantar.fotos[0].alt}
+              widths={[828, 1280, jantar.ampla!.width]}
+              sizes="100vw"
+              formats={['avif']}
+              fallbackFormat="jpg"
+              quality={68}
+              loading="lazy"
+            />
+          </span>
+        </span>
+      </button>
+      <header class="cap-jantar__cabeca">
+        <p class="rotulo" data-revelar="fade">{jantar.ambiente}</p>
+        <h3 id="cap-jantar" class="titulo" data-revelar="linhas">A sala é a <em>adega.</em></h3>
+      </header>
+    </figure>
+    <div class="container grade cap-jantar__baixo">
+      <ul class="cap__destaques" data-revelar="fade">
+        {jantar.destaques.map((d) => <li>{d}</li>)}
+      </ul>
+      <figure class="cap-jantar__adega">
+        <button class="foto" type="button" data-lightbox-abrir={indiceDe(jantar.fotos[1])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${jantar.fotos[1].legenda}`}>
+          <span class="cap__revela" data-revelar="mascara" data-direcao="direita">
+            <Picture
+              src={jantar.fotos[1].src}
+              alt={jantar.fotos[1].alt}
+              widths={[480, 720, jantar.fotos[1].src.width]}
+              sizes="(min-width: 1024px) 38vw, 86vw"
+              formats={['avif']}
+              fallbackFormat="jpg"
+              quality={70}
+              loading="lazy"
+              style={`object-position: ${jantar.fotos[1].foco}`}
+            />
+          </span>
+        </button>
+        <figcaption class="legenda">{jantar.fotos[1].legenda}</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <!-- 3. Cozinha: fundo da cor dos armários, título atravessando a foto, segunda foto em degrau -->
+  <article class="cap cap--cozinha" id="projeto-cozinha" data-capitulo="areia" data-tema="claro" aria-labelledby="cap-cozinha">
+    <div class="container grade cap-cozinha__grade">
+      <header class="cap-cozinha__cabeca">
+        <p class="rotulo" data-revelar="fade">{cozinha.ambiente}</p>
+        <h3 id="cap-cozinha" class="titulo" data-revelar="linhas">Tudo em tom de <em>areia.</em></h3>
+      </header>
+      <figure class="cap-cozinha__maior">
+        <button class="foto" type="button" data-lightbox-abrir={indiceDe(cozinha.fotos[0])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${cozinha.fotos[0].legenda}`}>
+          <span class="cap__revela" data-revelar="mascara">
+            <Picture
+              src={cozinha.fotos[0].src}
+              alt={cozinha.fotos[0].alt}
+              widths={[640, 960, cozinha.fotos[0].src.width]}
+              sizes="(min-width: 1024px) 50vw, 92vw"
+              formats={['avif']}
+              fallbackFormat="jpg"
+              quality={70}
+              loading="lazy"
+              style={`object-position: ${cozinha.fotos[0].foco}`}
+            />
+          </span>
+        </button>
+        <figcaption class="legenda">{cozinha.fotos[0].legenda}</figcaption>
+      </figure>
+      <div class="cap-cozinha__lado">
+        <ul class="cap__destaques" data-revelar="fade">
+          {cozinha.destaques.map((d) => <li>{d}</li>)}
+        </ul>
+        <figure>
+          <button class="foto" type="button" data-lightbox-abrir={indiceDe(cozinha.fotos[1])} data-lightbox-grupo="projetos" data-cursor="Ampliar" aria-label={`Ampliar foto: ${cozinha.fotos[1].legenda}`}>
+            <span class="cap__revela" data-revelar="mascara" data-direcao="direita">
+              <Picture
+                src={cozinha.fotos[1].src}
+                alt={cozinha.fotos[1].alt}
+                widths={[480, 720, cozinha.fotos[1].src.width]}
+                sizes="(min-width: 1024px) 34vw, 80vw"
+                formats={['avif']}
+                fallbackFormat="jpg"
+                quality={70}
+                loading="lazy"
+                style={`object-position: ${cozinha.fotos[1].foco}`}
+              />
+            </span>
+          </button>
+          <figcaption class="legenda">{cozinha.fotos[1].legenda}</figcaption>
+        </figure>
+      </div>
+    </div>
+  </article>
 </section>
 
 <style>
-  .projetos__lista {
-    margin-top: clamp(56px, 7vw, 112px);
-    display: grid;
-    gap: clamp(96px, 11vw, 200px);
+  .projetos {
+    --enfase: var(--madeira);
+    position: relative;
+    z-index: 2;
+    background: var(--gesso);
+    color: var(--tinta);
+    transition:
+      background-color 900ms var(--ease-out),
+      color 700ms var(--ease-out);
+  }
+  .projetos[data-fundo='noite'] {
+    --enfase: var(--luz);
+    background: var(--noite);
+    color: var(--claro);
+  }
+  .projetos[data-fundo='noite'] :global(.rotulo),
+  .projetos[data-fundo='noite'] :global(.legenda),
+  .projetos[data-fundo='noite'] .cap__destaques {
+    color: var(--aluminio);
+  }
+  .projetos[data-fundo='areia'] {
+    background: var(--areia);
+  }
+  :global(.reduzido) .projetos {
+    transition: none;
   }
 
-  .projeto {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--col-gap);
-    align-items: start;
-  }
-
-  /* Ficha fixa ao lado das fotos enquanto elas passam. */
-  .projeto__ficha {
-    grid-column: 1 / span 4;
-    position: sticky;
-    top: calc(var(--header-h) + 40px);
-    display: grid;
-    gap: 18px;
-  }
-  .projeto--inverso .projeto__ficha {
-    grid-column: 9 / span 4;
-    grid-row: 1;
-  }
-  .projeto__ambiente {
-    font-size: var(--fs-rotulo);
-    font-weight: 600;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--tinta-2);
-  }
-  .projeto__destaques {
-    margin-top: 6px;
-    border-top: 1px solid var(--linha);
-  }
-  .projeto__destaques li {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding-block: 12px;
-    border-bottom: 1px solid var(--linha);
-    font-size: var(--fs-pequeno);
-    color: var(--tinta-2);
-  }
-  .projeto__destaques li::before {
-    content: '';
-    flex: none;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--ponto);
-    transform: translateY(-2px);
-  }
-
-  .projeto__fotos {
-    grid-column: 6 / span 7;
-    display: grid;
-  }
-  .projeto--inverso .projeto__fotos {
-    grid-column: 1 / span 7;
-    grid-row: 1;
-  }
-
-  .projeto__foto {
-    display: grid;
-    gap: 12px;
-  }
-  .projeto__foto figcaption {
-    font-size: 0.8125rem;
-    color: var(--tinta-2);
-  }
-  /* a legenda da foto grande fica no lado livre (a segunda foto sobe pelo outro lado) */
-  .projeto__foto--1 figcaption {
-    max-width: 42%;
-  }
-  .projeto--inverso .projeto__foto--1 figcaption {
-    margin-left: auto;
-    text-align: right;
-  }
-  .projeto__moldura {
+  .cap__revela {
     display: block;
-    width: 100%;
-    aspect-ratio: 6 / 5;
-    text-align: left;
-  }
-  .projeto__img {
-    position: absolute;
-    inset: 0;
-    display: block;
-    overflow: hidden;
-    background: var(--pedra);
-  }
-  .projeto__img :global(picture),
-  .projeto__img :global(img) {
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
-  .projeto__img :global(img) {
-    object-fit: cover;
-    transition: transform 1200ms var(--ease-out);
+  .cap__destaques {
+    display: grid;
+    gap: 2px;
+    font-size: var(--fs-lead);
+    line-height: 1.4;
+    color: var(--tinta-2);
+    transition: color 700ms var(--ease-out);
   }
-  @media (hover: hover) {
-    .projeto__moldura:hover .projeto__img :global(img) {
-      transform: scale(1.035);
-    }
+  .cap__destaques li + li {
+    margin-top: 4px;
+  }
+  .projetos :global(.legenda) {
+    margin-top: 12px;
   }
 
-  /* A segunda foto sobe por cima da primeira, com uma moldura da cor do fundo. */
-  .projeto__foto--2 {
-    position: relative;
-    z-index: 1;
-    width: 54%;
-    margin-top: -16%;
+  /* ---------- 1. living ---------- */
+  .cap--living {
+    display: grid;
+    grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
+    align-items: start;
+    padding-bottom: var(--secao);
+  }
+  .cap-living__alta {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+  }
+  .cap-living__alta .foto {
+    height: 100%;
+  }
+  .cap-living__texto {
+    display: grid;
+    gap: 28px;
+    padding: clamp(112px, 24vh, 260px) var(--gutter) 0 clamp(28px, 5vw, 96px);
+  }
+  .cap__cabeca {
+    display: grid;
+    gap: 20px;
+  }
+  .cap-living__detalhe {
+    width: min(76%, 480px);
+    margin-top: clamp(56px, 14vh, 180px);
     margin-left: auto;
   }
-  .projeto--inverso .projeto__foto--2 {
-    margin-left: 0;
-    margin-right: auto;
-  }
-  .projeto__foto--2 .projeto__moldura {
+  .cap-living__detalhe .foto {
     aspect-ratio: 4 / 5;
-    box-shadow: 0 0 0 clamp(8px, 0.9vw, 14px) var(--gesso);
-    --marca: transparent;
   }
-  .projeto__foto--2 figcaption {
-    padding-top: clamp(8px, 0.9vw, 14px);
+
+  /* ---------- 2. jantar ---------- */
+  .cap--jantar {
+    padding-bottom: var(--secao);
+  }
+  .cap-jantar__ampla {
+    position: relative;
+    height: clamp(460px, 100svh, 62vw);
+    min-height: 520px;
+    overflow: hidden;
+  }
+  .cap-jantar__ampla .foto {
+    height: 100%;
+    background: var(--noite-2);
+  }
+  /* a foto é maior que o quadro para deslizar dentro dele na rolagem */
+  .cap__parallax {
+    position: absolute;
+    inset: -7% 0;
+    display: block;
+  }
+  .cap-jantar__ampla::before {
+    content: '';
+    position: absolute;
+    inset: 42% 0 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgb(13 15 20 / 0.78));
+  }
+  .cap-jantar__cabeca {
+    position: absolute;
+    z-index: 2;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: clamp(24px, 5vh, 56px);
+    display: grid;
+    gap: 14px;
+    color: var(--claro);
+    pointer-events: none;
+  }
+  .cap-jantar__cabeca :global(.rotulo) {
+    color: rgb(246 243 237 / 0.84) !important;
+  }
+  .cap-jantar__baixo {
+    row-gap: 36px;
+    align-items: start;
+  }
+  .cap-jantar__baixo .cap__destaques {
+    grid-column: 1 / span 4;
+    padding-top: clamp(28px, 3vw, 48px);
+  }
+  .cap-jantar__adega {
+    position: relative;
+    z-index: 3;
+    grid-column: 8 / -1;
+    margin-top: clamp(-220px, -14vw, -80px);
+  }
+  .cap-jantar__adega .foto {
+    aspect-ratio: 4 / 5;
+  }
+
+  /* ---------- 3. cozinha ---------- */
+  .cap--cozinha {
+    padding-block: var(--secao);
+  }
+  .cap-cozinha__grade {
+    align-items: start;
+    row-gap: 40px;
+  }
+  .cap-cozinha__cabeca {
+    position: relative;
+    z-index: 2;
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 18px;
+    margin-bottom: clamp(-96px, -5vw, -24px);
+  }
+  .cap-cozinha__cabeca :global(.titulo) {
+    max-width: 12em;
+  }
+  .cap-cozinha__maior {
+    grid-column: 1 / span 7;
+  }
+  .cap-cozinha__maior .foto {
+    aspect-ratio: 5 / 6;
+  }
+  .cap-cozinha__lado {
+    grid-column: 9 / -1;
+    display: grid;
+    gap: clamp(40px, 6vw, 96px);
+    padding-top: clamp(80px, 13vw, 240px);
+  }
+  .cap-cozinha__lado .foto {
+    aspect-ratio: 4 / 5;
   }
 
   @media (max-width: 1023px) {
-    .projeto__ficha,
-    .projeto--inverso .projeto__ficha,
-    .projeto__fotos,
-    .projeto--inverso .projeto__fotos {
+    .cap--living {
+      display: block;
+      padding-bottom: var(--secao);
+    }
+    .cap-living__alta {
+      position: relative;
+      height: min(120vw, 92svh);
+    }
+    .cap-living__texto {
+      padding: 40px var(--gutter) 0;
+    }
+    .cap-jantar__ampla {
+      height: min(125vw, 86svh);
+    }
+    .cap-jantar__baixo .cap__destaques,
+    .cap-jantar__adega,
+    .cap-cozinha__maior,
+    .cap-cozinha__lado {
       grid-column: 1 / -1;
-      grid-row: auto;
     }
-    .projeto__ficha {
-      position: static;
-      margin-bottom: 32px;
+    .cap-jantar__adega {
+      width: 86%;
+      margin: 0 calc(var(--gutter) * -1) 0 auto;
     }
-  }
-  @media (max-width: 767px) {
-    .projeto__foto--1 {
+    .cap-cozinha__cabeca {
+      margin-bottom: 0;
+    }
+    .cap-cozinha__maior {
       margin-inline: calc(var(--gutter) * -1);
     }
-    .projeto__foto--1 .projeto__moldura {
-      aspect-ratio: 4 / 5;
-      --marca: transparent;
-    }
-    .projeto__foto--1 figcaption,
-    .projeto--inverso .projeto__foto--1 figcaption {
-      max-width: none;
-      margin-left: 0;
+    .cap-cozinha__maior :global(.legenda) {
       padding-inline: var(--gutter);
-      text-align: left;
     }
-    .projeto__foto--2,
-    .projeto--inverso .projeto__foto--2 {
-      width: 68%;
-      margin: 20px 0 0 auto;
-    }
-    .projeto__foto--2 .projeto__moldura {
-      box-shadow: none;
-    }
-    .projeto__foto--2 figcaption {
+    .cap-cozinha__lado {
       padding-top: 0;
+    }
+    .cap-cozinha__lado figure {
+      width: 78%;
+      margin-left: auto;
     }
   }
 </style>

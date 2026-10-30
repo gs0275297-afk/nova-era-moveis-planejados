@@ -1,0 +1,55 @@
+---
+import { Picture } from 'astro:assets';
+import { indiceDe, panorama } from '../data/projetos';
+---
+
+<!-- Interrupção de ritmo entre a galeria e os detalhes: uma foto só, que se abre até as bordas da tela. -->
+<section class="panorama" aria-label={panorama.legenda} data-panorama data-tema="claro">
+  <figure class="panorama__quadro grao" data-panorama-quadro>
+    <button class="foto" type="button" data-lightbox-abrir={indiceDe(panorama)} data-lightbox-grupo="panorama" data-cursor="Ampliar" aria-label={`Ampliar foto: ${panorama.legenda}`}>
+      <span class="panorama__foto" data-parallax>
+        <Picture
+          src={panorama.tela}
+          alt={panorama.alt}
+          widths={[828, 1280, panorama.tela.width]}
+          sizes="100vw"
+          formats={['avif']}
+          fallbackFormat="jpg"
+          quality={68}
+          loading="lazy"
+        />
+      </span>
+    </button>
+  </figure>
+  <p class="panorama__legenda container legenda">{panorama.legenda}</p>
+</section>
+
+<style>
+  .panorama {
+    position: relative;
+    z-index: 2;
+    background: var(--gesso);
+  }
+  .panorama__quadro {
+    position: relative;
+    height: clamp(420px, 92svh, 58vw);
+    overflow: hidden;
+  }
+  .panorama__quadro .foto {
+    height: 100%;
+  }
+  .panorama__foto {
+    position: absolute;
+    inset: -7% 0;
+    display: block;
+  }
+  .panorama__legenda {
+    padding-block: 12px clamp(40px, 5vw, 80px);
+  }
+  @media (max-width: 767px) {
+    .panorama__quadro {
+      height: 78vw;
+      min-height: 300px;
+    }
+  }
+</style>

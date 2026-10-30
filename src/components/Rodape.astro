@@ -6,59 +6,59 @@ import { empresa, mensagemPadrao, navegacao } from '../data/empresa';
 const ano = new Date().getFullYear();
 ---
 
-<footer class="rodape escuro">
-  <div class="container grade rodape__grade">
-    <div class="rodape__marca">
+<footer class="rodape escuro" data-tema="escuro">
+  <div class="container">
+    <a class="rodape__chamada" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
+      <span class="titulo">Vamos planejar <em>o seu espaço?</em></span>
+      <Icone nome="seta-diagonal" />
+    </a>
+
+    <div class="grade rodape__grade">
       <div class="rodape__selo">
         <Logo versao="selo" />
       </div>
       <p class="rodape__frase">{empresa.frase}</p>
-    </div>
 
-    <nav class="rodape__nav" aria-label="Rodapé">
-      <p class="rodape__titulo">Navegação</p>
-      <ul>
-        {navegacao.map((item) => (
+      <nav class="rodape__nav" aria-label="Rodapé">
+        <p class="rotulo">Navegação</p>
+        <ul>
+          <li><a href="#nova-era">A {empresa.nomeCurto}</a></li>
+          {navegacao.map((item) => (
+            <li>
+              <a href={item.href}>{item.rotulo}</a>
+            </li>
+          ))}
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </nav>
+
+      <div class="rodape__contato">
+        <p class="rotulo">Contato</p>
+        <ul>
           <li>
-            <a href={item.href}>{item.rotulo}</a>
+            <a href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">WhatsApp {empresa.telefone.exibicao}</a>
           </li>
-        ))}
-      </ul>
-    </nav>
+          <li>
+            <a href={empresa.telefone.link}>Telefone {empresa.telefone.exibicao}</a>
+          </li>
+          <li>
+            <a href={empresa.instagram.link} target="_blank" rel="noopener">{empresa.instagram.usuario}</a>
+          </li>
+        </ul>
+      </div>
 
-    <div class="rodape__contato">
-      <p class="rodape__titulo">Contato</p>
-      <ul>
-        <li>
-          <a href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
-            <Icone nome="whatsapp" />
-            WhatsApp {empresa.telefone.exibicao}
-          </a>
-        </li>
-        <li>
-          <a href={empresa.telefone.link}>
-            <Icone nome="telefone" />
-            Telefone {empresa.telefone.exibicao}
-          </a>
-        </li>
-        <li>
-          <a href={empresa.instagram.link} target="_blank" rel="noopener">
-            <Icone nome="instagram" />
-            {empresa.instagram.usuario}
-          </a>
-        </li>
-      </ul>
+      <address class="rodape__endereco">
+        <p class="rotulo">Endereço</p>
+        {empresa.endereco.rua}<br />
+        {empresa.endereco.bairro}, {empresa.endereco.cidade} – {empresa.endereco.uf}<br />
+        CEP {empresa.endereco.cep}
+      </address>
     </div>
-
-    <address class="rodape__endereco">
-      <p class="rodape__titulo">Endereço</p>
-      {empresa.endereco.rua}<br />
-      {empresa.endereco.bairro}, {empresa.endereco.cidade} – {empresa.endereco.uf}<br />
-      CEP {empresa.endereco.cep}
-    </address>
 
     <div class="rodape__base">
-      <p>© {ano} {empresa.nome}. {empresa.cidade} – {empresa.uf}.</p>
+      <p>© {ano} {empresa.nome}.</p>
+      <!-- Só aparece para quem tem "menos movimento" ligado no sistema: permite ver as animações mesmo assim. -->
+      <button class="rodape__movimento" type="button" data-movimento hidden></button>
       <a class="link-seta" href="#inicio" data-dir="cima">
         <span>Voltar ao topo</span>
         <Icone nome="seta-cima" />
@@ -69,45 +69,58 @@ const ano = new Date().getFullYear();
 
 <style>
   .rodape {
-    padding-block: clamp(72px, 8vw, 128px) max(32px, env(safe-area-inset-bottom));
+    padding-block: clamp(80px, 10vw, 176px) max(28px, env(safe-area-inset-bottom));
   }
+  .rodape__chamada {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: clamp(32px, 4vw, 64px);
+    border-bottom: 1px solid var(--linha-clara);
+  }
+  .rodape__chamada :global(svg) {
+    flex: none;
+    width: clamp(36px, 5vw, 84px);
+    height: clamp(36px, 5vw, 84px);
+    stroke-width: 1;
+    color: var(--luz);
+    transition: transform 620ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .rodape__chamada:hover :global(svg) {
+      transform: translate(6px, -6px);
+    }
+  }
+
   .rodape__grade {
-    row-gap: 48px;
-  }
-  .rodape__marca {
-    grid-column: 1 / span 4;
-    display: grid;
-    align-content: start;
-    gap: 28px;
+    row-gap: 40px;
+    padding-top: clamp(40px, 5vw, 80px);
   }
   .rodape__selo {
-    width: clamp(132px, 12vw, 176px);
+    grid-column: 1 / span 1;
+    width: clamp(84px, 7vw, 116px);
   }
   .rodape__frase {
-    max-width: 18em;
-    font-size: 1.25rem;
-    font-weight: 330;
-    line-height: 1.35;
+    grid-column: 3 / span 3;
+    max-width: 16em;
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    line-height: 1.2;
     letter-spacing: -0.01em;
   }
-  .rodape__titulo {
-    margin-bottom: 16px;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--aluminio);
+  .rodape :global(.rotulo) {
+    margin-bottom: 14px;
   }
   .rodape__nav {
-    grid-column: 6 / span 2;
+    grid-column: 7 / span 2;
   }
   .rodape__contato {
-    grid-column: 8 / span 3;
+    grid-column: 9 / span 2;
   }
   .rodape__endereco {
     grid-column: 11 / span 2;
     font-style: normal;
-    color: var(--claro);
     font-size: 0.9375rem;
     line-height: 1.7;
   }
@@ -115,59 +128,66 @@ const ano = new Date().getFullYear();
   .rodape__contato a {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    min-height: 40px;
+    min-height: 36px;
     font-size: 0.9375rem;
-    color: var(--claro);
-    transition: color var(--t-micro) var(--ease-out);
-  }
-  .rodape__contato :global(svg) {
-    width: 18px;
-    height: 18px;
-    color: var(--aluminio);
+    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 6px) / 0 1px no-repeat;
+    transition:
+      background-size var(--t-ui) var(--ease-out),
+      color var(--t-micro) var(--ease-out);
   }
   @media (hover: hover) {
     .rodape__nav a:hover,
     .rodape__contato a:hover {
-      color: var(--aluminio);
+      background-size: 100% 1px;
+      color: var(--luz);
     }
   }
+
   .rodape__base {
-    grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 12px 24px;
-    margin-top: clamp(24px, 4vw, 56px);
-    padding-top: 22px;
+    gap: 8px 24px;
+    margin-top: clamp(40px, 5vw, 80px);
+    padding-top: 14px;
     border-top: 1px solid var(--linha-clara);
     font-size: 0.8125rem;
     color: var(--aluminio);
   }
+  .rodape__movimento {
+    min-height: 44px;
+    font-size: 0.8125rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 
   @media (max-width: 1023px) {
-    .rodape__marca {
-      grid-column: 1 / -1;
+    .rodape__selo {
+      grid-column: 1 / span 3;
+    }
+    .rodape__frase {
+      grid-column: 4 / -1;
     }
     .rodape__nav {
       grid-column: 1 / span 4;
     }
     .rodape__contato {
-      grid-column: 5 / span 8;
+      grid-column: 5 / span 4;
     }
     .rodape__endereco {
-      grid-column: 1 / -1;
+      grid-column: 9 / -1;
     }
   }
-  @media (max-width: 599px) {
+  @media (max-width: 639px) {
     .rodape__nav,
-    .rodape__contato {
+    .rodape__contato,
+    .rodape__endereco {
       grid-column: 1 / -1;
     }
     .rodape {
       /* espaço para a barra fixa de orçamento */
-      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
   }
 </style>

@@ -1,4 +1,6 @@
 ---
+import { Picture } from 'astro:assets';
+import capaCozinha from '../assets/simulador/capa-cozinha.jpg';
 import IconeSim from './IconeSim.astro';
 import Icone from './Icone.astro';
 import { empresa } from '../data/empresa';
@@ -28,30 +30,26 @@ const abas = [
   { id: 'luz', nome: 'Iluminação', icone: 'luz' },
   { id: 'camera', nome: 'Câmera', icone: 'camera' },
 ] as const;
-
-// Mosaico da capa (e do modo sem 3D): amostras reais do catálogo do simulador.
-const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], madeiras[3]];
 ---
 
-<section class="simulador secao" id="simulador" aria-labelledby="simulador-titulo">
-  <div class="container grade cabeca">
-    <p class="rotulo" data-revelar="fade">Simulador 3D</p>
-    <h2 id="simulador-titulo" class="titulo" data-revelar="linhas">
-      Monte a cozinha <strong>e veja na hora.</strong>
-    </h2>
-  </div>
+<section class="simulador escuro" id="simulador" aria-labelledby="simulador-titulo" data-tema="escuro">
   <div class="container grade simulador__intro">
-    <p class="lead" data-revelar="fade">
-      Troque madeiras, cores, puxadores, bancada e luz, abra portas e gavetas e envie a combinação para pedir um
-      orçamento à {empresa.nomeCurto}.
-    </p>
-    <p class="simulador__aviso" data-revelar="fade">
-      Simulação ilustrativa para explorar possibilidades: não é um projeto executado pela {empresa.nomeCurto} nem um
-      orçamento. Medidas, materiais e soluções são definidos com a equipe, depois da avaliação técnica e comercial.
-    </p>
+    <h2 id="simulador-titulo" class="titulo" data-revelar="linhas">
+      Agora, <em>monte a sua.</em>
+    </h2>
+    <div class="simulador__texto">
+      <p class="lead" data-revelar="fade">
+        Troque madeiras, cores, puxadores, bancada e luz, abra portas e gavetas e envie a combinação para pedir um
+        orçamento à {empresa.nomeCurto}.
+      </p>
+      <p class="simulador__aviso" data-revelar="fade">
+        Simulação ilustrativa para explorar possibilidades: não é um projeto executado pela {empresa.nomeCurto} nem um
+        orçamento. Medidas, materiais e soluções são definidos com a equipe, depois da avaliação técnica e comercial.
+      </p>
+    </div>
   </div>
 
-  <div class="container">
+  <div class="simulador__moldura">
     <div class="sim" data-sim data-estado="inicial" data-whatsapp={empresa.whatsapp.numero}>
       <!-- ---------- palco 3D ---------- -->
       <div class="sim__palco" data-sim-palco>
@@ -60,17 +58,18 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
           câmera, também estão disponíveis nos botões do painel de personalização.
         </p>
         <div class="sim__capa" data-sim-capa>
-          <div class="sim__mosaico" aria-hidden="true">
-            {mosaico.map((a) => <span style={`--img: url(${a.imagem}); --tom: ${a.tom ?? '#fff'}`} />)}
+          <!-- Imagem da própria cena: pesa pouco e a passagem para o 3D acontece no mesmo enquadramento. -->
+          <div class="sim__poster" aria-hidden="true">
+            <Picture src={capaCozinha} alt="" widths={[828, 1280, capaCozinha.width]} sizes="100vw" formats={['avif']} fallbackFormat="jpg" quality={66} loading="lazy" />
           </div>
           <div class="sim__capa-texto">
-            <p class="sim__capa-titulo">Cozinha planejada em 3D</p>
+            <p class="sim__capa-selo">Simulação ilustrativa</p>
             <p class="sim__capa-sub" data-sim-capa-sub>Gire, aproxime, abra portas e gavetas e troque os acabamentos em tempo real.</p>
-            <button class="botao botao--claro" type="button" data-sim-abrir>
-              Abrir simulador
+            <button class="botao botao--luz" type="button" data-sim-abrir>
+              Abrir o simulador
               <Icone nome="seta" />
             </button>
-            <p class="sim__capa-nota">Carrega cerca de 1,5 MB na primeira vez.</p>
+            <p class="sim__capa-nota">O 3D só é baixado quando você abre.</p>
           </div>
           <div class="sim__erro" data-sim-erro hidden>
             <p class="sim__capa-titulo">O 3D não abriu neste aparelho</p>
@@ -165,7 +164,7 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
           <!-- Materiais (madeiras) -->
           <div class="sim__pn" role="tabpanel" id="sim-pn-materiais" aria-labelledby="sim-aba-materiais" hidden>
             <h3>Materiais</h3>
-            <p class="sim__nota">Escolha a parte do móvel e depois a madeira. Passe o mouse nas amostras para comparar antes de aplicar.</p>
+            <p class="sim__nota">Escolha a parte do móvel e depois a madeira. <span class="sim__so-mouse">Passe o mouse nas amostras para comparar antes de aplicar.</span></p>
             <div class="sim__papeis" role="group" aria-label="Parte do móvel" data-papeis>
               {papeis.map((p, i) => <button type="button" data-papel={p.id} aria-pressed={i === 0 ? 'true' : 'false'} title={p.dica}>{p.nome}</button>)}
             </div>
@@ -379,26 +378,32 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
 </section>
 
 <style>
-  .simulador__intro {
-    row-gap: 18px;
-    margin-top: 28px;
-    margin-bottom: clamp(32px, 4vw, 56px);
+  .simulador {
+    position: relative;
+    z-index: 2;
+    padding-top: var(--secao);
   }
-  .simulador__intro .lead {
-    grid-column: 4 / span 5;
+  .simulador__intro {
+    row-gap: 24px;
+    align-items: end;
+    padding-bottom: clamp(36px, 5vw, 80px);
+  }
+  .simulador__intro :global(.titulo) {
+    grid-column: 1 / span 7;
+  }
+  .simulador__texto {
+    grid-column: 8 / -1;
+    display: grid;
+    gap: 16px;
   }
   .simulador__aviso {
-    grid-column: 9 / span 4;
-    align-self: end;
     font-size: 0.8125rem;
-    line-height: 1.55;
-    color: var(--tinta-2);
-    padding-left: 16px;
-    border-left: 2px solid var(--ponto);
+    line-height: 1.5;
+    color: var(--aluminio);
   }
   @media (max-width: 1023px) {
-    .simulador__intro .lead,
-    .simulador__aviso {
+    .simulador__intro :global(.titulo),
+    .simulador__texto {
       grid-column: 1 / -1;
     }
   }
@@ -409,10 +414,19 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--painel);
-    height: clamp(580px, 84vh, 880px);
+    height: clamp(620px, 100svh, 1100px);
     background: var(--branco);
-    box-shadow: 0 0 0 1px var(--linha);
     color: var(--tinta);
+  }
+  /* antes de abrir, só a capa, de borda a borda: o painel chega junto com a cena */
+  .sim[data-estado='inicial'],
+  .sim[data-estado='erro'] {
+    grid-template-columns: minmax(0, 1fr);
+    background: var(--noite);
+  }
+  .sim[data-estado='inicial'] .sim__painel,
+  .sim[data-estado='erro'] .sim__painel {
+    display: none;
   }
   .sim__palco {
     --fundo-cena: #e9e8e3;
@@ -441,29 +455,29 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
     inset: 0;
     z-index: 3;
     display: grid;
-    align-content: center;
+    align-content: end;
     justify-items: start;
-    padding: clamp(24px, 5vw, 64px);
+    padding: clamp(24px, 5vw, 64px) var(--gutter);
     background: var(--noite);
     color: var(--claro);
     overflow: hidden;
   }
-  .sim__mosaico {
+  .sim__poster,
+  .sim__poster :global(picture),
+  .sim__poster :global(img) {
     position: absolute;
     inset: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    opacity: 0.55;
+    width: 100%;
+    height: 100%;
   }
-  .sim__mosaico span {
-    background: var(--tom) var(--img) center / 140px;
-    background-blend-mode: multiply;
+  .sim__poster :global(img) {
+    object-fit: cover;
   }
-  .sim__mosaico::after {
+  .sim__poster::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgb(12 19 38 / 0.94) 0%, rgb(12 19 38 / 0.72) 55%, rgb(12 19 38 / 0.35));
+    background: linear-gradient(90deg, rgb(13 15 20 / 0.78) 0%, rgb(13 15 20 / 0.42) 30%, rgb(13 15 20 / 0) 54%);
   }
   .sim__capa-texto,
   .sim__erro {
@@ -471,44 +485,55 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
     display: grid;
     justify-items: start;
     gap: 16px;
-    max-width: 30em;
+    max-width: 26em;
+  }
+  .sim__capa-selo {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
   .sim__capa-titulo {
-    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem);
-    font-weight: 330;
-    letter-spacing: -0.025em;
-    line-height: 1.1;
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
+    letter-spacing: -0.018em;
+    line-height: 1.06;
   }
   .sim__capa-sub {
-    color: var(--aluminio);
+    font-size: var(--fs-lead);
+    line-height: 1.45;
+    color: var(--claro);
   }
   .sim__capa-nota {
-    font-size: 0.75rem;
-    color: var(--aluminio);
+    font-size: 0.8125rem;
+    color: rgb(246 243 237 / 0.86);
   }
   .sim[data-estado='erro'] .sim__capa-texto,
   .sim__erro[hidden] {
     display: none;
   }
-  .sim[data-estado='pronto'] .sim__capa,
-  .sim[data-estado='carregando'] .sim__capa {
+  .sim[data-estado='carregando'] .sim__capa-texto {
+    visibility: hidden;
+  }
+  .sim[data-estado='pronto'] .sim__capa {
     opacity: 0;
     visibility: hidden;
     transition:
-      opacity 500ms var(--ease-out),
-      visibility 0s 500ms;
+      opacity 700ms var(--ease-out),
+      visibility 0s 700ms;
   }
 
   .sim__carga {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 4;
     display: none;
     place-content: center;
     justify-items: center;
     gap: 14px;
     font-size: 0.875rem;
-    color: var(--tinta-2);
+    color: var(--claro);
+    background: rgb(13 15 20 / 0.3);
   }
   .sim[data-estado='carregando'] .sim__carga {
     display: grid;
@@ -516,7 +541,7 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
   .sim__carga span {
     width: 120px;
     height: 2px;
-    background: linear-gradient(90deg, var(--tinta) 0 40%, var(--linha) 40%);
+    background: linear-gradient(90deg, var(--luz) 0 40%, var(--linha-clara) 40%);
     background-size: 200% 100%;
     animation: carga 1.1s linear infinite;
   }
@@ -1138,13 +1163,32 @@ const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], ma
   :global(html.simulador-aberto main) {
     z-index: 60;
   }
+  @media (hover: none) {
+    .sim__so-mouse {
+      display: none;
+    }
+  }
+  /* dentro do <main>, a seção do simulador também sobe: a de contato vem depois, com o mesmo z-index */
+  :global(html.simulador-aberto) .simulador {
+    z-index: 80;
+  }
 
   /* ---------- celular e tablet: capa no fluxo; aberto vira tela inteira com painel embaixo ---------- */
   @media (max-width: 1023px) {
     .sim {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: minmax(0, 1fr);
-      height: min(78svh, 620px);
+      height: min(100svh, 130vw);
+      min-height: 480px;
+    }
+    .sim__poster :global(img) {
+      object-position: 62% 50%;
+    }
+    .sim__poster::after {
+      background: linear-gradient(0deg, rgb(13 15 20 / 0.82) 0%, rgb(13 15 20 / 0.5) 42%, rgb(13 15 20 / 0) 72%);
+    }
+    .sim__capa {
+      align-content: end;
     }
     .sim:not(.is-sobreposto) .sim__painel {
       display: none;

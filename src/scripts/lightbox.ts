@@ -71,6 +71,7 @@ export function iniciarLightbox(lenis: Lenis | null) {
       .filter((b) => b.dataset.lightboxGrupo === grupo && !b.closest('[hidden]'))
       .map((b) => Number(b.dataset.lightboxAbrir));
     navegacao.forEach((b) => (b.hidden = sequencia.length < 2));
+    img.loading = 'eager';
     mostrar(Math.max(0, sequencia.indexOf(Number(origem.dataset.lightboxAbrir))));
     lenis?.stop();
     dialogo.showModal();
@@ -92,7 +93,7 @@ export function iniciarLightbox(lenis: Lenis | null) {
         ],
         { duration: 760, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
       );
-      dialogo.animate([{ backgroundColor: 'rgb(12 19 38 / 0)' }, { backgroundColor: 'rgb(12 19 38 / 0.97)' }], {
+      dialogo.animate([{ backgroundColor: 'rgb(13 15 20 / 0)' }, { backgroundColor: 'rgb(13 15 20 / 0.97)' }], {
         duration: 500,
         easing: 'ease-out',
       });

@@ -4,24 +4,28 @@ import Icone from './Icone.astro';
 import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/empresa';
 ---
 
-<header class="topo" data-topo>
-  <div class="container topo__barra">
+<!-- O cabeçalho acompanha a seção que está por baixo (data-tema): sobre foto e fundo escuro usa o selo
+     e texto claro; sobre fundo claro usa a logo em linha e texto escuro. -->
+<header class="topo" data-topo data-sobre="escuro" data-no-topo>
+  <div class="topo__barra">
     <a href="#inicio" class="topo__logo" aria-label="Nova Era Móveis Planejados, voltar ao início">
-      <Logo />
+      <span class="topo__selo"><Logo versao="selo" imediato /></span>
+      <span class="topo__miolo"><Logo imediato /></span>
     </a>
 
     <nav class="topo__nav" aria-label="Principal">
       <ul>
         {navegacao.map((item) => (
           <li>
-            <a href={item.href} data-nav>{item.rotulo}</a>
+            <a href={item.href} data-nav><span>{item.rotulo}</span></a>
           </li>
         ))}
       </ul>
     </nav>
 
-    <a class="botao topo__cta" href="#contato" data-magnetico>
+    <a class="topo__cta" href="#contato">
       Orçamento
+      <Icone nome="seta-diagonal" />
     </a>
 
     <button class="topo__menu" type="button" aria-expanded="false" aria-controls="menu-movel" data-menu-abrir>
@@ -31,28 +35,25 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
   </div>
 </header>
 
-<div id="menu-movel" class="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden data-menu>
-  <div class="menu__topo container">
-    <Logo />
+<div id="menu-movel" class="menu escuro" role="dialog" aria-modal="true" aria-label="Menu" hidden data-menu>
+  <div class="menu__topo">
+    <span class="menu__selo"><Logo versao="selo" /></span>
     <button class="menu__fechar" type="button" data-menu-fechar>
       <span>Fechar</span>
       <Icone nome="fechar" />
     </button>
   </div>
-  <nav class="menu__nav container" aria-label="Menu principal">
+  <nav class="menu__nav" aria-label="Menu principal">
     <ul>
-      {navegacao.map((item) => (
+      {[{ href: '#nova-era', rotulo: 'A Nova Era' }, ...navegacao, { href: '#contato', rotulo: 'Contato' }].map((item) => (
         <li data-menu-item>
-          <a href={item.href} data-menu-link>
-            {item.rotulo}
-            <Icone nome="seta" />
-          </a>
+          <a href={item.href} data-menu-link>{item.rotulo}</a>
         </li>
       ))}
     </ul>
   </nav>
-  <div class="menu__rodape container" data-menu-item>
-    <a class="botao" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
+  <div class="menu__rodape" data-menu-item>
+    <a class="botao botao--luz" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
       <Icone nome="whatsapp" />
       Orçamento pelo WhatsApp
     </a>
@@ -65,73 +66,148 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
 
 <style>
   .topo {
+    --fg: var(--claro);
+    --fg-2: rgb(246 243 237 / 0.78);
+    --fundo: rgb(13 15 20 / 0.9);
     position: fixed;
     inset: 0 0 auto;
     z-index: 50;
     height: var(--header-h);
-    background: var(--gesso);
+    color: var(--fg);
     transition:
-      box-shadow var(--t-ui) var(--ease-out),
-      transform 600ms var(--ease-out);
+      transform 620ms var(--ease-out),
+      color var(--t-ui) var(--ease-out);
   }
-  .topo.is-rolado {
-    box-shadow: 0 1px 0 var(--linha);
+  .topo[data-sobre='claro'] {
+    --fg: var(--tinta);
+    --fg-2: var(--tinta-2);
+    --fundo: var(--gesso);
+  }
+  /* o fundo é uma camada à parte: aparece sem pintar a barra inteira de novo */
+  .topo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--fundo);
+    opacity: 1;
+    box-shadow: 0 1px 0 rgb(128 128 128 / 0.14);
+    transition:
+      opacity var(--t-ui) var(--ease-out),
+      background-color var(--t-ui) var(--ease-out);
+  }
+  .topo[data-no-topo]::before {
+    opacity: 0;
   }
   .topo.is-oculto {
-    transform: translateY(-100%);
+    transform: translateY(-101%);
   }
 
   .topo__barra {
+    position: relative;
     height: 100%;
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: clamp(20px, 3vw, 48px);
+    padding-inline: var(--gutter);
   }
   .topo__logo {
-    display: inline-flex;
+    position: relative;
+    display: block;
+    width: 64px;
+    height: 64px;
     margin-right: auto;
-    /* a logo é multiplicada sobre este fundo */
-    background: var(--gesso);
+  }
+  .topo__selo,
+  .topo__miolo {
+    position: absolute;
+    left: 0;
+    transition: opacity var(--t-ui) var(--ease-out);
+  }
+  .topo__selo {
+    top: 50%;
+    width: 64px;
+    transform: translateY(-50%);
+  }
+  /* centrado sem transform: um transform aqui isolaria a logo, e o "multiply" dela não alcançaria o fundo da barra */
+  .topo__miolo {
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .topo[data-sobre='claro'] .topo__selo {
+    opacity: 0;
+  }
+  .topo[data-sobre='claro'] .topo__miolo {
+    opacity: 1;
   }
 
   .topo__nav ul {
     display: flex;
-    gap: clamp(22px, 2.6vw, 44px);
+    gap: clamp(20px, 2.6vw, 44px);
   }
   .topo__nav a {
     position: relative;
     display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding-block: 10px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--tinta-2);
+    padding-block: 12px;
+    font-size: 0.9375rem;
+    letter-spacing: 0.01em;
+    color: var(--fg-2);
     transition: color var(--t-micro) var(--ease-out);
   }
-  /* item ativo: o ponto vermelho da logo */
-  .topo__nav a::before {
+  /* item ativo e passagem do mouse: uma linha de luz que se acende sob o texto */
+  .topo__nav a::after {
     content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--ponto);
-    transform: scale(0);
-    transition: transform var(--t-ui) var(--ease-out);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 480ms var(--ease-out);
   }
   .topo__nav a:hover,
   .topo__nav a.is-ativo {
-    color: var(--tinta);
+    color: var(--fg);
   }
-  .topo__nav a.is-ativo::before {
-    transform: scale(1);
+  .topo__nav a:hover::after,
+  .topo__nav a.is-ativo::after {
+    transform: scaleX(1);
   }
 
   .topo__cta {
-    min-height: 46px;
-    padding-inline: 24px;
-    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding-inline: 18px 14px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 34%, transparent);
+    transition:
+      background-color var(--t-micro) var(--ease-out),
+      color var(--t-micro) var(--ease-out);
+  }
+  .topo__cta :global(svg) {
+    width: 16px;
+    height: 16px;
+    transition: transform var(--t-ui) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .topo__cta:hover {
+      background: var(--fg);
+      color: var(--noite);
+    }
+    .topo[data-sobre='claro'] .topo__cta:hover {
+      color: var(--claro);
+    }
+    .topo__cta:hover :global(svg) {
+      transform: translate(2px, -2px);
+    }
   }
 
   .topo__menu {
@@ -141,7 +217,7 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
     min-height: 44px;
     padding-inline: 4px;
     font-size: 0.8125rem;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
@@ -169,6 +245,15 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
       display: inline-flex;
     }
   }
+  @media (max-width: 767px) {
+    .topo__logo,
+    .topo__selo {
+      width: 52px;
+    }
+    .topo__logo {
+      height: 52px;
+    }
+  }
 
   /* ---------- menu do celular ---------- */
   .menu {
@@ -179,7 +264,7 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
     flex-direction: column;
     overflow-y: auto;
     overscroll-behavior: contain;
-    background: var(--gesso);
+    padding-inline: var(--gutter);
     clip-path: inset(0 0 0 0);
   }
   .menu[hidden] {
@@ -191,13 +276,17 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
     justify-content: space-between;
     min-height: var(--header-h);
   }
+  .menu__selo {
+    display: block;
+    width: 52px;
+  }
   .menu__fechar {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     min-height: 44px;
     font-size: 0.8125rem;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
@@ -209,32 +298,20 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
     flex: 1;
     display: flex;
     align-items: center;
-    padding-block: 32px;
+    padding-block: 24px;
   }
   .menu__nav ul {
     width: 100%;
-  }
-  .menu__nav li {
-    border-top: 1px solid var(--linha);
-  }
-  .menu__nav li:last-child {
-    border-bottom: 1px solid var(--linha);
+    display: grid;
+    gap: 2px;
   }
   .menu__nav a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    padding-block: 16px;
-    font-size: clamp(1.9rem, 1.4rem + 2.6vw, 2.8rem);
-    font-weight: 330;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-  }
-  .menu__nav a :global(svg) {
-    width: 22px;
-    height: 22px;
-    color: var(--tinta-2);
+    display: block;
+    padding-block: 8px;
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 1.6rem + 6vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
   }
   .menu__rodape {
     display: grid;
@@ -246,12 +323,12 @@ import { empresa, enderecoCompleto, mensagemPadrao, navegacao } from '../data/em
   }
   .menu__rodape p {
     font-size: 0.875rem;
-    color: var(--tinta-2);
+    color: var(--aluminio);
   }
   .menu__rodape p a {
     display: inline-block;
     padding-block: 6px;
-    font-weight: 550;
-    color: var(--tinta);
+    font-size: 1rem;
+    color: var(--claro);
   }
 </style>

@@ -7,16 +7,13 @@ import { categorias } from '../data/projetos';
 const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
 ---
 
-<section class="contato secao" id="contato" aria-labelledby="contato-titulo">
-  <div class="container grade cabeca">
-    <p class="rotulo" data-revelar="fade">Orçamento e contato</p>
-    <h2 id="contato-titulo" class="titulo" data-revelar="linhas">
-      Conte qual espaço <strong>você quer planejar.</strong>
-    </h2>
-  </div>
-
+<section class="contato secao" id="contato" aria-labelledby="contato-titulo" data-tema="claro">
   <div class="container grade contato__grade">
     <div class="contato__info">
+      <p class="rotulo" data-revelar="fade">Orçamento</p>
+      <h2 id="contato-titulo" class="titulo" data-revelar="linhas">
+        Conte qual espaço <em>você quer planejar.</em>
+      </h2>
       <p class="lead" data-revelar="fade">
         Preencha o formulário e a mensagem abre pronta no WhatsApp da {empresa.nomeCurto}. Se preferir, fale direto
         pelos canais abaixo.
@@ -115,7 +112,7 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
       </div>
     </form>
 
-    <div class="mapa" data-mapa data-revelar="fade">
+    <div class="mapa escuro" data-mapa data-revelar="fade">
       <div class="mapa__capa" data-mapa-capa>
         <svg class="mapa__desenho" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <g stroke="currentColor" stroke-width="1" fill="none">
@@ -145,15 +142,19 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
 </section>
 
 <style>
+  .contato {
+    position: relative;
+    z-index: 2;
+    background: var(--gesso);
+  }
   .contato__grade {
-    margin-top: clamp(48px, 6vw, 96px);
     row-gap: clamp(48px, 6vw, 96px);
     align-items: start;
   }
   .contato__info {
-    grid-column: 1 / span 5;
+    grid-column: 1 / span 6;
     display: grid;
-    gap: 36px;
+    gap: 28px;
   }
 
   .canais {
@@ -167,7 +168,7 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
   }
   .canal dt {
     font-size: 0.6875rem;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--tinta-2);
@@ -192,12 +193,10 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
 
   /* ---------- formulário ---------- */
   .formulario {
-    grid-column: 7 / span 6;
+    grid-column: 8 / -1;
     display: grid;
     gap: 30px;
-    padding: clamp(28px, 3.6vw, 56px);
-    background: var(--branco);
-    box-shadow: 0 0 0 1px var(--linha);
+    padding-top: clamp(0px, 3vw, 56px);
   }
   .campo {
     display: grid;
@@ -210,9 +209,9 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
   .campo label,
   .campo legend {
     padding: 0;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
   }
   .campo legend {
     margin-bottom: 10px;
@@ -245,8 +244,8 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
   .campo input[type='text']:focus,
   .campo textarea:focus {
     outline: none;
-    border-bottom-color: var(--marinho);
-    box-shadow: 0 1px 0 0 var(--marinho);
+    border-bottom-color: var(--tinta);
+    box-shadow: 0 1px 0 0 var(--tinta);
   }
   .campo [aria-invalid='true'] {
     border-bottom-color: var(--ponto);
@@ -351,7 +350,7 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
     height: 100%;
     color: rgb(170 176 189 / 0.22);
   }
-  /* marcador: o ponto vermelho da logo, com anel */
+  /* marcador: um ponto de luz, com anel */
   .mapa__marcador {
     position: absolute;
     left: 58%;
@@ -360,10 +359,10 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
     height: 14px;
     margin: -7px 0 0 -7px;
     border-radius: 50%;
-    background: var(--ponto);
+    background: var(--luz);
     box-shadow:
-      0 0 0 8px rgb(200 22 29 / 0.18),
-      0 0 0 20px rgb(200 22 29 / 0.08);
+      0 0 0 8px rgb(239 197 142 / 0.18),
+      0 0 0 20px rgb(239 197 142 / 0.08);
   }
   .mapa__texto {
     position: relative;
@@ -398,10 +397,6 @@ const opcoes = [...categorias.map((c) => c.nome), 'Outro ambiente'];
     }
   }
   @media (max-width: 599px) {
-    .formulario {
-      margin-inline: calc(var(--gutter) * -1);
-      padding-inline: var(--gutter);
-    }
     .formulario__envio .botao,
     .mapa__botoes .botao {
       width: 100%;

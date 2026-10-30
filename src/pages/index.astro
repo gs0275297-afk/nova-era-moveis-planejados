@@ -5,6 +5,7 @@ import Hero from '../components/Hero.astro';
 import Sobre from '../components/Sobre.astro';
 import Projetos from '../components/Projetos.astro';
 import Galeria from '../components/Galeria.astro';
+import Panorama from '../components/Panorama.astro';
 import Detalhes from '../components/Detalhes.astro';
 import Simulador from '../components/Simulador.astro';
 import Contato from '../components/Contato.astro';
@@ -23,6 +24,7 @@ import Lightbox from '../components/Lightbox.astro';
     <Sobre />
     <Projetos />
     <Galeria />
+    <Panorama />
     <Detalhes />
     <Simulador />
     <Contato />
@@ -54,15 +56,15 @@ import Lightbox from '../components/Lightbox.astro';
   .cursor span {
     display: grid;
     place-items: center;
-    width: 88px;
-    height: 88px;
-    margin: -44px 0 0 -44px;
+    width: 84px;
+    height: 84px;
+    margin: -42px 0 0 -42px;
     border-radius: 50%;
-    background: var(--tinta);
-    color: var(--claro);
+    background: var(--luz);
+    color: var(--tinta);
     font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     transform: scale(0);
     transition: transform 420ms var(--ease-out);

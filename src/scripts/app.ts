@@ -5,7 +5,7 @@ import { iniciarFormulario } from './formulario';
 import { iniciarGaleria } from './galeria';
 import { iniciarDetalhes } from './detalhes';
 import { iniciarSimulador } from './simulador';
-import { iniciarBarraMovel, iniciarCabecalho, iniciarMapa, iniciarMenu, iniciarVideos } from './interface';
+import { iniciarBarraMovel, iniciarCabecalho, iniciarMapa, iniciarMenu, iniciarOpcaoMovimento, iniciarVideos } from './interface';
 import { $, movimentoReduzido } from './util';
 
 const raiz = document.documentElement;
@@ -24,7 +24,7 @@ try {
 function navegar(hash: string) {
   const alvo = $(hash);
   if (!alvo) return;
-  if (lenis) lenis.scrollTo(alvo, { duration: 1.3, offset: hash === '#inicio' ? -200 : 0 });
+  if (lenis) lenis.scrollTo(alvo, { duration: 1.4 });
   else alvo.scrollIntoView({ behavior: movimentoReduzido() ? 'auto' : 'smooth' });
   history.replaceState(null, '', hash === '#inicio' ? location.pathname : hash);
 }
@@ -54,5 +54,6 @@ iniciarGaleria();
 iniciarDetalhes();
 iniciarSimulador(lenis);
 iniciarBarraMovel();
+iniciarOpcaoMovimento();
 
 raiz.classList.add('motion-ok');

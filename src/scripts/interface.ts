@@ -1,7 +1,7 @@
 import type Lenis from 'lenis';
 import { $, $$, aoTerminar, desktop, movimentoReduzido, observar } from './util';
 
-/* ---------- Cabeçalho: filete ao rolar, some ao descer, item ativo ---------- */
+/* ---------- Cabeçalho: acompanha o tema da seção por baixo, some ao descer, item ativo ---------- */
 export function iniciarCabecalho(estado: { menuAberto: boolean }) {
   const topo = $('[data-topo]');
   if (!topo) return;
@@ -11,7 +11,7 @@ export function iniciarCabecalho(estado: { menuAberto: boolean }) {
   const atualizar = () => {
     agendado = false;
     const y = window.scrollY;
-    topo.classList.toggle('is-rolado', y > 24);
+    topo.toggleAttribute('data-no-topo', y < 40);
     const descendo = y > ultimo + 4;
     const subindo = y < ultimo - 4;
     if (descendo && y > window.innerHeight * 0.8 && !estado.menuAberto) topo.classList.add('is-oculto');
@@ -29,6 +29,17 @@ export function iniciarCabecalho(estado: { menuAberto: boolean }) {
     { passive: true },
   );
   atualizar();
+
+  // Tema: claro ou escuro, conforme a seção que está passando por baixo da barra.
+  const temas = observar(
+    (entradas) => {
+      entradas.forEach((ent) => {
+        if (ent.isIntersecting) topo.dataset.sobre = (ent.target as HTMLElement).dataset.tema ?? 'escuro';
+      });
+    },
+    { rootMargin: '-2% 0px -97% 0px' },
+  );
+  $$('[data-tema]').forEach((s) => temas.observe(s));
 
   // Destaque do item de navegação da seção visível.
   const links = $$<HTMLAnchorElement>('[data-nav]');
@@ -137,7 +148,7 @@ export function iniciarMenu(lenis: Lenis | null, estado: { menuAberto: boolean }
 /* ---------- Barra de orçamento fixa no celular ---------- */
 export function iniciarBarraMovel() {
   const barra = $('[data-barra-movel]');
-  const hero = $('.hero');
+  const hero = $('[data-hero]');
   const ocultar = [$('#contato'), $('.rodape')].filter((el): el is HTMLElement => !!el);
   if (!barra || !hero) return;
 
@@ -149,6 +160,7 @@ export function iniciarBarraMovel() {
     barra.inert = !mostrar;
   };
   observar(([ent]) => {
+    // a abertura é mais alta que a tela: a barra entra quando a apresentação já cobriu a foto
     passouHero = !ent.isIntersecting && ent.boundingClientRect.top < 0;
     aplicar();
   }).observe(hero);
@@ -176,6 +188,17 @@ export function iniciarVideos() {
         botao.setAttribute('aria-label', `${pausado ? 'Reproduzir' : 'Pausar'} vídeo: ${titulo}`);
       }
     };
+    // o pôster só é baixado quando o vídeo se aproxima da tela
+    const pedirPoster = observar(
+      ([ent]) => {
+        if (!ent.isIntersecting || !video.dataset.poster) return;
+        video.poster = video.dataset.poster;
+        pedirPoster.disconnect();
+      },
+      { rootMargin: '600px 0px' },
+    );
+    pedirPoster.observe(video);
+
     const liberado = () => !desktop() || !!item?.classList.contains('is-ativo');
     const avaliar = () => {
       if (visivel && liberado() && !pausadoPeloUsuario && !document.hidden) video.play().catch(() => marcar());
@@ -220,5 +243,25 @@ export function iniciarMapa() {
     mapa.prepend(iframe);
     capa.remove();
     iframe.focus();
+  });
+}
+
+/* ---------- Opção de movimento: para quem tem "menos movimento" ligado no sistema ---------- */
+export function iniciarOpcaoMovimento() {
+  const botao = $<HTMLButtonElement>('[data-movimento]');
+  const raiz = document.documentElement;
+  if (!botao || !raiz.classList.contains('sistema-reduzido')) return;
+  const reduzido = raiz.classList.contains('reduzido');
+  botao.hidden = false;
+  botao.textContent = reduzido ? 'Seu sistema pede menos movimento. Ativar as animações neste site' : 'Voltar a reduzir as animações';
+  botao.addEventListener('click', () => {
+    try {
+      if (reduzido) localStorage.setItem('novaera-movimento', 'completo');
+      else localStorage.removeItem('novaera-movimento');
+    } catch {
+      return;
+    }
+    window.scrollTo(0, 0);
+    location.reload();
   });
 }

@@ -1,18 +1,20 @@
 import type Lenis from 'lenis';
 import type { Configurador } from './configurador/index';
-import { $, movimentoReduzido, observar } from './util';
+import { $, movimentoReduzido } from './util';
 
 /**
  * Carregador do simulador 3D. Fica no pacote principal e é leve: o three.js e a cena só são
- * baixados quando o simulador vai ser usado.
- * - computador: quando a seção se aproxima da tela;
- * - celular e tablet: quando a pessoa toca em "Abrir simulador" (abre em tela inteira);
- * - link compartilhado (#simulador=...): logo ao abrir a página.
+ * baixados por intenção do visitante.
+ * - até lá, a seção mostra só uma imagem da própria cena (capa);
+ * - apontar para o botão já adianta o download do código, para a abertura parecer imediata;
+ * - computador: a cena abre no lugar da capa. Celular e tablet: abre em tela inteira;
+ * - link compartilhado (#simulador=...): carrega logo ao abrir a página.
  */
 export function iniciarSimulador(lenis: Lenis | null) {
   const raiz = $('[data-sim]');
   if (!raiz) return;
   const grande = () => window.matchMedia('(min-width: 1024px)').matches;
+  const moldura = raiz.closest('section') ?? raiz;
   let carregando: Promise<Configurador | null> | null = null;
 
   const carregar = () =>
@@ -33,39 +35,32 @@ export function iniciarSimulador(lenis: Lenis | null) {
       }));
 
   const abrir = async () => {
+    if (grande()) {
+      // no computador, a cena ocupa a tela: traz a moldura inteira para a vista
+      if (lenis) lenis.scrollTo(raiz, { duration: 0.9 });
+      else raiz.scrollIntoView({ behavior: movimentoReduzido() ? 'auto' : 'smooth' });
+    }
     const c = await carregar();
     if (c && !grande()) {
       c.motor.suspender(false);
       c.abrirSobreposto();
     }
   };
-  $('[data-sim-abrir]', raiz)?.addEventListener('click', abrir);
+
+  const botao = $('[data-sim-abrir]', raiz);
+  botao?.addEventListener('click', abrir);
+  // Adianta só o código (a cena continua esperando o clique): apontar é quase sempre o prelúdio do clique.
+  const adiantar = () => void import('./configurador/index').catch(() => undefined);
+  botao?.addEventListener('pointerenter', adiantar, { once: true });
+  botao?.addEventListener('focus', adiantar, { once: true });
+
   raiz.addEventListener('simulador:fechado', () => {
     if (!grande()) carregando?.then((c) => c?.motor.suspender(true));
   });
 
   if (location.hash.startsWith('#simulador=')) {
-    const secao = raiz.closest('section');
-    if (secao) lenis ? lenis.scrollTo(secao, { immediate: true }) : secao.scrollIntoView();
+    if (lenis) lenis.scrollTo(moldura, { immediate: true });
+    else moldura.scrollIntoView();
     if (grande()) carregar();
-    return;
   }
-
-  // No computador, começa a carregar quando a seção se aproxima (também se a janela crescer depois).
-  let vigiando = false;
-  const vigiar = () => {
-    if (vigiando || !grande()) return;
-    vigiando = true;
-    const obs = observar(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        obs.disconnect();
-        carregar();
-      },
-      { rootMargin: '700px 0px' },
-    );
-    obs.observe(raiz);
-  };
-  vigiar();
-  window.matchMedia('(min-width: 1024px)').addEventListener('change', vigiar);
 }

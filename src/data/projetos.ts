@@ -1,6 +1,9 @@
 import type { ImageMetadata } from 'astro';
 
-import aberturaJantarForro from '../assets/fotos/abertura-jantar-forro.jpg';
+import aberturaAmpliada from '../assets/fotos/abertura-ampliada.jpg';
+import jantarAdegaAmpla from '../assets/fotos/jantar-adega-ampla.jpg';
+import panoramaPainel from '../assets/fotos/panorama-painel.jpg';
+import cozinhaUInox from '../assets/fotos/cozinha-u-inox.jpg';
 import livingPeDireitoDuplo from '../assets/fotos/living-pe-direito-duplo.jpg';
 import aparadorCurvo from '../assets/fotos/aparador-curvo.jpg';
 import jantarAdega from '../assets/fotos/jantar-adega.jpg';
@@ -41,7 +44,7 @@ export interface Foto {
 }
 
 export const abertura: Foto = {
-  src: aberturaJantarForro,
+  src: aberturaAmpliada,
   alt: 'Sala de jantar com paredes em painéis ripados de madeira, forro amadeirado com linhas de luz e mesa para oito lugares',
   legenda: 'Sala de jantar com painéis ripados e iluminação linear',
   foco: '50% 40%',
@@ -53,6 +56,8 @@ export interface Projeto {
   ambiente: string;
   destaques: string[];
   fotos: [Foto, Foto];
+  /** recorte de borda a borda da primeira foto, quando o capítulo usa tela cheia */
+  ampla?: ImageMetadata;
 }
 
 // Projetos em destaque: pares de fotos do mesmo espaço.
@@ -82,6 +87,7 @@ export const projetos: Projeto[] = [
     titulo: 'Sala de jantar com adega',
     ambiente: 'Jantar e adega',
     destaques: ['Paredes em painéis ripados', 'Nichos e prateleiras iluminados', 'Adega integrada ao ambiente'],
+    ampla: jantarAdegaAmpla,
     fotos: [
       {
         src: jantarAdega,
@@ -131,30 +137,26 @@ export const categorias: { id: Categoria; nome: string }[] = [
 
 export interface FotoGaleria extends Foto {
   categoria: Categoria;
-  /** formato da miniatura na grade: destaque ocupa 2x2 células, paisagem 2x1, retrato 1x1 */
-  formato: 'retrato' | 'paisagem' | 'destaque';
 }
 
 // Galeria por ambiente (fotos que não estão nos projetos em destaque).
 export const galeria: FotoGaleria[] = [
   {
     categoria: 'cozinhas',
-    formato: 'destaque',
     src: cozinhaArmarioVidro,
     alt: 'Cozinha com torre de armários de portas de vidro escuro, painel em madeira e bancada com cooktop',
     legenda: 'Torre de armários com portas de vidro',
     foco: '50% 40%',
   },
   {
-    categoria: 'salas',
-    formato: 'paisagem',
-    src: salaPainelMarmore,
-    alt: 'Painel de TV em placas marmorizadas com frisos dourados, ripado nas laterais e rack suspenso claro',
-    legenda: 'Painel de TV com ripado e frisos dourados',
+    categoria: 'cozinhas',
+    src: cozinhaUInox,
+    alt: 'Cozinha em U com armários lisos em tom areia até o teto, fogão, janela sobre a cuba, geladeira de inox e iluminação sob os superiores',
+    legenda: 'Cozinha em U com armários até o teto',
+    foco: '50% 45%',
   },
   {
     categoria: 'dormitorios',
-    formato: 'destaque',
     src: dormitorioCabeceiraPainel,
     alt: 'Dormitório com painel de cabeceira cinza, espelhos redondos com iluminação e guarda-roupa de portas lisas',
     legenda: 'Painel de cabeceira com espelhos iluminados',
@@ -162,7 +164,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'bar',
-    formato: 'retrato',
     src: barPrateleirasLed,
     alt: 'Bar com prateleiras iluminadas sobre parede escura e balcão inferior em madeira com iluminação no rodapé',
     legenda: 'Bar com prateleiras iluminadas',
@@ -170,7 +171,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'cozinhas',
-    formato: 'retrato',
     src: cozinhaAereosMadeira,
     alt: 'Cozinha com armários superiores em madeira, inferiores claros, forno embutido e revestimento preto',
     legenda: 'Armários superiores em madeira',
@@ -178,7 +178,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'salas',
-    formato: 'destaque',
     src: salaIntegradaEscada,
     alt: 'Sala integrada com paredes revestidas em painéis de madeira, prateleira alta, rack suspenso e escada caracol ao fundo',
     legenda: 'Sala com paredes em painéis de madeira',
@@ -186,7 +185,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'banho-hall',
-    formato: 'retrato',
     src: banheiroBancadaEspelheira,
     alt: 'Banheiro com bancada dupla, gabinete suspenso claro e espelheira com portas espelhadas',
     legenda: 'Gabinete suspenso e espelheira',
@@ -194,14 +192,12 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'dormitorios',
-    formato: 'paisagem',
     src: dormitorioCabeceiraEstofada,
     alt: 'Dormitório com cabeceira estofada em gomos, painel marmorizado com frisos dourados e ripado nas laterais',
     legenda: 'Cabeceira estofada e painel marmorizado',
   },
   {
     categoria: 'cozinhas',
-    formato: 'retrato',
     src: cozinhaGourmetIntegrada,
     alt: 'Cozinha integrada com armários escuros, churrasqueira embutida, bancada com banquetas e TV na parede em madeira',
     legenda: 'Cozinha integrada ao estar',
@@ -209,7 +205,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'bar',
-    formato: 'destaque',
     src: barNichosIluminados,
     alt: 'Móvel de bar com nichos iluminados, prateleiras de vidro e adega embutida ao lado do painel de TV',
     legenda: 'Bar com nichos iluminados ao lado da TV',
@@ -217,7 +212,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'salas',
-    formato: 'retrato',
     src: salaRackPrateleiras,
     alt: 'Rack suspenso em madeira com prateleiras flutuantes e plantas sobre parede azul',
     legenda: 'Rack e prateleiras flutuantes',
@@ -225,7 +219,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'dormitorios',
-    formato: 'retrato',
     src: dormitorioArmarioTv,
     alt: 'Guarda-roupa de portas lisas com nicho para TV, gaveteiro e prateleiras laterais',
     legenda: 'Guarda-roupa com nicho para TV',
@@ -233,7 +226,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'banho-hall',
-    formato: 'destaque',
     src: hallRipadoEspelho,
     alt: 'Hall com parede ripada em madeira, espelho redondo com moldura de madeira e aparador suspenso com iluminação embaixo',
     legenda: 'Hall com ripado e espelho redondo',
@@ -241,7 +233,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'cozinhas',
-    formato: 'retrato',
     src: cozinhaIlhaLed,
     alt: 'Ilha de cozinha escura com cooktop, frente com frisos verticais e iluminação no rodapé',
     legenda: 'Ilha com iluminação no rodapé',
@@ -249,7 +240,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'salas',
-    formato: 'retrato',
     src: salaPainelMadeira,
     alt: 'Sala com paredes em painéis de madeira, prateleira superior, rack suspenso cinza e mesa de centro em madeira',
     legenda: 'Painel de madeira com rack suspenso',
@@ -257,14 +247,12 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'dormitorios',
-    formato: 'paisagem',
     src: dormitorioPainelTv,
     alt: 'Dormitório com painel de TV marmorizado com frisos dourados, penteadeira e cômoda clara',
     legenda: 'Painel de TV e penteadeira no dormitório',
   },
   {
     categoria: 'salas',
-    formato: 'retrato',
     src: livingAparadorQuadro,
     alt: 'Aparador baixo em madeira com portas sob um quadro grande, em sala de parede clara com boiserie',
     legenda: 'Aparador em madeira na sala',
@@ -272,7 +260,6 @@ export const galeria: FotoGaleria[] = [
   },
   {
     categoria: 'dormitorios',
-    formato: 'retrato',
     src: dormitorioEscrivaninha,
     alt: 'Escrivaninha com estante de nichos, espelho com iluminação e gaveteiro em madeira e cinza',
     legenda: 'Escrivaninha com estante e espelho iluminado',
@@ -280,9 +267,27 @@ export const galeria: FotoGaleria[] = [
   },
 ];
 
-// Lista única do visualizador ampliado: projetos em destaque e, depois, a galeria.
+// Foto de borda a borda entre a galeria e os detalhes.
+export const panorama: Foto & { tela: ImageMetadata } = {
+  src: salaPainelMarmore,
+  tela: panoramaPainel,
+  alt: 'Painel de TV em placas marmorizadas com frisos dourados, ripado nas laterais, rack suspenso claro e vaso com bambu',
+  legenda: 'Painel de TV com ripado, placa marmorizada e frisos dourados',
+};
+
+// Índice de ambientes da apresentação: leva à galeria já filtrada.
+export const previas: Record<Categoria, { src: ImageMetadata; alt: string }> = {
+  cozinhas: { src: cozinhaUInox, alt: 'Cozinha em U com armários em tom areia' },
+  salas: { src: salaIntegradaEscada, alt: 'Sala com paredes em painéis de madeira' },
+  dormitorios: { src: dormitorioCabeceiraPainel, alt: 'Dormitório com painel de cabeceira e espelhos iluminados' },
+  bar: { src: barPrateleirasLed, alt: 'Bar com prateleiras iluminadas' },
+  'banho-hall': { src: hallRipadoEspelho, alt: 'Hall com parede ripada e espelho redondo' },
+};
+
+// Lista única do visualizador ampliado: projetos em destaque, panorama e, depois, a galeria.
 export const fotosAmpliaveis = [
-  ...projetos.flatMap((p) => p.fotos.map((foto) => ({ foto, ambiente: p.titulo }))),
+  ...projetos.flatMap((p) => p.fotos.map((foto) => ({ foto: foto as Foto, ambiente: p.titulo }))),
+  { foto: panorama as Foto, ambiente: 'Salas e painéis' },
   ...galeria.map((foto) => ({ foto, ambiente: categorias.find((c) => c.id === foto.categoria)?.nome ?? '' })),
 ];
 export const indiceDe = (foto: Foto) => fotosAmpliaveis.findIndex((item) => item.foto === foto);

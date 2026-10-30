@@ -1,20 +1,23 @@
 """Prepara as fotos reais da Nova Era para o site.
 
 Le os originais em "fotos e videos/" (nunca altera esses arquivos) e grava em
-src/assets/fotos/ copias com nomes descritivos. O Astro gera AVIF/WebP responsivos
+src/assets/fotos/ copias com nomes descritivos. O Astro gera AVIF responsivos
 a partir delas no build.
 
 - Fotos inteiras sao copiadas sem recompressao, com a marca d'agua original.
 - Recortes (abertura e detalhes) usam so enquadramentos da propria foto; nada e
   apagado, retocado ou gerado.
-- Fotos nao usadas: 14.39.10 (2), 14.39.12, 14.39.13, 14.39.15 (2), 14.39.18 (2) e
-  14.39.23 (1) repetem ambientes ja mostrados por outro angulo.
+- Telas cheias: os originais chegaram com 1179 px de largura (compressao do WhatsApp).
+  As poucas fotos usadas de borda a borda sao ampliadas por reamostragem classica
+  (Lanczos + nitidez leve), sem IA: nenhum detalhe e inventado, so a suavidade diminui.
+- Fotos nao usadas: 14.39.10 (2) e 14.39.12 quase nao mostram moveis; 14.39.13,
+  14.39.15 (2) e 14.39.23 (1) repetem ambientes ja mostrados por outro angulo.
 """
 
 import shutil
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 RAIZ = Path(__file__).resolve().parent.parent
 ORIGEM = RAIZ / "fotos e videos"
@@ -37,6 +40,7 @@ FOTOS = {
     "cozinha-aereos-madeira": "14.39.17",
     "cozinha-gourmet-integrada": "14.39.14 (1)",
     "cozinha-ilha-led": "14.39.14",
+    "cozinha-u-inox": "14.39.18 (2)",
     "sala-painel-marmore": "14.39.11 (1)",
     "sala-integrada-escada": "14.39.13 (1)",
     "sala-painel-madeira": "14.39.12 (2)",
@@ -63,6 +67,13 @@ RECORTES = {
     "detalhe-espelhos-cabeceira": ("14.39.16", (0, 420, 1000, 1220)),
 }
 
+# nome -> (arquivo original, recorte, fator): fotos que ocupam a tela de borda a borda
+AMPLIADAS = {
+    "abertura-ampliada": ("14.39.23", (0, 0, 1179, 1190), 1.6),
+    "jantar-adega-ampla": ("14.39.22 (1)", (0, 215, 1161, 1020), 1.55),
+    "panorama-painel": ("14.39.11 (1)", (0, 0, 1179, 680), 1.55),
+}
+
 
 def main() -> None:
     DESTINO.mkdir(parents=True, exist_ok=True)
@@ -75,6 +86,13 @@ def main() -> None:
         img = Image.open(ORIGEM / f"{PREFIXO}{arquivo}.jpeg").convert("RGB").crop(caixa)
         img.save(DESTINO / f"{nome}.jpg", quality=92, optimize=True, progressive=True)
         print(f"{nome:30} {img.size} (recorte)")
+
+    for nome, (arquivo, caixa, fator) in AMPLIADAS.items():
+        img = Image.open(ORIGEM / f"{PREFIXO}{arquivo}.jpeg").convert("RGB").crop(caixa)
+        img = img.resize((round(img.width * fator), round(img.height * fator)), Image.LANCZOS)
+        img = img.filter(ImageFilter.UnsharpMask(radius=1.6, percent=55, threshold=2))
+        img.save(DESTINO / f"{nome}.jpg", quality=90, optimize=True, progressive=True)
+        print(f"{nome:30} {img.size} (ampliada, sem IA)")
 
     gerar_og()
 

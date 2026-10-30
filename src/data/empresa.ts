@@ -48,10 +48,8 @@ export const mapa = {
 export const mensagemPadrao = 'Olá! Conheci o site da Nova Era Móveis Planejados e gostaria de solicitar um orçamento.';
 
 export const navegacao = [
-  { href: '#nova-era', rotulo: 'A Nova Era' },
   { href: '#projetos', rotulo: 'Projetos' },
   { href: '#ambientes', rotulo: 'Ambientes' },
   { href: '#detalhes', rotulo: 'Detalhes' },
   { href: '#simulador', rotulo: 'Simulador 3D' },
-  { href: '#contato', rotulo: 'Contato' },
 ];

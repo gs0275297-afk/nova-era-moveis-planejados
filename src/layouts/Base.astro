@@ -1,8 +1,9 @@
 ---
 import '@fontsource-variable/jost';
 import '../styles/global.css';
-// Pré-carrega a fonte (subconjunto latino) para o título da abertura não "piscar".
+// Pré-carrega as duas fontes que aparecem na primeira tela, para o título não "piscar".
 import sansNormal from '@fontsource-variable/jost/files/jost-latin-wght-normal.woff2?url';
+import serifDisplay from '../assets/fontes/newsreader-display.woff2?url';
 
 import { empresa } from '../data/empresa';
 
@@ -47,10 +48,11 @@ const schema = {
     <title>{titulo}</title>
     <meta name="description" content={descricao} />
     {canonical && <link rel="canonical" href={canonical} />}
-    <meta name="theme-color" content="#f4f3ef" />
+    <meta name="theme-color" content="#0d0f14" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href={serifDisplay} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={sansNormal} as="font" type="font/woff2" crossorigin />
 
     <meta property="og:type" content="website" />
@@ -69,10 +71,16 @@ const schema = {
       (function () {
         var d = document.documentElement;
         d.classList.add('js', 'js-motion');
-        // Movimento reduzido: só esmaecimentos suaves, sem deslocamentos nem parallax.
-        // Em desenvolvimento, ?movimento-completo força as animações completas para revisão.
-        var forcar = dev && location.search.indexOf('movimento-completo') > -1;
-        if (!forcar && window.matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('reduzido');
+        // O site respeita o pedido de menos movimento do sistema. Quem preferir pode ligar as animações
+        // no rodapé (fica guardado neste navegador). Em desenvolvimento, ?movimento-completo faz o mesmo.
+        var pref = null;
+        try {
+          pref = localStorage.getItem('novaera-movimento');
+        } catch (e) {}
+        var forcar = pref === 'completo' || (dev && location.search.indexOf('movimento-completo') > -1);
+        var sistema = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (sistema) d.classList.add('sistema-reduzido');
+        if (sistema && !forcar) d.classList.add('reduzido');
         setTimeout(function () {
           if (!d.classList.contains('motion-ok')) d.classList.add('motion-falhou');
         }, 3000);

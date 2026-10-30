@@ -4,11 +4,10 @@ import Icone from './Icone.astro';
 import { detalhes } from '../data/projetos';
 ---
 
-<section class="detalhes secao escuro" id="detalhes" aria-labelledby="detalhes-titulo" data-detalhes>
-  <div class="container grade cabeca">
-    <p class="rotulo" data-revelar="fade">Detalhes</p>
+<section class="detalhes secao escuro" id="detalhes" aria-labelledby="detalhes-titulo" data-detalhes data-tema="escuro">
+  <div class="container detalhes__cabeca">
     <h2 id="detalhes-titulo" class="titulo" data-revelar="linhas">
-      O acabamento é <strong>onde o projeto aparece.</strong>
+      De perto, é o <em>acabamento</em> que aparece.
     </h2>
   </div>
 
@@ -30,9 +29,9 @@ import { detalhes } from '../data/projetos';
                   alt={d.midia.foto.alt}
                   widths={[480, 720, d.midia.foto.src.width]}
                   sizes="(min-width: 1024px) 50vw, 82vw"
-                  formats={['avif', 'webp']}
+                  formats={['avif']}
                   fallbackFormat="jpg"
-                  quality={78}
+                  quality={72}
                   loading="lazy"
                 />
               ) : (
@@ -42,7 +41,7 @@ import { detalhes } from '../data/projetos';
                     loop
                     playsinline
                     preload="none"
-                    poster={`/videos/${d.midia.arquivo}.jpg`}
+                    data-poster={`/videos/${d.midia.arquivo}.jpg`}
                     width="576"
                     height="460"
                     aria-label={d.midia.alt}
@@ -66,6 +65,13 @@ import { detalhes } from '../data/projetos';
 </section>
 
 <style>
+  .detalhes {
+    position: relative;
+    z-index: 2;
+  }
+  .detalhes__cabeca :global(.titulo) {
+    max-width: 11em;
+  }
   .detalhes__corpo {
     position: relative;
     margin-top: clamp(48px, 6vw, 96px);
@@ -119,10 +125,10 @@ import { detalhes } from '../data/projetos';
     text-align: left;
   }
   .detalhe__titulo {
-    font-size: clamp(1.4rem, 1.1rem + 1vw, 2.2rem);
-    font-weight: 340;
-    letter-spacing: -0.025em;
-    line-height: 1.1;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 1.2rem + 1.5vw, 2.9rem);
+    letter-spacing: -0.018em;
+    line-height: 1.06;
   }
   .detalhe__texto {
     font-size: var(--fs-pequeno);
@@ -143,11 +149,11 @@ import { detalhes } from '../data/projetos';
       column-gap: var(--col-gap);
       position: relative;
       /* o palco ocupa a coluna da direita; a lista define a altura */
-      min-height: clamp(460px, 40vw, 640px);
+      min-height: clamp(480px, 46vw, 780px);
       align-content: start;
     }
     .detalhe {
-      grid-column: 1 / span 5;
+      grid-column: 1 / span 4;
       border-top: 1px solid var(--linha-clara);
     }
     .detalhe:last-child {
@@ -155,28 +161,28 @@ import { detalhes } from '../data/projetos';
     }
     .detalhe__botao {
       position: relative;
-      padding: 22px 0 22px 26px;
+      padding: 20px 0;
       color: var(--aluminio);
       transition: color var(--t-ui) var(--ease-out);
     }
-    /* ponto vermelho marca o item ativo */
+    /* linha de luz marca o item ativo */
     .detalhe__botao::before {
       content: '';
       position: absolute;
       left: 0;
-      top: 2.05em;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--ponto);
-      transform: scale(0);
-      transition: transform var(--t-ui) var(--ease-out);
+      top: -1px;
+      width: 100%;
+      height: 1px;
+      background: var(--luz);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      transition: transform 700ms var(--ease-out);
     }
     .detalhe.is-ativo .detalhe__botao {
       color: var(--claro);
     }
     .detalhe.is-ativo .detalhe__botao::before {
-      transform: scale(1);
+      transform: scaleX(1);
     }
     /* texto de apoio só no item ativo, abrindo em altura */
     .detalhe__texto {
@@ -206,7 +212,9 @@ import { detalhes } from '../data/projetos';
       position: absolute;
       top: 0;
       right: 0;
-      width: calc((100% - 11 * var(--col-gap)) / 12 * 6 + 5 * var(--col-gap));
+      /* palco largo: sete colunas, até a borda direita da tela */
+      right: calc(var(--gutter) * -1);
+      width: calc((100% - 11 * var(--col-gap)) / 12 * 7 + 7 * var(--col-gap) + var(--gutter));
       height: 100%;
       clip-path: inset(0 0 100% 0);
       transition: clip-path 900ms var(--ease-in-out);
