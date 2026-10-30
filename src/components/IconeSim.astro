@@ -1,0 +1,55 @@
+---
+// Ícones do simulador 3D: traço de 1.5px, mesmo peso dos ícones do site.
+export type NomeIconeSim =
+  | 'desfazer'
+  | 'restaurar'
+  | 'comparar'
+  | 'captura'
+  | 'salvar'
+  | 'salvas'
+  | 'link'
+  | 'tela-cheia'
+  | 'fechar'
+  | 'mais'
+  | 'menos'
+  | 'ambiente'
+  | 'materiais'
+  | 'cores'
+  | 'portas'
+  | 'puxadores'
+  | 'bancada'
+  | 'luz'
+  | 'camera'
+  | 'recolher';
+interface Props {
+  nome: NomeIconeSim;
+  class?: string;
+}
+const { nome, class: classe } = Astro.props;
+const caminhos: Record<NomeIconeSim, string> = {
+  desfazer: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
+  restaurar: 'M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5',
+  comparar: 'M12 3v18M4 6h5v12H4zM15 6h5v12h-5z',
+  captura: 'M4 8h3l2-3h6l2 3h3v11H4zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z',
+  salvar: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
+  salvas: 'M4 6h6l2 2h8v11H4zM4 10h16',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  'tela-cheia': 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
+  fechar: 'M6 6l12 12M18 6 6 18',
+  mais: 'M12 5v14M5 12h14',
+  menos: 'M5 12h14',
+  ambiente: 'M4 11 12 4l8 7M6 9.5V20h12V9.5M10 20v-5h4v5',
+  materiais: 'M4 4h16v16H4zM8 4v16M12 4c-1 4 1 8 0 16M16 4v16',
+  cores: 'M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2s-1-1.6-1-2.6c0-1 .8-1.4 1.8-1.4H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8ZM7.5 11.5h.01M10 7.5h.01M14.5 7.5h.01',
+  portas: 'M5 3h14v18H5zM12 3v18M9.5 11v2M14.5 11v2',
+  puxadores: 'M7 6v12M7 6h3M7 18h3M14 9h6M14 15h6M17 9v6',
+  bancada: 'M3 9h18v3H3zM5 12v8M19 12v8M8 9V6h8v3',
+  luz: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z',
+  camera: 'M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6ZM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
+  recolher: 'M6 15l6-6 6 6',
+};
+---
+
+<svg class={classe} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d={caminhos[nome]} />
+</svg>

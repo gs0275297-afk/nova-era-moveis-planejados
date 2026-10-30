@@ -19,6 +19,19 @@ gsap.ticker.lagSmoothing(0);
  * - títulos de seção: linhas sobem dentro de máscaras; textos de apoio surgem em sequência.
  */
 
+/*
+ * Entradas que tocam uma vez SEM "once: true": um gatilho "once" se destrói ao disparar e, se isso
+ * acontece durante o refresh de outro gatilho (página recarregada já rolada), o ScrollTrigger perde
+ * o índice da lista interna e lança erro. Aqui os gatilhos ficam e cada elemento entra uma vez só.
+ */
+const primeiraVez = (lote: Element[]) =>
+  lote.filter((el) => {
+    const h = el as HTMLElement;
+    if (h.dataset.revelado) return false;
+    h.dataset.revelado = '1';
+    return true;
+  });
+
 /** Rolagem suave + todas as animações. Só é chamado quando o usuário aceita movimento. */
 export function iniciarMovimento(): Lenis {
   const lenis = new Lenis({ lerp: 0.11, wheelMultiplier: 0.95 });
@@ -58,8 +71,7 @@ export function iniciarMovimentoSuave() {
 
   ScrollTrigger.batch('[data-revelar]', {
     start: 'top 92%',
-    once: true,
-    onEnter: (lote) => surgir(lote, { stagger: 0.06, overwrite: true }),
+    onEnter: (lote) => surgir(primeiraVez(lote), { stagger: 0.06, overwrite: true }),
   });
 }
 
@@ -143,10 +155,9 @@ function frase() {
 function revelacoes() {
   ScrollTrigger.batch('[data-revelar="fade"]', {
     start: 'top 90%',
-    once: true,
     onEnter: (lote) =>
       gsap.fromTo(
-        lote,
+        primeiraVez(lote),
         { autoAlpha: 0, y: 26 },
         { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.08, overwrite: true },
       ),
@@ -165,7 +176,7 @@ function revelacoes() {
           duration: 1.2,
           ease: 'expo.out',
           stagger: 0.09,
-          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+          scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
         });
       },
     });
@@ -181,7 +192,7 @@ function revelacoes() {
     const inicio = mascaras[el.dataset.direcao ?? 'baixo'] ?? mascaras.baixo;
     const interno = el.firstElementChild;
     gsap.set(el, { autoAlpha: 1, clipPath: inicio });
-    const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 84%', once: true } });
+    const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 84%', toggleActions: 'play none none none' } });
     tl.to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'expo.inOut' });
     if (interno) tl.from(interno, { scale: 1.25, duration: 2.1, ease: 'expo.out' }, 0.1);
   });

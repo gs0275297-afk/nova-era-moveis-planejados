@@ -52,5 +52,6 @@ export const navegacao = [
   { href: '#projetos', rotulo: 'Projetos' },
   { href: '#ambientes', rotulo: 'Ambientes' },
   { href: '#detalhes', rotulo: 'Detalhes' },
+  { href: '#simulador', rotulo: 'Simulador 3D' },
   { href: '#contato', rotulo: 'Contato' },
 ];

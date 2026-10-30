@@ -12,4 +12,8 @@ export default defineConfig({
   trailingSlash: 'never',
   build: { format: 'directory' },
   integrations: SITE_URL ? [sitemap()] : [],
+  vite: {
+    // O pedaço do simulador 3D (three.js, ~170 KB gzip) só é baixado quando o simulador vai ser usado.
+    build: { chunkSizeWarningLimit: 1000 },
+  },
 });

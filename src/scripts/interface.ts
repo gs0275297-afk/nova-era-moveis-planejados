@@ -1,5 +1,5 @@
 import type Lenis from 'lenis';
-import { $, $$, aoTerminar, desktop, movimentoReduzido } from './util';
+import { $, $$, aoTerminar, desktop, movimentoReduzido, observar } from './util';
 
 /* ---------- Cabeçalho: filete ao rolar, some ao descer, item ativo ---------- */
 export function iniciarCabecalho(estado: { menuAberto: boolean }) {
@@ -35,7 +35,7 @@ export function iniciarCabecalho(estado: { menuAberto: boolean }) {
   const secoes = links
     .map((a) => $(a.getAttribute('href') ?? ''))
     .filter((s): s is HTMLElement => s instanceof HTMLElement);
-  const obs = new IntersectionObserver(
+  const obs = observar(
     (entradas) => {
       entradas.forEach((ent) => {
         if (!ent.isIntersecting) return;
@@ -148,11 +148,11 @@ export function iniciarBarraMovel() {
     barra.classList.toggle('is-visivel', mostrar);
     barra.inert = !mostrar;
   };
-  new IntersectionObserver(([ent]) => {
+  observar(([ent]) => {
     passouHero = !ent.isIntersecting && ent.boundingClientRect.top < 0;
     aplicar();
   }).observe(hero);
-  const obs = new IntersectionObserver((entradas) => {
+  const obs = observar((entradas) => {
     entradas.forEach((ent) => (ent.isIntersecting ? visiveis.add(ent.target) : visiveis.delete(ent.target)));
     aplicar();
   });
@@ -194,7 +194,7 @@ export function iniciarVideos() {
     botao?.addEventListener('click', alternar);
     video.addEventListener('click', alternar);
 
-    new IntersectionObserver(
+    observar(
       ([ent]) => {
         visivel = ent.isIntersecting;
         avaliar();

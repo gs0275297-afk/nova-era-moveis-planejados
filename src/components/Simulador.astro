@@ -1,0 +1,1468 @@
+---
+import IconeSim from './IconeSim.astro';
+import Icone from './Icone.astro';
+import { empresa } from '../data/empresa';
+import {
+  ambientes,
+  brilhos,
+  cenarios,
+  cores,
+  idLaca,
+  luzes,
+  madeiras,
+  metais,
+  papeis,
+  pedras,
+  puxadores,
+  temperaturas,
+  vistas,
+} from '../scripts/configurador/catalogo';
+
+const abas = [
+  { id: 'ambiente', nome: 'Ambiente', icone: 'ambiente' },
+  { id: 'materiais', nome: 'Materiais', icone: 'materiais' },
+  { id: 'cores', nome: 'Cores', icone: 'cores' },
+  { id: 'portas', nome: 'Portas e gavetas', icone: 'portas' },
+  { id: 'puxadores', nome: 'Puxadores', icone: 'puxadores' },
+  { id: 'bancada', nome: 'Bancada', icone: 'bancada' },
+  { id: 'luz', nome: 'Iluminação', icone: 'luz' },
+  { id: 'camera', nome: 'Câmera', icone: 'camera' },
+] as const;
+
+// Mosaico da capa (e do modo sem 3D): amostras reais do catálogo do simulador.
+const mosaico = [madeiras[1], pedras[0], madeiras[0], madeiras[2], pedras[3], madeiras[3]];
+---
+
+<section class="simulador secao" id="simulador" aria-labelledby="simulador-titulo">
+  <div class="container grade cabeca">
+    <p class="rotulo" data-revelar="fade">Simulador 3D</p>
+    <h2 id="simulador-titulo" class="titulo" data-revelar="linhas">
+      Monte a cozinha <strong>e veja na hora.</strong>
+    </h2>
+  </div>
+  <div class="container grade simulador__intro">
+    <p class="lead" data-revelar="fade">
+      Troque madeiras, cores, puxadores, bancada e luz, abra portas e gavetas e envie a combinação para pedir um
+      orçamento à {empresa.nomeCurto}.
+    </p>
+    <p class="simulador__aviso" data-revelar="fade">
+      Simulação ilustrativa para explorar possibilidades: não é um projeto executado pela {empresa.nomeCurto} nem um
+      orçamento. Medidas, materiais e soluções são definidos com a equipe, depois da avaliação técnica e comercial.
+    </p>
+  </div>
+
+  <div class="container">
+    <div class="sim" data-sim data-estado="inicial" data-whatsapp={empresa.whatsapp.numero}>
+      <!-- ---------- palco 3D ---------- -->
+      <div class="sim__palco" data-sim-palco>
+        <p class="sr-only">
+          Cena 3D ilustrativa de uma cozinha planejada. Todas as opções da cena, como acabamentos, portas, gavetas, luzes e
+          câmera, também estão disponíveis nos botões do painel de personalização.
+        </p>
+        <div class="sim__capa" data-sim-capa>
+          <div class="sim__mosaico" aria-hidden="true">
+            {mosaico.map((a) => <span style={`--img: url(${a.imagem}); --tom: ${a.tom ?? '#fff'}`} />)}
+          </div>
+          <div class="sim__capa-texto">
+            <p class="sim__capa-titulo">Cozinha planejada em 3D</p>
+            <p class="sim__capa-sub" data-sim-capa-sub>Gire, aproxime, abra portas e gavetas e troque os acabamentos em tempo real.</p>
+            <button class="botao botao--claro" type="button" data-sim-abrir>
+              Abrir simulador
+              <Icone nome="seta" />
+            </button>
+            <p class="sim__capa-nota">Carrega cerca de 1,5 MB na primeira vez.</p>
+          </div>
+          <div class="sim__erro" data-sim-erro hidden>
+            <p class="sim__capa-titulo">O 3D não abriu neste aparelho</p>
+            <p class="sim__capa-sub">
+              O navegador não oferece os recursos gráficos necessários. As amostras acima mostram os acabamentos do simulador; para
+              conversar sobre o seu projeto, fale com a {empresa.nomeCurto}.
+            </p>
+            <a class="botao botao--claro" href={empresa.whatsapp.link('Olá! Vim pelo site da Nova Era Móveis Planejados e gostaria de conversar sobre uma cozinha planejada.')} target="_blank" rel="noopener">
+              <Icone nome="whatsapp" />
+              Falar pelo WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <div class="sim__carga" data-sim-carga aria-live="polite"><span></span><p>Montando a cozinha…</p></div>
+
+        <div class="sim__barra" role="toolbar" aria-label="Ações do simulador">
+          <button type="button" class="sim__acao" data-acao="desfazer" aria-label="Desfazer" title="Desfazer (Ctrl+Z)" disabled><IconeSim nome="desfazer" /></button>
+          <button type="button" class="sim__acao" data-acao="restaurar" aria-label="Restaurar o padrão" title="Restaurar o padrão"><IconeSim nome="restaurar" /></button>
+          <span class="sim__sep" aria-hidden="true"></span>
+          <button type="button" class="sim__acao" data-acao="comparar" aria-pressed="false" aria-label="Comparar com a configuração atual" title="Comparar A | B"><IconeSim nome="comparar" /></button>
+          <button type="button" class="sim__acao" data-acao="capturar" aria-label="Baixar imagem da cena" title="Baixar imagem da cena"><IconeSim nome="captura" /></button>
+          <button type="button" class="sim__acao" data-acao="salvar" aria-label="Salvar configuração" title="Salvar configuração"><IconeSim nome="salvar" /></button>
+          <button type="button" class="sim__acao" data-acao="salvas" aria-label="Configurações salvas" title="Configurações salvas"><IconeSim nome="salvas" /><b data-sim-contagem hidden></b></button>
+          <button type="button" class="sim__acao" data-acao="link" aria-label="Copiar link desta configuração" title="Copiar link"><IconeSim nome="link" /></button>
+          <span class="sim__sep" aria-hidden="true"></span>
+          <button type="button" class="sim__acao" data-acao="tela-cheia" aria-pressed="false" aria-label="Tela cheia" title="Tela cheia"><IconeSim nome="tela-cheia" /></button>
+          <button type="button" class="sim__acao sim__acao--fechar" data-acao="fechar" aria-label="Fechar simulador" title="Fechar"><IconeSim nome="fechar" /></button>
+        </div>
+
+        <div class="sim__vistas" role="group" aria-label="Ângulos da câmera">
+          {vistas.map((v) => <button type="button" data-vista={v.id}>{v.nome}</button>)}
+        </div>
+        <div class="sim__zoom" role="group" aria-label="Aproximação">
+          <button type="button" data-zoom="0.8" aria-label="Aproximar"><IconeSim nome="mais" /></button>
+          <button type="button" data-zoom="1.25" aria-label="Afastar"><IconeSim nome="menos" /></button>
+        </div>
+        <p class="sim__dica" data-sim-dica>
+          <span data-dica-mouse>Arraste para girar · botão direito para deslocar · clique na cena e role para aproximar · clique nas portas e gavetas</span>
+          <span data-dica-toque>Um dedo gira · dois dedos aproximam e deslocam · toque nas portas e gavetas</span>
+        </p>
+        <p class="sim__selo">Simulação ilustrativa</p>
+        <p class="sim__apontar" data-sim-apontar hidden></p>
+        <div class="sim__divisor" data-sim-divisor hidden>
+          <span class="sim__divisor-rotulo sim__divisor-rotulo--a">A · antes</span>
+          <button type="button" class="sim__divisor-alca" aria-label="Arrastar a divisão da comparação"></button>
+          <span class="sim__divisor-rotulo sim__divisor-rotulo--b">B · agora</span>
+        </div>
+      </div>
+
+      <!-- ---------- painel de personalização ---------- -->
+      <aside class="sim__painel" data-sim-painel aria-label="Personalização">
+        <button type="button" class="sim__recolher" data-sim-recolher aria-expanded="true" aria-label="Recolher o painel">
+          <span></span>
+        </button>
+        <div class="sim__abas" role="tablist" aria-label="Categorias" data-lenis-prevent>
+          {
+            abas.map((a, i) => (
+              <button type="button" role="tab" id={`sim-aba-${a.id}`} aria-controls={`sim-pn-${a.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-aba={a.id}>
+                <IconeSim nome={a.icone} />
+                <span>{a.nome}</span>
+                <i class="sim__marca" aria-hidden="true" />
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="sim__conteudo" data-lenis-prevent>
+          <!-- Ambiente -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-ambiente" aria-labelledby="sim-aba-ambiente">
+            <h3>Ambiente</h3>
+            {
+              ambientes.map((a) => (
+                <div class="sim__ambiente" aria-current="true">
+                  <strong>{a.nome}</strong>
+                  <span>{a.descricao}</span>
+                </div>
+              ))
+            }
+            <h4>Ilha</h4>
+            <div class="sim__seg" role="group" aria-label="Ilha">
+              <button type="button" data-opcao="ilha" data-valor="sim">Com ilha</button>
+              <button type="button" data-opcao="ilha" data-valor="nao">Sem ilha</button>
+            </div>
+            <h4>Armários superiores</h4>
+            <div class="sim__seg" role="group" aria-label="Armários superiores">
+              <button type="button" data-opcao="aereos" data-valor="nicho">Com nicho aberto</button>
+              <button type="button" data-opcao="aereos" data-valor="fechados">Todos fechados</button>
+            </div>
+          </div>
+
+          <!-- Materiais (madeiras) -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-materiais" aria-labelledby="sim-aba-materiais" hidden>
+            <h3>Materiais</h3>
+            <p class="sim__nota">Escolha a parte do móvel e depois a madeira. Passe o mouse nas amostras para comparar antes de aplicar.</p>
+            <div class="sim__papeis" role="group" aria-label="Parte do móvel" data-papeis>
+              {papeis.map((p, i) => <button type="button" data-papel={p.id} aria-pressed={i === 0 ? 'true' : 'false'} title={p.dica}>{p.nome}</button>)}
+            </div>
+            <h4>Madeiras</h4>
+            <div class="sim__amostras">
+              {
+                madeiras.map((a) => (
+                  <button type="button" class="sim__amostra" data-acabamento={a.id} aria-pressed="false">
+                    <span class="sim__chip" style={`--img: url(${a.imagem}); --tom: ${a.tom}`} />
+                    <span>{a.nome}</span>
+                  </button>
+                ))
+              }
+            </div>
+            <p class="sim__atual">Atual: <b data-atual-papel></b></p>
+          </div>
+
+          <!-- Cores (lacas) -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-cores" aria-labelledby="sim-aba-cores" hidden>
+            <h3>Cores</h3>
+            <p class="sim__nota">Cores lisas para a parte escolhida. O acabamento fosco ou acetinado muda o reflexo da luz.</p>
+            <div class="sim__papeis" role="group" aria-label="Parte do móvel" data-papeis>
+              {papeis.map((p, i) => <button type="button" data-papel={p.id} aria-pressed={i === 0 ? 'true' : 'false'} title={p.dica}>{p.nome}</button>)}
+            </div>
+            <h4>Acabamento</h4>
+            <div class="sim__seg" role="group" aria-label="Acabamento da cor">
+              {brilhos.map((b) => <button type="button" data-brilho={b.id}>{b.nome}</button>)}
+            </div>
+            <h4>Paleta</h4>
+            <div class="sim__amostras sim__amostras--cores">
+              {
+                cores.map((c) => (
+                  <button type="button" class="sim__amostra" data-cor={c.id} data-acabamento={idLaca(c.id, 'fosco')} aria-pressed="false">
+                    <span class="sim__chip" style={`background: ${c.hex}`} />
+                    <span>{c.nome}</span>
+                  </button>
+                ))
+              }
+            </div>
+            <p class="sim__atual">Atual: <b data-atual-papel></b></p>
+          </div>
+
+          <!-- Portas e gavetas -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-portas" aria-labelledby="sim-aba-portas" hidden>
+            <h3>Portas e gavetas</h3>
+            <div class="sim__botoes">
+              <button type="button" class="sim__botao" data-todas="porta">Abrir portas</button>
+              <button type="button" class="sim__botao" data-todas="gaveta">Abrir gavetas</button>
+              <button type="button" class="sim__botao" data-todas="fechar">Fechar tudo</button>
+            </div>
+            <p class="sim__nota">Você também pode clicar direto nas frentes, na cena.</p>
+            <div class="sim__lista" data-sim-articulacoes></div>
+          </div>
+
+          <!-- Puxadores -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-puxadores" aria-labelledby="sim-aba-puxadores" hidden>
+            <h3>Puxadores</h3>
+            <h4>Tipo</h4>
+            <div class="sim__cartoes">
+              {
+                puxadores.map((p) => (
+                  <button type="button" class="sim__cartao" data-puxador={p.id} aria-pressed="false">
+                    <span class:list={['sim__pux', `sim__pux--${p.id}`]} aria-hidden="true"><i /></span>
+                    <strong>{p.nome}</strong>
+                    <span>{p.dica}</span>
+                  </button>
+                ))
+              }
+            </div>
+            <h4>Acabamento do metal</h4>
+            <p class="sim__nota">Vale também para a torneira.</p>
+            <div class="sim__amostras">
+              {
+                metais.map((m) => (
+                  <button type="button" class="sim__amostra" data-metal={m.id} aria-pressed="false">
+                    <span class="sim__chip sim__chip--metal" style={`--metal: ${m.hex}`} />
+                    <span>{m.nome}</span>
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+
+          <!-- Bancada -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-bancada" aria-labelledby="sim-aba-bancada" hidden>
+            <h3>Bancada</h3>
+            <div class="sim__amostras">
+              {
+                pedras.map((a) => (
+                  <button type="button" class="sim__amostra" data-pedra={a.id} aria-pressed="false">
+                    <span class="sim__chip" style={`--img: url(${a.imagem}); --tom: #fff`} />
+                    <span>{a.nome}</span>
+                  </button>
+                ))
+              }
+            </div>
+            <h4>Espessura aparente</h4>
+            <div class="sim__seg" role="group" aria-label="Espessura aparente da bancada">
+              <button type="button" data-opcao="espessura" data-valor="fina">Fina</button>
+              <button type="button" data-opcao="espessura" data-valor="encorpada">Encorpada</button>
+            </div>
+            <p class="sim__nota">Visual apenas: a espessura real da pedra é definida no projeto.</p>
+          </div>
+
+          <!-- Iluminação -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-luz" aria-labelledby="sim-aba-luz" hidden>
+            <h3>Iluminação</h3>
+            <div class="sim__cartoes sim__cartoes--luz">
+              {
+                cenarios.map((c) => (
+                  <button type="button" class="sim__cartao" data-cenario={c.id} aria-pressed="false">
+                    <span class:list={['sim__ceu', `sim__ceu--${c.id}`]} aria-hidden="true" />
+                    <strong>{c.nome}</strong>
+                    <span>{c.dica}</span>
+                  </button>
+                ))
+              }
+            </div>
+            <h4>Luzes</h4>
+            <div class="sim__interruptores">
+              {
+                luzes.map((l) => (
+                  <button type="button" class="sim__interruptor" role="switch" aria-checked="false" data-luz={l.id}>
+                    <span class="sim__chave" aria-hidden="true" />
+                    {l.nome}
+                  </button>
+                ))
+              }
+            </div>
+            <h4>Cor da luz artificial</h4>
+            <div class="sim__seg" role="group" aria-label="Cor da luz artificial">
+              {temperaturas.map((t) => <button type="button" data-temperatura={t.id}>{t.nome}</button>)}
+            </div>
+          </div>
+
+          <!-- Câmera -->
+          <div class="sim__pn" role="tabpanel" id="sim-pn-camera" aria-labelledby="sim-aba-camera" hidden>
+            <h3>Câmera</h3>
+            <div class="sim__botoes sim__botoes--grade">
+              {vistas.map((v) => <button type="button" class="sim__botao" data-vista={v.id}>{v.nome}</button>)}
+            </div>
+            <h4>Aproximação</h4>
+            <div class="sim__botoes">
+              <button type="button" class="sim__botao" data-zoom="0.8">Aproximar</button>
+              <button type="button" class="sim__botao" data-zoom="1.25">Afastar</button>
+            </div>
+            <p class="sim__nota">No mouse: arraste para girar, botão direito (ou Shift) para deslocar e Ctrl + rolagem para aproximar. No toque: um dedo gira, dois dedos aproximam e deslocam.</p>
+          </div>
+        </div>
+
+        <div class="sim__rodape">
+          <button type="button" class="botao" data-acao="orcamento">
+            <Icone nome="whatsapp" />
+            Resumo e orçamento
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ---------- resumo e pedido de orçamento ---------- -->
+  <dialog class="sim-dialogo" data-sim-orcamento aria-labelledby="sim-orc-titulo">
+    <form method="dialog" class="sim-dialogo__caixa" data-sim-orc-form>
+      <div class="sim-dialogo__topo">
+        <h3 id="sim-orc-titulo">Resumo da sua simulação</h3>
+        <button type="submit" value="fechar" class="sim-dialogo__fechar" aria-label="Fechar"><IconeSim nome="fechar" /></button>
+      </div>
+      <div class="sim-dialogo__corpo" data-lenis-prevent>
+        <figure class="sim-dialogo__imagem" data-sim-orc-figura hidden><img alt="Imagem da cena simulada" data-sim-orc-img /></figure>
+        <dl class="sim-resumo" data-sim-resumo></dl>
+        <label class="sim-dialogo__campo">
+          <span>Seu nome <small>(opcional)</small></span>
+          <input type="text" name="nome" autocomplete="name" maxlength="80" />
+        </label>
+        <label class="sim-dialogo__campo">
+          <span>Observações <small>(opcional)</small></span>
+          <textarea name="obs" rows="3" maxlength="600" placeholder="Medidas aproximadas, o que precisa guardar, se o imóvel está em obra…"></textarea>
+        </label>
+        <p class="sim-dialogo__aviso">
+          A simulação é ilustrativa: não é um orçamento e não garante que todas as medidas e soluções sejam executáveis. A
+          confirmação depende da avaliação técnica e comercial da {empresa.nomeCurto}.
+        </p>
+      </div>
+      <div class="sim-dialogo__acoes">
+        <button type="button" class="botao" data-sim-enviar>
+          <Icone nome="whatsapp" />
+          Enviar pelo WhatsApp
+        </button>
+        <button type="button" class="botao botao--contorno" data-acao="capturar">Baixar imagem</button>
+        <button type="button" class="link-seta" data-sim-copiar-resumo><span>Copiar resumo</span></button>
+      </div>
+      <p class="sim-dialogo__nota">O WhatsApp não anexa a imagem sozinho: baixe-a e envie na conversa, se quiser. O link da simulação vai na mensagem.</p>
+    </form>
+  </dialog>
+
+  <!-- ---------- configurações salvas (só nesta sessão do navegador) ---------- -->
+  <dialog class="sim-dialogo sim-dialogo--estreito" data-sim-salvas aria-labelledby="sim-salvas-titulo">
+    <form method="dialog" class="sim-dialogo__caixa">
+      <div class="sim-dialogo__topo">
+        <h3 id="sim-salvas-titulo">Configurações salvas</h3>
+        <button type="submit" value="fechar" class="sim-dialogo__fechar" aria-label="Fechar"><IconeSim nome="fechar" /></button>
+      </div>
+      <div class="sim-dialogo__corpo" data-lenis-prevent>
+        <p class="sim-dialogo__aviso">Ficam guardadas só neste navegador, enquanto a aba estiver aberta. Para levar a outro aparelho, use “Copiar link”.</p>
+        <ul class="sim-salvas" data-sim-lista-salvas></ul>
+      </div>
+    </form>
+  </dialog>
+
+  <p class="sim-aviso" data-sim-aviso role="status" aria-live="polite"></p>
+</section>
+
+<style>
+  .simulador__intro {
+    row-gap: 18px;
+    margin-top: 28px;
+    margin-bottom: clamp(32px, 4vw, 56px);
+  }
+  .simulador__intro .lead {
+    grid-column: 4 / span 5;
+  }
+  .simulador__aviso {
+    grid-column: 9 / span 4;
+    align-self: end;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: var(--tinta-2);
+    padding-left: 16px;
+    border-left: 2px solid var(--ponto);
+  }
+  @media (max-width: 1023px) {
+    .simulador__intro .lead,
+    .simulador__aviso {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ---------- estrutura ---------- */
+  .sim {
+    --painel: 372px;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--painel);
+    height: clamp(580px, 84vh, 880px);
+    background: var(--branco);
+    box-shadow: 0 0 0 1px var(--linha);
+    color: var(--tinta);
+  }
+  .sim__palco {
+    --fundo-cena: #e9e8e3;
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 40%, color-mix(in srgb, var(--fundo-cena) 70%, #fff), var(--fundo-cena));
+    transition: background 600ms var(--ease-out);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .sim__palco :global(canvas) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    cursor: grab;
+    outline: none;
+  }
+  .sim__palco :global(canvas:active) {
+    cursor: grabbing;
+  }
+
+  /* capa: aparece antes de abrir e também no modo sem 3D */
+  .sim__capa {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    padding: clamp(24px, 5vw, 64px);
+    background: var(--noite);
+    color: var(--claro);
+    overflow: hidden;
+  }
+  .sim__mosaico {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    opacity: 0.55;
+  }
+  .sim__mosaico span {
+    background: var(--tom) var(--img) center / 140px;
+    background-blend-mode: multiply;
+  }
+  .sim__mosaico::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(12 19 38 / 0.94) 0%, rgb(12 19 38 / 0.72) 55%, rgb(12 19 38 / 0.35));
+  }
+  .sim__capa-texto,
+  .sim__erro {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    max-width: 30em;
+  }
+  .sim__capa-titulo {
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem);
+    font-weight: 330;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+  .sim__capa-sub {
+    color: var(--aluminio);
+  }
+  .sim__capa-nota {
+    font-size: 0.75rem;
+    color: var(--aluminio);
+  }
+  .sim[data-estado='erro'] .sim__capa-texto,
+  .sim__erro[hidden] {
+    display: none;
+  }
+  .sim[data-estado='pronto'] .sim__capa,
+  .sim[data-estado='carregando'] .sim__capa {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 500ms var(--ease-out),
+      visibility 0s 500ms;
+  }
+
+  .sim__carga {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    font-size: 0.875rem;
+    color: var(--tinta-2);
+  }
+  .sim[data-estado='carregando'] .sim__carga {
+    display: grid;
+  }
+  .sim__carga span {
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--tinta) 0 40%, var(--linha) 40%);
+    background-size: 200% 100%;
+    animation: carga 1.1s linear infinite;
+  }
+  @keyframes carga {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
+  /* controles sobre a cena: só depois de pronta */
+  .sim__barra,
+  .sim__vistas,
+  .sim__zoom,
+  .sim__dica,
+  .sim__selo {
+    position: absolute;
+    z-index: 1;
+    transition: opacity var(--t-ui) var(--ease-out);
+  }
+  .sim:not([data-estado='pronto']) :is(.sim__barra, .sim__vistas, .sim__zoom, .sim__dica, .sim__selo) {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sim__barra {
+    top: 14px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    background: rgb(255 255 255 / 0.86);
+    box-shadow: 0 0 0 1px var(--linha);
+    backdrop-filter: blur(10px);
+  }
+  .sim__acao {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: var(--tinta);
+    transition:
+      background-color var(--t-micro) var(--ease-out),
+      color var(--t-micro) var(--ease-out);
+  }
+  .sim__acao :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .sim__acao:hover:not(:disabled) {
+    background: var(--gesso-2);
+  }
+  .sim__acao:disabled {
+    color: rgb(17 26 51 / 0.3);
+    cursor: default;
+  }
+  .sim__acao[aria-pressed='true'] {
+    background: var(--tinta);
+    color: var(--claro);
+  }
+  .sim__acao b {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
+    border-radius: 8px;
+    background: var(--ponto);
+    color: #fff;
+    font-size: 0.625rem;
+    line-height: 15px;
+    font-weight: 600;
+  }
+  .sim__acao--fechar {
+    display: none;
+  }
+  .sim__sep {
+    width: 1px;
+    height: 22px;
+    margin-inline: 4px;
+    background: var(--linha);
+  }
+
+  .sim__vistas {
+    left: 14px;
+    bottom: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: calc(100% - 120px);
+  }
+  .sim__vistas button,
+  .sim__zoom button {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 0.75rem;
+    font-weight: 550;
+    background: rgb(255 255 255 / 0.86);
+    box-shadow: 0 0 0 1px var(--linha);
+    backdrop-filter: blur(10px);
+    transition: background-color var(--t-micro) var(--ease-out);
+  }
+  .sim__vistas button:hover,
+  .sim__zoom button:hover {
+    background: #fff;
+  }
+  .sim__vistas button[aria-current='true'] {
+    background: var(--tinta);
+    color: var(--claro);
+  }
+  .sim__zoom {
+    right: 14px;
+    bottom: 14px;
+    display: grid;
+    gap: 4px;
+  }
+  .sim__zoom button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+  .sim__zoom :global(svg) {
+    width: 18px;
+    height: 18px;
+  }
+  .sim__dica {
+    top: 70px;
+    left: 14px;
+    max-width: 34em;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--tinta-2);
+    background: rgb(255 255 255 / 0.8);
+    backdrop-filter: blur(10px);
+    transition: opacity 600ms var(--ease-out);
+  }
+  .sim__dica.is-oculta {
+    opacity: 0;
+  }
+  [data-dica-toque] {
+    display: none;
+  }
+  @media (hover: none) {
+    [data-dica-mouse] {
+      display: none;
+    }
+    [data-dica-toque] {
+      display: inline;
+    }
+  }
+  .sim__selo {
+    top: 18px;
+    right: 16px;
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+  }
+  .sim__palco[data-cenario='noite'] :is(.sim__selo) {
+    color: var(--aluminio);
+  }
+  .sim__apontar {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 16px;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 550;
+    background: var(--tinta);
+    color: var(--claro);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* divisor da comparação A | B */
+  .sim__divisor {
+    --x: 50%;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .sim__divisor::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    width: 2px;
+    margin-left: -1px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgb(17 26 51 / 0.25);
+  }
+  .sim__divisor-alca {
+    position: absolute;
+    top: 50%;
+    left: var(--x);
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 12px rgb(17 26 51 / 0.25);
+    pointer-events: auto;
+    cursor: ew-resize;
+    touch-action: none;
+  }
+  .sim__divisor-alca::before {
+    content: '‹ ›';
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tinta);
+  }
+  .sim__divisor-rotulo {
+    position: absolute;
+    bottom: 64px;
+    padding: 5px 10px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--tinta);
+    color: var(--claro);
+  }
+  .sim__divisor-rotulo--a {
+    right: calc(100% - var(--x) + 10px);
+  }
+  .sim__divisor-rotulo--b {
+    left: calc(var(--x) + 10px);
+  }
+
+  /* ---------- painel ---------- */
+  .sim__painel {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 0;
+    border-left: 1px solid var(--linha);
+    background: var(--branco);
+  }
+  .sim__recolher {
+    display: none;
+  }
+  .sim__abas {
+    grid-row: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    padding-block: 6px;
+    border-right: 1px solid var(--linha);
+    background: var(--gesso);
+    overflow-y: auto;
+  }
+  .sim__abas button {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+    padding: 11px 4px;
+    font-size: 0.6875rem;
+    font-weight: 550;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--tinta-2);
+    transition:
+      color var(--t-micro) var(--ease-out),
+      background-color var(--t-micro) var(--ease-out);
+  }
+  .sim__abas button :global(svg) {
+    width: 22px;
+    height: 22px;
+  }
+  .sim__abas button:hover {
+    color: var(--tinta);
+  }
+  .sim__abas button[aria-selected='true'] {
+    color: var(--tinta);
+    background: var(--branco);
+    box-shadow: inset 2px 0 0 var(--tinta);
+  }
+  /* ponto vermelho: categoria com algo diferente do padrão */
+  .sim__marca {
+    position: absolute;
+    top: 9px;
+    right: 14px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ponto);
+    transform: scale(0);
+    transition: transform var(--t-ui) var(--ease-out);
+  }
+  .sim__abas button.is-alterado .sim__marca {
+    transform: scale(1);
+  }
+
+  .sim__conteudo {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px 20px 28px;
+  }
+  .sim__pn h3 {
+    margin-bottom: 14px;
+    font-size: 1.25rem;
+    font-weight: 450;
+    letter-spacing: -0.015em;
+  }
+  .sim__pn h4 {
+    margin: 22px 0 10px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+  }
+  .sim__nota {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--tinta-2);
+  }
+  .sim__ambiente {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: inset 0 0 0 2px var(--tinta);
+    font-size: 0.8125rem;
+    color: var(--tinta-2);
+  }
+  .sim__ambiente strong {
+    font-size: 0.9375rem;
+    font-weight: 550;
+    color: var(--tinta);
+  }
+
+  .sim__seg {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sim__seg button,
+  .sim__papeis button,
+  .sim__botao {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px var(--linha-forte);
+    transition:
+      background-color var(--t-micro) var(--ease-out),
+      color var(--t-micro) var(--ease-out),
+      box-shadow var(--t-micro) var(--ease-out);
+  }
+  .sim__seg button:hover,
+  .sim__papeis button:hover,
+  .sim__botao:hover {
+    box-shadow: inset 0 0 0 1px var(--tinta);
+  }
+  .sim__seg button[aria-pressed='true'],
+  .sim__papeis button[aria-pressed='true'] {
+    background: var(--tinta);
+    color: var(--claro);
+    box-shadow: none;
+  }
+  .sim__papeis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .sim__botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .sim__botoes--grade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sim__amostras {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .sim__amostra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 6px 10px 6px 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-align: left;
+    box-shadow: inset 0 0 0 1px var(--linha);
+    transition: box-shadow var(--t-micro) var(--ease-out);
+  }
+  .sim__amostra:hover {
+    box-shadow: inset 0 0 0 1px var(--tinta-2);
+  }
+  .sim__amostra[aria-pressed='true'] {
+    box-shadow: inset 0 0 0 2px var(--tinta);
+  }
+  .sim__chip {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    background: var(--tom, #fff) var(--img) center / 80px;
+    background-blend-mode: multiply;
+    box-shadow: inset 0 0 0 1px rgb(17 26 51 / 0.12);
+  }
+  .sim__chip--metal {
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0%, var(--metal) 45%, color-mix(in srgb, var(--metal) 60%, #000) 100%);
+  }
+  .sim__amostras--cores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sim__atual {
+    margin-top: 14px;
+    font-size: 0.8125rem;
+    color: var(--tinta-2);
+  }
+  .sim__atual b {
+    font-weight: 550;
+    color: var(--tinta);
+  }
+
+  .sim__cartoes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .sim__cartao {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: 10px;
+    text-align: left;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--tinta-2);
+    box-shadow: inset 0 0 0 1px var(--linha);
+    transition: box-shadow var(--t-micro) var(--ease-out);
+  }
+  .sim__cartao strong {
+    font-size: 0.8125rem;
+    font-weight: 550;
+    color: var(--tinta);
+  }
+  .sim__cartao:hover {
+    box-shadow: inset 0 0 0 1px var(--tinta-2);
+  }
+  .sim__cartao[aria-pressed='true'] {
+    box-shadow: inset 0 0 0 2px var(--tinta);
+  }
+  /* pictogramas dos puxadores, sobre uma "frente" */
+  .sim__pux {
+    position: relative;
+    height: 46px;
+    margin-bottom: 4px;
+    background: var(--gesso-2);
+    box-shadow: inset 0 0 0 1px var(--linha);
+  }
+  .sim__pux i {
+    position: absolute;
+    background: #9a9ea6;
+  }
+  .sim__pux--perfil i {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    height: 4px;
+  }
+  .sim__pux--barra i {
+    top: 18px;
+    left: 30%;
+    right: 30%;
+    height: 4px;
+    border-radius: 2px;
+  }
+  .sim__pux--botao i {
+    top: 16px;
+    left: calc(50% - 5px);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .sim__pux--toque i {
+    display: none;
+  }
+  .sim__ceu {
+    height: 46px;
+    margin-bottom: 4px;
+  }
+  .sim__ceu--dia {
+    background: linear-gradient(160deg, #fdf3dc, #cfe2ef);
+  }
+  .sim__ceu--tarde {
+    background: linear-gradient(160deg, #ffcf8f, #e98f63);
+  }
+  .sim__ceu--neutra {
+    background: linear-gradient(160deg, #f2f3f4, #c9cdd3);
+  }
+  .sim__ceu--noite {
+    background: radial-gradient(circle at 70% 70%, #ffcf9a 0 6%, transparent 30%), linear-gradient(160deg, #1d2742, #0c1326);
+  }
+  .sim__interruptores {
+    display: grid;
+    gap: 2px;
+  }
+  .sim__interruptor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    font-size: 0.8125rem;
+    text-align: left;
+  }
+  .sim__chave {
+    flex: none;
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--pedra);
+    transition: background-color var(--t-micro) var(--ease-out);
+  }
+  .sim__chave::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+    transition: transform var(--t-micro) var(--ease-out);
+  }
+  .sim__interruptor[aria-checked='true'] .sim__chave {
+    background: var(--tinta);
+  }
+  .sim__interruptor[aria-checked='true'] .sim__chave::after {
+    transform: translateX(16px);
+  }
+  .sim__interruptor:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .sim__lista :global(h4) {
+    margin: 18px 0 6px;
+  }
+  .sim__lista :global(button) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 2px;
+    font-size: 0.8125rem;
+    text-align: left;
+    border-bottom: 1px solid var(--linha);
+  }
+  .sim__lista :global(button span) {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+  }
+  .sim__lista :global(button[aria-pressed='true'] span) {
+    color: var(--ponto);
+  }
+
+  .sim__rodape {
+    padding: 14px 20px;
+    border-top: 1px solid var(--linha);
+  }
+  .sim__rodape .botao {
+    width: 100%;
+    min-height: 50px;
+  }
+  .sim__rodape :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ---------- tela cheia (API nativa ou sobreposição) ---------- */
+  .sim:fullscreen,
+  .sim.is-sobreposto {
+    height: 100%;
+    width: 100%;
+  }
+  .sim.is-sobreposto {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    height: 100dvh;
+  }
+  .sim.is-sobreposto .sim__acao--fechar {
+    display: grid;
+  }
+  /* o <main> cria um contexto de empilhamento: em tela inteira ele sobe acima do cabeçalho e da barra */
+  :global(html.simulador-aberto main) {
+    z-index: 60;
+  }
+
+  /* ---------- celular e tablet: capa no fluxo; aberto vira tela inteira com painel embaixo ---------- */
+  @media (max-width: 1023px) {
+    .sim {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+      height: min(78svh, 620px);
+    }
+    .sim:not(.is-sobreposto) .sim__painel {
+      display: none;
+    }
+    .sim:not(.is-sobreposto)[data-estado='pronto'] .sim__capa {
+      opacity: 1;
+      visibility: visible;
+    }
+    .sim.is-sobreposto {
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+    .sim.is-sobreposto .sim__painel {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto auto;
+      border-left: 0;
+      border-top: 1px solid var(--linha);
+      box-shadow: 0 -10px 30px rgb(12 19 38 / 0.12);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .sim__recolher {
+      display: grid;
+      place-items: center;
+      height: 22px;
+    }
+    .sim__recolher span {
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--pedra);
+    }
+    .sim__abas {
+      grid-row: auto;
+      flex-direction: row;
+      padding: 0 8px;
+      border-right: 0;
+      border-bottom: 1px solid var(--linha);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .sim__abas::-webkit-scrollbar {
+      display: none;
+    }
+    .sim__abas button {
+      flex: none;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 10px;
+      font-size: 0.75rem;
+    }
+    .sim__abas button :global(svg) {
+      width: 18px;
+      height: 18px;
+    }
+    .sim__abas button[aria-selected='true'] {
+      box-shadow: inset 0 -2px 0 var(--tinta);
+    }
+    .sim__marca {
+      top: 8px;
+      right: 4px;
+    }
+    .sim__conteudo {
+      max-height: 34dvh;
+      padding: 14px 16px 16px;
+    }
+    .sim__painel.is-recolhido .sim__conteudo {
+      display: none;
+    }
+    .sim__rodape {
+      padding: 10px 16px;
+    }
+    .sim__pn h3 {
+      display: none;
+    }
+    .sim__amostras,
+    .sim__cartoes {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    .sim__barra {
+      top: max(10px, env(safe-area-inset-top));
+      left: 10px;
+      right: 10px;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .sim__acao {
+      flex: none;
+      width: 38px;
+      height: 38px;
+    }
+    .sim__sep,
+    .sim__acao[data-acao='tela-cheia'] {
+      display: none;
+    }
+    .sim__vistas {
+      display: none;
+    }
+    .sim__dica {
+      top: auto;
+      bottom: 10px;
+      left: 10px;
+      right: 64px;
+    }
+    .sim__selo {
+      top: calc(max(10px, env(safe-area-inset-top)) + 54px);
+      right: 14px;
+      font-size: 0.625rem;
+    }
+    .sim__zoom {
+      right: 10px;
+      bottom: 10px;
+    }
+  }
+
+  /* ---------- diálogos ---------- */
+  .sim-dialogo {
+    width: min(640px, calc(100vw - 24px));
+    max-height: min(90dvh, 900px);
+    padding: 0;
+    border: 0;
+    background: var(--branco);
+    color: var(--tinta);
+    box-shadow: 0 30px 80px rgb(12 19 38 / 0.35);
+  }
+  .sim-dialogo--estreito {
+    width: min(480px, calc(100vw - 24px));
+  }
+  .sim-dialogo::backdrop {
+    background: rgb(12 19 38 / 0.55);
+  }
+  .sim-dialogo__caixa {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    max-height: inherit;
+  }
+  .sim-dialogo__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--linha);
+  }
+  .sim-dialogo__topo h3 {
+    font-size: 1.25rem;
+    font-weight: 450;
+    letter-spacing: -0.015em;
+  }
+  .sim-dialogo__fechar {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+  }
+  .sim-dialogo__fechar :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .sim-dialogo__corpo {
+    display: grid;
+    gap: 16px;
+    padding: 18px 22px;
+    overflow-y: auto;
+  }
+  .sim-dialogo__imagem {
+    aspect-ratio: 16 / 9;
+    background: var(--gesso-2);
+  }
+  .sim-dialogo__imagem[hidden] {
+    display: none;
+  }
+  .sim-dialogo__imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .sim-dialogo__imagem img:not([src]) {
+    visibility: hidden;
+  }
+  .sim-resumo {
+    display: grid;
+    border-top: 1px solid var(--linha);
+  }
+  .sim-resumo :global(div) {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--linha);
+    font-size: 0.8125rem;
+  }
+  .sim-resumo :global(dt) {
+    color: var(--tinta-2);
+  }
+  .sim-resumo :global(dd) {
+    font-weight: 500;
+  }
+  .sim-resumo :global(dd em) {
+    margin-left: 6px;
+    font-style: normal;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ponto);
+  }
+  .sim-dialogo__campo {
+    display: grid;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  .sim-dialogo__campo small {
+    font-weight: 400;
+    color: var(--tinta-2);
+  }
+  .sim-dialogo__campo input,
+  .sim-dialogo__campo textarea {
+    width: 100%;
+    padding: 10px 0;
+    border: 0;
+    border-bottom: 1px solid var(--linha-forte);
+    border-radius: 0;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+  .sim-dialogo__campo :is(input, textarea):focus {
+    outline: none;
+    border-bottom-color: var(--marinho);
+    box-shadow: 0 1px 0 var(--marinho);
+  }
+  .sim-dialogo__aviso {
+    padding: 12px 14px;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--tinta-2);
+    background: var(--gesso);
+    border-left: 2px solid var(--ponto);
+  }
+  .sim-dialogo__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    padding: 16px 22px 8px;
+    border-top: 1px solid var(--linha);
+  }
+  .sim-dialogo__acoes .botao {
+    min-height: 50px;
+  }
+  .sim-dialogo__acoes :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .sim-dialogo__nota {
+    padding: 0 22px 18px;
+    font-size: 0.75rem;
+    color: var(--tinta-2);
+  }
+  .sim-salvas {
+    display: grid;
+  }
+  .sim-salvas :global(li) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linha);
+    font-size: 0.8125rem;
+  }
+  .sim-salvas :global(li strong) {
+    flex: 1 1 auto;
+    font-weight: 550;
+  }
+  .sim-salvas :global(li small) {
+    color: var(--tinta-2);
+  }
+  .sim-salvas :global(li button) {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.75rem;
+    font-weight: 550;
+    box-shadow: inset 0 0 0 1px var(--linha-forte);
+  }
+  .sim-salvas :global(.vazio) {
+    color: var(--tinta-2);
+  }
+  @media (max-width: 599px) {
+    .sim-dialogo {
+      width: 100vw;
+      max-width: none;
+      max-height: 100dvh;
+      height: 100dvh;
+      margin: 0;
+    }
+    .sim-dialogo__acoes .botao {
+      width: 100%;
+    }
+  }
+
+  .sim-aviso {
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    z-index: 95;
+    padding: 12px 18px;
+    font-size: 0.875rem;
+    background: var(--tinta);
+    color: var(--claro);
+    box-shadow: 0 10px 30px rgb(12 19 38 / 0.3);
+    transform: translate(-50%, 160%);
+    transition: transform 420ms var(--ease-out);
+    pointer-events: none;
+  }
+  .sim-aviso.is-visivel {
+    transform: translate(-50%, 0);
+  }
+</style>

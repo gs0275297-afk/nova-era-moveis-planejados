@@ -4,6 +4,7 @@ import { iniciarLightbox } from './lightbox';
 import { iniciarFormulario } from './formulario';
 import { iniciarGaleria } from './galeria';
 import { iniciarDetalhes } from './detalhes';
+import { iniciarSimulador } from './simulador';
 import { iniciarBarraMovel, iniciarCabecalho, iniciarMapa, iniciarMenu, iniciarVideos } from './interface';
 import { $, movimentoReduzido } from './util';
 
@@ -51,6 +52,7 @@ iniciarVideos();
 iniciarMapa();
 iniciarGaleria();
 iniciarDetalhes();
+iniciarSimulador(lenis);
 iniciarBarraMovel();
 
 raiz.classList.add('motion-ok');
