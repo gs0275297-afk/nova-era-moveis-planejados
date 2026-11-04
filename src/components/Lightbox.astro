@@ -6,7 +6,7 @@ import { fotosAmpliaveis } from '../data/projetos';
 // Versões grandes para o visualizador, na ordem de fotosAmpliaveis (os índices dos botões apontam para cá).
 const ampliadas = await Promise.all(
   fotosAmpliaveis.map(async ({ foto, ambiente }) => ({
-    src: (await getImage({ src: foto.src, width: foto.src.width, format: 'webp', quality: 84 })).src,
+    src: (await getImage({ src: foto.src, width: foto.src.width, format: 'webp', quality: 90 })).src,
     largura: foto.src.width,
     altura: foto.src.height,
     alt: foto.alt,

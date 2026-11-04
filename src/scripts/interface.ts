@@ -160,7 +160,7 @@ export function iniciarBarraMovel() {
     barra.inert = !mostrar;
   };
   observar(([ent]) => {
-    // com movimento, a abertura é mais alta que a tela: a barra entra quando a apresentação já cobriu a foto
+    // a barra entra quando a abertura sai da tela
     passouHero = !ent.isIntersecting && ent.boundingClientRect.top < 0;
     aplicar();
   }).observe(hero);

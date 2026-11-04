@@ -2,7 +2,7 @@
 import { empresa } from '../data/empresa';
 ---
 
-<!-- Sobe por cima da foto da abertura. A frase é a da própria empresa (bio do Instagram). -->
+<!-- A frase é a da própria empresa (bio do Instagram). -->
 <section class="manifesto escuro" id="nova-era" aria-labelledby="sobre-titulo" data-tema="escuro">
   <div class="container">
     <h2 id="sobre-titulo" class="manifesto__frase" data-frase>{empresa.frase}</h2>
@@ -14,11 +14,10 @@ import { empresa } from '../data/empresa';
     position: relative;
     z-index: 2;
     padding-block: var(--secao);
-    box-shadow: 0 -1px 0 rgb(239 197 142 / 0.5);
-  }
-  /* a seção sobe por cima da foto parada (só com movimento completo) */
-  :global(.js-motion:not(.reduzido)) .manifesto {
-    margin-top: -100svh;
+    /* em cima, a linha de luz; embaixo, 1 px da própria cor cobre a emenda com os projetos (escala de 125%) */
+    box-shadow:
+      0 -1px 0 rgb(239 197 142 / 0.5),
+      0 1px 0 var(--noite);
   }
   .manifesto__frase {
     max-width: 17em;

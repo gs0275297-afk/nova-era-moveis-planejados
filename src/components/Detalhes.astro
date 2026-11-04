@@ -22,11 +22,11 @@ const proporcao = (d: Detalhe) => (d.midia.tipo === 'foto' ? d.midia.src.width /
                     <Picture
                       src={d.midia.src}
                       alt={d.midia.alt}
-                      widths={[480, d.midia.src.width]}
-                      sizes="(min-width: 1024px) 50vw, 90vw"
+                      widths={[360, d.midia.src.width]}
+                      sizes="(min-width: 1024px) 36vw, 70vw"
                       formats={['avif']}
                       fallbackFormat="jpg"
-                      quality={74}
+                      quality={84}
                       loading="lazy"
                     />
                   ) : (
@@ -74,6 +74,11 @@ const proporcao = (d: Detalhe) => (d.midia.tipo === 'foto' ? d.midia.src.width /
   .detalhes__linha {
     display: flex;
     gap: var(--col-gap);
+  }
+  /* a linha dos vídeos (576 px) ocupa 8 colunas: fica com a mesma altura da primeira e sem ampliar */
+  .detalhes__linha:nth-child(2) {
+    width: calc((100% - 11 * var(--col-gap)) / 12 * 8 + 7 * var(--col-gap));
+    margin-left: auto;
   }
   .detalhe {
     flex: var(--r) 1 0;
@@ -145,8 +150,7 @@ const proporcao = (d: Detalhe) => (d.midia.tipo === 'foto' ? d.midia.src.width /
     }
     .detalhe {
       flex: none;
-      width: calc(66vw * var(--r));
-      max-width: 88vw;
+      width: calc(clamp(150px, 46vw, 200px) * var(--r));
       scroll-snap-align: start;
     }
   }

@@ -14,8 +14,7 @@ if (import.meta.env.DEV) Object.assign(window, { __gsap: gsap, __ScrollTrigger: 
 
 /*
  * Linguagem de movimento: pouca, e a serviço das fotos.
- * - abertura: a foto se abre do centro como um vão, o título sobe linha a linha e, na rolagem,
- *   a apresentação sobe por cima da foto parada;
+ * - abertura: a foto se abre do centro como um vão e o título sobe linha a linha;
  * - frase da Nova Era: as palavras acendem conforme a leitura avança;
  * - títulos de seção: linhas sobem dentro de máscaras;
  * - fotos e textos: esmaecimento com um assentamento curto (são muitas fotos, o movimento não pode cansar).
@@ -108,11 +107,10 @@ export function iniciarMovimentoSuave() {
 
 /* ---------- Abertura ---------- */
 function hero() {
-  const secao = $('[data-hero]');
   const quadro = $('[data-hero-foto]');
   const img = quadro?.querySelector('img');
   const titulo = $('[data-hero-titulo]');
-  if (!secao || !quadro || !img || !titulo) return;
+  if (!quadro || !img || !titulo) return;
 
   // Entrada rápida: não espera nada. Em até 1,5 s está tudo no lugar e a página nunca fica bloqueada.
   const tl = gsap.timeline();
@@ -138,14 +136,6 @@ function hero() {
   });
   tl.fromTo('[data-hero-item]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.06 }, 0.6);
   tl.from('.topo__barra > *', { autoAlpha: 0, y: -10, duration: 0.7, ease: 'power3.out', stagger: 0.05, clearProps: 'all' }, 0.55);
-
-  // Rolagem: título e chamada saem antes de a próxima seção cobrir a foto.
-  gsap.to('[data-hero-texto]', {
-    y: () => -window.innerHeight * 0.08,
-    autoAlpha: 0,
-    ease: 'power1.in',
-    scrollTrigger: { trigger: secao, start: 'top top', end: () => `+=${window.innerHeight * 0.45}`, scrub: true, invalidateOnRefresh: true },
-  });
 }
 
 /* ---------- Frase de apresentação: as palavras acendem com a rolagem ---------- */

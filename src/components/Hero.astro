@@ -5,38 +5,36 @@ import { empresa, mensagemPadrao } from '../data/empresa';
 import { abertura } from '../data/projetos';
 ---
 
-<!-- Abertura em tela inteira: o ambiente é o protagonista. Com movimento, a foto fica parada e a
-     apresentação sobe por cima dela; sem movimento (ou sem JS), a página apenas segue. -->
+<!-- Abertura: a foto ocupa a parte da tela que a resolução dela comporta (os originais têm 1179 px de
+     largura), sem ampliação. No computador, texto à esquerda e foto à direita até a borda; no celular,
+     a foto inteira em cima e o texto embaixo. -->
 <section class="abertura escuro" id="inicio" aria-labelledby="hero-titulo" data-hero data-tema="escuro">
-  <div class="abertura__palco">
-    <div class="abertura__foto" data-hero-foto>
-      <Picture
-        src={abertura.src}
-        alt={abertura.alt}
-        widths={[828, 1280, abertura.src.width]}
-        sizes="(max-aspect-ratio: 19/20) 95vh, 100vw"
-        formats={['avif']}
-        fallbackFormat="jpg"
-        quality={74}
-        loading="eager"
-        fetchpriority="high"
-      />
-    </div>
-    <div class="abertura__veu" aria-hidden="true"></div>
+  <div class="abertura__foto" data-hero-foto>
+    <Picture
+      src={abertura.src}
+      alt={abertura.alt}
+      widths={[640, 960, abertura.src.width]}
+      sizes="(max-width: 1023px) 100vw, 59vw"
+      formats={['avif']}
+      fallbackFormat="jpg"
+      quality={84}
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
 
-    <div class="abertura__base" data-hero-texto>
-      <h1 id="hero-titulo" class="display" data-hero-titulo>
-        Móveis planejados em <em>{empresa.cidade}.</em>
-      </h1>
-      <div class="abertura__acoes" data-hero-item>
-        <a class="botao botao--luz" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
-          Solicitar orçamento
-          <Icone nome="seta" />
-        </a>
-        <a class="abertura__continua" href="#nova-era" aria-label="Continuar para a apresentação">
-          <i aria-hidden="true"></i>
-        </a>
-      </div>
+  <div class="abertura__texto" data-hero-texto>
+    <h1 id="hero-titulo" class="display" data-hero-titulo>
+      Móveis planejados em <em>{empresa.cidade}.</em>
+    </h1>
+    <div class="abertura__acoes" data-hero-item>
+      <a class="botao botao--luz" href={empresa.whatsapp.link(mensagemPadrao)} target="_blank" rel="noopener">
+        Solicitar orçamento
+        <Icone nome="seta" />
+      </a>
+      <a class="abertura__continua" href="#nova-era" aria-label="Continuar para a apresentação">
+        <i aria-hidden="true"></i>
+      </a>
     </div>
   </div>
 </section>
@@ -44,27 +42,16 @@ import { abertura } from '../data/projetos';
 <style>
   .abertura {
     position: relative;
-  }
-  .abertura__palco {
-    position: relative;
-    height: 100svh;
-    min-height: 560px;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 41fr) minmax(0, 59fr);
+    min-height: max(560px, 100svh);
     background: var(--noite);
   }
 
-  /* A foto fica parada enquanto a próxima seção sobe por cima dela. */
-  :global(.js-motion:not(.reduzido)) .abertura {
-    height: 200svh;
-  }
-  :global(.js-motion:not(.reduzido)) .abertura__palco {
-    position: sticky;
-    top: 0;
-  }
-
   .abertura__foto {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
     overflow: hidden;
   }
   .abertura__foto :global(picture),
@@ -73,37 +60,33 @@ import { abertura } from '../data/projetos';
     width: 100%;
     height: 100%;
   }
-  /* Enquadra da linha de luz do forro até a mesa, acima dos pés das cadeiras. */
   .abertura__foto :global(img) {
-    object-fit: cover;
-    object-position: 50% 68%;
-  }
-
-  /* Só o necessário para ler a barra em cima e o título embaixo: o meio da foto fica limpo. */
-  .abertura__veu {
     position: absolute;
     inset: 0;
+    object-fit: cover;
+    object-position: 50% 62%;
+  }
+  /* só o necessário para ler o menu sobre o forro */
+  .abertura__foto::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 22%;
     pointer-events: none;
-    background: linear-gradient(180deg, rgb(13 15 20 / 0.42) 0%, rgb(13 15 20 / 0) 16%, rgb(13 15 20 / 0) 54%, rgb(13 15 20 / 0.78) 100%);
+    background: linear-gradient(180deg, rgb(13 15 20 / 0.55), rgb(13 15 20 / 0));
   }
 
-  .abertura__base {
-    position: absolute;
-    z-index: 2;
-    inset: auto 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px 48px;
-    padding: 0 var(--gutter) clamp(24px, 4.4vh, 48px);
-    will-change: transform, opacity;
+  .abertura__texto {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: end;
+    display: grid;
+    gap: clamp(28px, 4vh, 48px);
+    padding: calc(var(--header-h) + 32px) clamp(28px, 3.4vw, 64px) clamp(32px, 6vh, 72px) var(--gutter);
   }
   .abertura :global(.display) {
-    max-width: 10em;
-    font-size: clamp(2.8rem, 1rem + 4.4vw, 6.4rem);
+    font-size: clamp(2.8rem, 0.9rem + 3.9vw, 6rem);
     line-height: 1;
-    text-shadow: 0 2px 40px rgb(13 15 20 / 0.35);
   }
   .abertura__acoes {
     display: flex;
@@ -146,9 +129,22 @@ import { abertura } from '../data/projetos';
     transform: none;
   }
 
+  /* celular e tablet: a foto inteira, sem corte, e o texto embaixo */
+  @media (max-width: 1023px) {
+    .abertura {
+      display: block;
+      min-height: 0;
+    }
+    .abertura__foto :global(img) {
+      position: static;
+      height: auto;
+    }
+    .abertura__texto {
+      padding: 28px var(--gutter) 40px;
+    }
+  }
   @media (max-width: 767px) {
     .abertura__acoes {
-      width: 100%;
       justify-content: space-between;
     }
     .abertura__acoes .botao {
@@ -156,9 +152,6 @@ import { abertura } from '../data/projetos';
     }
     .abertura__continua {
       flex: none;
-    }
-    .abertura__veu {
-      background: linear-gradient(180deg, rgb(13 15 20 / 0.42) 0%, rgb(13 15 20 / 0) 16%, rgb(13 15 20 / 0) 40%, rgb(13 15 20 / 0.82) 100%);
     }
   }
 </style>

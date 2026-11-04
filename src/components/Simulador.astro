@@ -20,6 +20,9 @@ import {
   vistas,
 } from '../scripts/configurador/catalogo';
 
+// Madeiras e cores vão para uma parte do móvel (Individual) ou para todas de uma vez (Todos).
+const notaTodos = `Vale para ${papeis.map((p) => p.nome.toLowerCase()).join(', ')}. Bancada, puxadores, vidros e eletrodomésticos não mudam.`;
+
 const abas = [
   { id: 'ambiente', nome: 'Ambiente', icone: 'ambiente' },
   { id: 'materiais', nome: 'Materiais', icone: 'materiais' },
@@ -153,10 +156,15 @@ const abas = [
           <!-- Materiais (madeiras) -->
           <div class="sim__pn" role="tabpanel" id="sim-pn-materiais" aria-labelledby="sim-aba-materiais" hidden>
             <h3>Materiais</h3>
-            <p class="sim__nota">Escolha a parte do móvel e depois a madeira. <span class="sim__so-mouse">Passe o mouse nas amostras para comparar antes de aplicar.</span></p>
+            <p class="sim__nota">Escolha onde aplicar e depois a madeira. <span class="sim__so-mouse">Passe o mouse nas amostras para comparar antes de aplicar.</span></p>
+            <div class="sim__modos" role="group" aria-label="Onde aplicar" data-modos>
+              <button type="button" data-modo="individual" aria-pressed="true"><b>Individual</b><span>Uma parte por vez</span></button>
+              <button type="button" data-modo="todos" aria-pressed="false"><b>Todos</b><span>Todos os móveis de uma vez</span></button>
+            </div>
             <div class="sim__papeis" role="group" aria-label="Parte do móvel" data-papeis>
               {papeis.map((p, i) => <button type="button" data-papel={p.id} aria-pressed={i === 0 ? 'true' : 'false'} title={p.dica}>{p.nome}</button>)}
             </div>
+            <p class="sim__todos" data-todos-nota hidden>{notaTodos}</p>
             <h4>Madeiras</h4>
             <div class="sim__amostras">
               {
@@ -174,10 +182,15 @@ const abas = [
           <!-- Cores (lacas) -->
           <div class="sim__pn" role="tabpanel" id="sim-pn-cores" aria-labelledby="sim-aba-cores" hidden>
             <h3>Cores</h3>
-            <p class="sim__nota">Cores lisas para a parte escolhida. O acabamento fosco ou acetinado muda o reflexo da luz.</p>
+            <p class="sim__nota">Cores lisas. O acabamento fosco ou acetinado muda o reflexo da luz.</p>
+            <div class="sim__modos" role="group" aria-label="Onde aplicar" data-modos>
+              <button type="button" data-modo="individual" aria-pressed="true"><b>Individual</b><span>Uma parte por vez</span></button>
+              <button type="button" data-modo="todos" aria-pressed="false"><b>Todos</b><span>Todos os móveis de uma vez</span></button>
+            </div>
             <div class="sim__papeis" role="group" aria-label="Parte do móvel" data-papeis>
               {papeis.map((p, i) => <button type="button" data-papel={p.id} aria-pressed={i === 0 ? 'true' : 'false'} title={p.dica}>{p.nome}</button>)}
             </div>
+            <p class="sim__todos" data-todos-nota hidden>{notaTodos}</p>
             <h4>Acabamento</h4>
             <div class="sim__seg" role="group" aria-label="Acabamento da cor">
               {brilhos.map((b) => <button type="button" data-brilho={b.id}>{b.nome}</button>)}
@@ -896,7 +909,61 @@ const abas = [
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    margin-top: 10px;
+  }
+  .sim__papeis[hidden] {
+    display: none;
+  }
+
+  /* Individual x Todos: duas opções lado a lado, com a explicação dentro do próprio botão */
+  .sim__modos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
     margin-top: 14px;
+  }
+  .sim__modos button {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    text-align: left;
+    box-shadow: inset 0 0 0 1px var(--linha-forte);
+    transition:
+      background-color var(--t-micro) var(--ease-out),
+      color var(--t-micro) var(--ease-out),
+      box-shadow var(--t-micro) var(--ease-out);
+  }
+  .sim__modos b {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .sim__modos span {
+    font-size: 0.75rem;
+    color: var(--tinta-2);
+  }
+  .sim__modos button:hover {
+    box-shadow: inset 0 0 0 1px var(--tinta);
+  }
+  .sim__modos button[aria-pressed='true'] {
+    background: var(--tinta);
+    color: var(--claro);
+    box-shadow: none;
+  }
+  .sim__modos button[aria-pressed='true'] span {
+    color: rgb(246 243 237 / 0.78);
+  }
+  .sim__todos {
+    margin-top: 10px;
+    padding: 10px 12px;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--tinta-2);
+    background: var(--gesso-2);
+  }
+  .sim__todos[hidden] {
+    display: none;
   }
   .sim__botoes {
     display: flex;

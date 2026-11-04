@@ -95,8 +95,13 @@ export async function iniciarConfigurador(raiz: HTMLElement, o: Opcoes) {
 
   /* ---------- estado da interface (não faz parte da configuração) ---------- */
   let papelAlvo: Papel = 'portas';
+  // "individual": madeira e cor vão para a parte escolhida; "todos": para todas as partes de uma vez
+  // (portas, superiores, gavetas, estrutura, painéis e nichos). Bancada, metais e vidros têm materiais próprios.
+  let modo: 'individual' | 'todos' = 'individual';
   let brilhoPreferido: Brilho = lerLaca(loja.get().acabamentos.portas)?.brilho ?? 'fosco';
   let comparando = false;
+  const alvos = (): Papel[] => (modo === 'todos' ? papeis.map((p) => p.id) : [papelAlvo]);
+  const aplicarEmAlvos = (c: Config, id: (atual: string) => string) => alvos().forEach((p) => (c.acabamentos[p] = id(c.acabamentos[p])));
 
   loja.ouvir((c, anterior) => {
     motor.aplicar(c, anterior);
@@ -104,25 +109,35 @@ export async function iniciarConfigurador(raiz: HTMLElement, o: Opcoes) {
   });
 
   const marcar = (el: Element, ligado: boolean, atributo = 'aria-pressed') => el.setAttribute(atributo, String(ligado));
-  const brilhoAtual = () => lerLaca(loja.get().acabamentos[papelAlvo])?.brilho ?? brilhoPreferido;
+  // brilho da cor: o da parte escolhida ou, no modo Todos, o da primeira parte em cor lisa
+  const brilhoAtual = () => alvos().map((p) => lerLaca(loja.get().acabamentos[p])?.brilho).find(Boolean) ?? brilhoPreferido;
 
   function sincronizar() {
     const c = loja.get();
     $$('[data-opcao="ilha"]').forEach((b) => marcar(b, (b.dataset.valor === 'sim') === c.composicao.ilha));
     $$('[data-opcao="aereos"]').forEach((b) => marcar(b, b.dataset.valor === c.composicao.aereos));
     $$('[data-opcao="espessura"]').forEach((b) => marcar(b, b.dataset.valor === c.bancada.espessura));
+    $$('[data-modo]').forEach((b) => marcar(b, b.dataset.modo === modo));
+    $$('[data-papeis]').forEach((g) => (g.hidden = modo === 'todos'));
+    $$('[data-todos-nota]').forEach((p) => (p.hidden = modo !== 'todos'));
     $$('[data-papel]').forEach((b) => marcar(b, b.dataset.papel === papelAlvo));
-    const atual = c.acabamentos[papelAlvo];
-    const laca = lerLaca(atual);
+    // no modo Todos, uma amostra só aparece marcada se todas as partes estiverem com ela
+    const valores = alvos().map((p) => c.acabamentos[p]);
+    const atual = valores.every((v) => v === valores[0]) ? valores[0] : null;
+    const lacas = valores.map(lerLaca);
+    const corUnica = lacas.every((l) => l && l.cor === lacas[0]?.cor) ? lacas[0]?.cor : null;
     const brilho = brilhoAtual();
     $$('[data-acabamento]:not([data-cor])').forEach((b) => marcar(b, b.dataset.acabamento === atual));
     $$('[data-cor]').forEach((b) => {
       b.dataset.acabamento = idLaca(b.dataset.cor!, brilho);
-      marcar(b, laca?.cor === b.dataset.cor);
+      marcar(b, corUnica === b.dataset.cor);
     });
     $$('[data-brilho]').forEach((b) => marcar(b, b.dataset.brilho === brilho));
-    const nomePapel = papeis.find((p) => p.id === papelAlvo)!.nome;
-    $$('[data-atual-papel]').forEach((el) => (el.textContent = `${nomePapel}, ${acabamento(atual).nome.toLowerCase()}`));
+    const textoAtual =
+      modo === 'todos'
+        ? `Todos os móveis, ${atual ? acabamento(atual).nome.toLowerCase() : 'acabamentos diferentes'}`
+        : `${papeis.find((p) => p.id === papelAlvo)!.nome}, ${acabamento(c.acabamentos[papelAlvo]).nome.toLowerCase()}`;
+    $$('[data-atual-papel]').forEach((el) => (el.textContent = textoAtual));
     $$('[data-puxador]').forEach((b) => marcar(b, b.dataset.puxador === c.puxador.tipo));
     $$<HTMLButtonElement>('[data-metal]').forEach((b) => {
       marcar(b, b.dataset.metal === c.puxador.metal);
@@ -197,16 +212,25 @@ export async function iniciarConfigurador(raiz: HTMLElement, o: Opcoes) {
       if (b.dataset.opcao === 'espessura') c.bancada.espessura = v === 'encorpada' ? 'encorpada' : 'fina';
     });
   });
+  ao('[data-modo]', (b) => {
+    modo = b.dataset.modo === 'todos' ? 'todos' : 'individual';
+    sincronizar();
+  });
   ao('[data-papel]', (b) => {
     papelAlvo = b.dataset.papel as Papel;
     sincronizar();
   });
-  ao('[data-acabamento]:not([data-cor])', (b) => loja.mudar((c) => (c.acabamentos[papelAlvo] = b.dataset.acabamento!)));
-  ao('[data-cor]', (b) => loja.mudar((c) => (c.acabamentos[papelAlvo] = idLaca(b.dataset.cor!, brilhoAtual()))));
+  // Uma mudança só, mesmo no modo Todos: "desfazer" volta todas as partes de uma vez.
+  ao('[data-acabamento]:not([data-cor])', (b) => loja.mudar((c) => aplicarEmAlvos(c, () => b.dataset.acabamento!)));
+  ao('[data-cor]', (b) => {
+    const brilho = brilhoAtual();
+    loja.mudar((c) => aplicarEmAlvos(c, () => idLaca(b.dataset.cor!, brilho)));
+  });
   ao('[data-brilho]', (b) => {
     brilhoPreferido = b.dataset.brilho as Brilho;
-    const laca = lerLaca(loja.get().acabamentos[papelAlvo]);
-    if (laca) loja.mudar((c) => (c.acabamentos[papelAlvo] = idLaca(laca.cor, brilhoPreferido)));
+    // muda o brilho só das partes que estão em cor lisa; as de madeira ficam como estão
+    const temCor = alvos().some((p) => lerLaca(loja.get().acabamentos[p]));
+    if (temCor) loja.mudar((c) => aplicarEmAlvos(c, (atual) => (lerLaca(atual) ? idLaca(lerLaca(atual)!.cor, brilhoPreferido) : atual)));
     else sincronizar();
   });
   ao('[data-puxador]', (b) => loja.mudar((c) => (c.puxador.tipo = b.dataset.puxador as Config['puxador']['tipo'])));
@@ -222,8 +246,10 @@ export async function iniciarConfigurador(raiz: HTMLElement, o: Opcoes) {
   // Pré-visualização: passar o mouse numa amostra mostra o resultado sem gravar.
   const previa = (el: HTMLElement): Config | null => {
     const c = clonar(loja.get());
-    if (el.dataset.cor) c.acabamentos[papelAlvo] = idLaca(el.dataset.cor, brilhoAtual());
-    else if (el.dataset.acabamento) c.acabamentos[papelAlvo] = el.dataset.acabamento;
+    if (el.dataset.cor) {
+      const id = idLaca(el.dataset.cor, brilhoAtual());
+      aplicarEmAlvos(c, () => id);
+    } else if (el.dataset.acabamento) aplicarEmAlvos(c, () => el.dataset.acabamento!);
     else if (el.dataset.pedra) c.bancada.pedra = el.dataset.pedra;
     else if (el.dataset.metal) c.puxador.metal = el.dataset.metal as Config['puxador']['metal'];
     else return null;

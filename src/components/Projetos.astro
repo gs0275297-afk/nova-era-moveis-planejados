@@ -7,16 +7,19 @@ const filtros = categorias.filter((c) => series.some((s) => s.categoria === c.id
 
 const proporcao = (foto: Foto) => foto.src.width / foto.src.height;
 // Parte da largura da tela ocupada por cada tipo de linha, para o navegador escolher o arquivo certo.
-const larguraDaLinha: Record<Linha['largura'], number> = { plena: 100, inteira: 93, direita: 62, esquerda: 62, estreita: 46 };
+const larguraDaLinha: Record<Linha['largura'], number> = { inteira: 93, direita: 62, esquerda: 62, estreita: 46 };
 const tamanhos = (linha: Linha, foto: Foto) => {
   const soma = linha.fotos.reduce((total, f) => total + proporcao(f), 0);
   return `(max-width: 767px) 100vw, ${Math.round((larguraDaLinha[linha.largura] * proporcao(foto)) / soma)}vw`;
 };
-const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.src.width).concat(foto.src.width);
+// Os arquivos já estão na resolução real do recorte: as versões menores servem às telas que pedem menos.
+const larguras = (foto: Foto) => [480, 720, 960].filter((l) => l < foto.src.width - 80).concat(foto.src.width);
 ---
 
 <!-- Cada série reúne as fotos de um ambiente. Numa mesma linha as fotos têm a mesma altura e preenchem a
-     largura (a proporção de cada uma define o quanto ocupa), então todas as bordas caem na grade. -->
+     largura (a proporção de cada uma define o quanto ocupa), então todas as bordas caem na grade.
+     Nenhuma foto aparece mais larga, em pixels de layout, do que o próprio arquivo: por isso uma foto
+     sozinha ocupa no máximo 8 colunas e a grade para em 1600 px. -->
 <section class="projetos" id="projetos" aria-labelledby="projetos-titulo" data-projetos>
   <header class="projetos__cabeca escuro" data-tema="escuro">
     <div class="container">
@@ -32,7 +35,7 @@ const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.s
   {
     series.map((serie) => (
       <article
-        class:list={['serie', { escuro: serie.tom === 'escuro', 'serie--abre-plena': serie.linhas[0].largura === 'plena' }]}
+        class:list={['serie', { escuro: serie.tom === 'escuro' }]}
         id={`projeto-${serie.id}`}
         data-categoria={serie.categoria}
         data-tema={serie.tom}
@@ -62,7 +65,7 @@ const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.s
                       sizes={tamanhos(linha, foto)}
                       formats={['avif']}
                       fallbackFormat="jpg"
-                      quality={76}
+                      quality={84}
                       loading="lazy"
                     />
                   </button>
@@ -139,9 +142,6 @@ const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.s
   .serie[hidden] {
     display: none;
   }
-  .serie--abre-plena {
-    padding-top: 0;
-  }
 
   .serie__titulo {
     font-family: var(--serif);
@@ -176,12 +176,6 @@ const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.s
     cursor: zoom-in;
   }
 
-  .fileira--plena {
-    display: block;
-    max-width: none;
-    padding-inline: 0;
-    margin-bottom: clamp(8px, 1.4vw, 24px);
-  }
   .fileira--inteira .fileira__fotos {
     grid-column: 1 / -1;
   }
@@ -249,9 +243,6 @@ const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.s
       row-gap: 6px;
       padding-block: 44px;
     }
-    .serie--abre-plena {
-      padding-top: 0;
-    }
     .fileira {
       display: block;
       padding-inline: 0;
@@ -263,9 +254,6 @@ const larguras = (foto: Foto) => [640, 960, 1280, 1600].filter((l) => l < foto.s
     .fileira--estreita .serie__titulo {
       margin-bottom: 16px;
       padding-inline: var(--gutter);
-    }
-    .serie--abre-plena .serie__titulo {
-      margin-top: 22px;
     }
     .fileira__fotos {
       flex-direction: column;

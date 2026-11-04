@@ -60,14 +60,15 @@ export const categorias: { id: Categoria; nome: string }[] = [
 
 /**
  * Uma linha de fotos. As fotos da linha têm a mesma altura e, juntas, preenchem a largura:
- * - plena: de borda a borda da tela;
- * - inteira: as 12 colunas da grade;
+ * - inteira: as 12 colunas da grade (sempre com duas fotos ou mais);
  * - direita / esquerda: 8 colunas, com 4 vazias do outro lado;
  * - estreita: 6 colunas à direita.
  * O título do projeto fica na linha marcada: acima dela (inteira) ou no espaço vazio ao lado.
+ * Uma foto sozinha nunca passa de 8 colunas: os originais têm 1179 px, e mais largo que isso a foto
+ * seria ampliada na tela.
  */
 export interface Linha {
-  largura: 'plena' | 'inteira' | 'direita' | 'esquerda' | 'estreita';
+  largura: 'inteira' | 'direita' | 'esquerda' | 'estreita';
   titulo?: boolean;
   fotos: Foto[];
 }
@@ -89,7 +90,8 @@ export const series: Serie[] = [
     tom: 'escuro',
     linhas: [
       {
-        largura: 'plena',
+        largura: 'esquerda',
+        titulo: true,
         fotos: [
           {
             src: jantarAmpla,
@@ -100,7 +102,6 @@ export const series: Serie[] = [
       },
       {
         largura: 'direita',
-        titulo: true,
         fotos: [
           {
             src: jantarAdega,
@@ -152,7 +153,8 @@ export const series: Serie[] = [
     tom: 'escuro',
     linhas: [
       {
-        largura: 'plena',
+        largura: 'direita',
+        titulo: true,
         fotos: [
           {
             src: gourmetPrateleirasAmpla,
@@ -163,7 +165,6 @@ export const series: Serie[] = [
       },
       {
         largura: 'inteira',
-        titulo: true,
         fotos: [
           {
             src: gourmetCozinha,
@@ -420,8 +421,9 @@ export interface Detalhe {
   midia: { tipo: 'foto'; src: ImageMetadata; alt: string } | { tipo: 'video'; arquivo: string; largura: number; altura: number; alt: string };
 }
 
-// Detalhes de execução: recortes de fotos reais e trechos curtos dos vídeos da empresa.
-// Os vídeos têm 576 px de largura, por isso ficam na linha de mídias menores.
+// Detalhes de execução: recortes de fotos reais (490 a 750 px) e trechos curtos dos vídeos da empresa
+// (576 px). São mídias pequenas: as duas linhas têm a mesma altura e a segunda ocupa só 8 colunas,
+// para nenhuma delas aparecer maior do que a própria resolução.
 export const detalhes: Detalhe[][] = [
   [
     {
@@ -434,6 +436,11 @@ export const detalhes: Detalhe[][] = [
       titulo: 'Ripado e friso',
       midia: { tipo: 'foto', src: detalheRipado, alt: 'Ripado vertical ao lado de placa marmorizada com friso dourado' },
     },
+    {
+      id: 'cabeceira',
+      titulo: 'Cabeceira com luz',
+      midia: { tipo: 'foto', src: detalheCabeceira, alt: 'Espelho redondo com luz ao lado da cabeceira e cama com roupa de cama branca e azul' },
+    },
   ],
   [
     {
@@ -445,11 +452,6 @@ export const detalhes: Detalhe[][] = [
       id: 'cantos',
       titulo: 'Cantos arredondados',
       midia: { tipo: 'video', arquivo: 'detalhe-aparador', largura: 576, altura: 460, alt: 'Câmera percorre um aparador suspenso em madeira com canto arredondado' },
-    },
-    {
-      id: 'cabeceira',
-      titulo: 'Cabeceira com luz',
-      midia: { tipo: 'foto', src: detalheCabeceira, alt: 'Espelho redondo com luz ao lado da cabeceira e cama com roupa de cama branca e azul' },
     },
   ],
 ];

@@ -38,6 +38,9 @@ export function iniciarLightbox(lenis: Lenis | null) {
     img.alt = f.alt;
     img.width = f.largura;
     img.height = f.altura;
+    // nunca maior que o próprio arquivo: acima disso a foto seria ampliada e perderia definição
+    img.style.maxWidth = `min(100%, ${f.largura}px)`;
+    img.style.maxHeight = `${f.altura}px`;
     if (atual) atual.textContent = String(posicao + 1);
     if (total) total.textContent = String(sequencia.length);
     if (ambiente) ambiente.textContent = f.ambiente;

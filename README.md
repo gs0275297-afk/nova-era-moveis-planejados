@@ -31,7 +31,11 @@ um botão no rodapé para ativar as animações (a escolha fica guardada naquele
 - **Composição:** as fotos são as protagonistas. Cada série reúne um ambiente, em linhas alinhadas a uma grade de
   12 colunas: as fotos de uma linha têm a mesma altura e preenchem a largura, com a mesma distância entre elas. O
   enquadramento é decidido em `scripts/preparar-fotos.py`; o site nunca recorta uma foto por CSS (a abertura, que
-  preenche a tela, é a única exceção).
+  preenche a sua metade da tela, é a única exceção).
+- **Resolução:** nenhuma foto aparece mais larga, em pixels de layout, do que o próprio arquivo (os originais têm
+  1179 px). Por isso uma foto sozinha ocupa no máximo 8 colunas, a grade para em 1600 px, a abertura usa só a
+  metade direita da tela no computador e os detalhes ficam pequenos. Ao mudar o layout, confira isso de novo: CSS
+  maior não dá mais definição, só amplia a foto.
 - **Texto:** só o que ajuda a entender os serviços, ver os projetos e entrar em contato.
 - **Movimento:** pouco, e a serviço das fotos (ver o comentário em `src/scripts/movimento.ts`). Com movimento
   reduzido: só esmaecimentos, sem deslocamento.
@@ -58,6 +62,11 @@ um botão no rodapé para ativar as animações (a escolha fica guardada naquele
 | `ambientes/` | um módulo por ambiente, com geometria, luzes e vistas próprias (hoje, `cozinha.ts`) |
 | `motor.ts` | renderização sob demanda em HDR, refino progressivo, câmera, comparação, captura, descarte |
 | `index.ts` | liga o painel ao estado e ao motor |
+
+Nas abas Materiais e Cores, **Individual** aplica a madeira ou a cor à parte escolhida e **Todos** aplica às seis
+partes do móvel de uma vez (portas, portas superiores, gavetas, estrutura, painéis e nichos). Bancada, puxadores,
+vidros e eletrodomésticos têm materiais próprios e não mudam. No modo Todos a mudança é uma só no histórico: um
+"desfazer" volta todas as partes.
 
 `src/scripts/simulador.ts` fica no pacote principal e só baixa o three.js quando a pessoa abre o simulador. Até lá, a
 seção mostra uma imagem da própria cena (`src/assets/simulador/capa-cozinha.jpg`), capturada do simulador: se a cena
@@ -100,8 +109,8 @@ preços, medidas garantidas, marcas ou especificações sem confirmação da Nov
   Google, depoimentos, prazos, garantias, condições de pagamento, materiais/marcas e etapas do atendimento.
   Por isso o site não tem horário, seção de processo nem avaliações, e o JSON-LD não tem `aggregateRating`.
 - **Fotos:** todas são de ambientes do portfólio da Nova Era. `scripts/preparar-fotos.py` faz só tratamento
-  clássico, sem IA: reduz a compressão, corrige de leve cor e luz, endireita as verticais, recorta e aplica nitidez
-  nas bordas. Nada é gerado, apagado ou retocado. Sempre que possível, o recorte deixa a marca d'água de fora; quatro
+  clássico, sem IA: suaviza as emendas dos blocos do JPEG, corrige de leve cor e luz, endireita as verticais, recorta
+  e aplica nitidez nas bordas, sem halo e sem ampliar. Nada é gerado, apagado ou retocado. Sempre que possível, o recorte deixa a marca d'água de fora; quatro
   fotos ainda a mostram, porque o recorte cortaria o móvel (a lista está no próprio script). Os originais chegaram com
   1179 px de largura: se a empresa enviar os arquivos sem a compressão do WhatsApp, troque em `fotos e videos/` e rode
   `python scripts/preparar-fotos.py`.

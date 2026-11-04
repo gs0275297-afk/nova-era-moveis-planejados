@@ -68,7 +68,8 @@
   /* espaço e grade */
   --gutter: clamp(18px, 3.4vw, 64px);
   --col-gap: clamp(12px, 1.5vw, 24px);
-  --max: 1760px;
+  /* largura máxima da grade: acima disso, as fotos (1179 px nos originais) apareceriam ampliadas */
+  --max: 1600px;
   --secao: clamp(96px, 8vw + 40px, 208px);
   --header-h: 84px;
 
